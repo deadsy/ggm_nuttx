@@ -1,5 +1,8 @@
 
-TARGET = axoloti
+BOARD = stm32f4discovery
+CONFIG = audio
+
+XTOOLS = /opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-
 
 DL = $(PWD)/dl
 SRC = $(PWD)/src
@@ -15,24 +18,33 @@ APPS_NAME = apps-$(NUTTX_VER)
 APPS_TGZ = $(DL)/$(APPS_NAME).tar.gz
 APPS_SRC = $(SRC)/apps
 
-PATCHFILES := $(sort $(wildcard patches/*.patch ))
+PATCHFILES := $(sort $(wildcard patches/*.patch))
 
 PATCH_CMD = \
   for f in $(PATCHFILES); do\
       echo $$f ":"; \
-      patch -d $(OS_DIR) -p1 < $$f || exit 1; \
+      patch -d $(SRC) -p1 < $$f || exit 1; \
   done
 
 COPY_CMD = tar cf - -C files . | tar xf - -C $(OS_DIR)
 
 .PHONY: all
-all: .stamp_src.$(TARGET)
+all: .stamp_build
 
-.stamp_src.$(TARGET): $(NUTTX_TGZ) $(APPS_TGZ)
+.stamp_src: $(NUTTX_TGZ) $(APPS_TGZ)
 	mkdir -p $(NUTTX_SRC)
 	tar -C $(NUTTX_SRC) --strip-components=1 -xzf $(NUTTX_TGZ)
 	mkdir -p $(APPS_SRC)
 	tar -C $(APPS_SRC) --strip-components=1 -xzf $(APPS_TGZ)
+	$(PATCH_CMD)
+	touch $@
+
+.stamp_cfg: .stamp_src
+	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD)/$(CONFIG)
+	touch $@
+
+.stamp_build: .stamp_cfg
+	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_SRC)
 	touch $@
 
 $(NUTTX_TGZ):
