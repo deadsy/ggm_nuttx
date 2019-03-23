@@ -2,6 +2,9 @@
 BOARD = stm32f4discovery
 CONFIG = audio
 
+#BOARD = axoloti
+#CONFIG = ggm
+
 XTOOLS = /opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-
 
 DL = $(PWD)/dl
@@ -26,10 +29,22 @@ PATCH_CMD = \
       patch -d $(SRC) -p1 < $$f || exit 1; \
   done
 
-COPY_CMD = tar cf - -C files . | tar xf - -C $(OS_DIR)
+COPY_CMD = tar cf - -C files . | tar xf - -C $(SRC)
 
 .PHONY: all
 all: .stamp_build
+
+.PHONY: src
+src: .stamp_src
+
+.PHONY: clean
+clean:
+	-rm -rf $(SRC)
+	-rm .stamp*
+
+.PHONY: distclean
+distclean: clean
+	-rm -rf $(DL)
 
 .stamp_src: $(NUTTX_TGZ) $(APPS_TGZ)
 	mkdir -p $(NUTTX_SRC)
@@ -37,6 +52,7 @@ all: .stamp_build
 	mkdir -p $(APPS_SRC)
 	tar -C $(APPS_SRC) --strip-components=1 -xzf $(APPS_TGZ)
 	$(PATCH_CMD)
+	$(COPY_CMD)
 	touch $@
 
 .stamp_cfg: .stamp_src
@@ -57,11 +73,3 @@ $(APPS_TGZ):
 	wget -P $(DL) $(NUTTX_SITE)/$(APPS_NAME).tar.gz
 	echo "8325b36bbe992474ddcb7bb965804ce45d7959ef18fefa35c3c9948089ec9fc5 *$(APPS_TGZ)" | sha256sum --check --strict
 
-.PHONY: clean
-clean:
-	-rm -rf $(SRC)
-	-rm .stamp*
-
-.PHONY: distclean
-distclean: clean
-	-rm -rf $(DL)
