@@ -1,11 +1,8 @@
 
-BOARD = stm32f4discovery
-CONFIG = audio
+BOARD_CONFIG = stm32f4discovery/audio
+#BOARD_CONFIG = axoloti/ggm
 
-#BOARD = axoloti
-#CONFIG = ggm
-
-XTOOLS = /opt/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-
+XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
 DL = $(PWD)/dl
 SRC = $(PWD)/src
@@ -20,6 +17,8 @@ NUTTX_SRC = $(SRC)/nuttx
 APPS_NAME = apps-$(NUTTX_VER)
 APPS_TGZ = $(DL)/$(APPS_NAME).tar.gz
 APPS_SRC = $(SRC)/apps
+
+BIN_FILE = $(NUTTX_SRC)/nuttx.bin
 
 PATCHFILES := $(sort $(wildcard patches/*.patch))
 
@@ -36,6 +35,10 @@ all: .stamp_build
 
 .PHONY: src
 src: .stamp_src
+
+.PHONY: flash
+flash: .stamp_build
+	st-flash write $(BIN_FILE) 0x08000000
 
 .PHONY: clean
 clean:
@@ -56,7 +59,7 @@ distclean: clean
 	touch $@
 
 .stamp_cfg: .stamp_src
-	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD)/$(CONFIG)
+	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD_CONFIG)
 	touch $@
 
 .stamp_build: .stamp_cfg
