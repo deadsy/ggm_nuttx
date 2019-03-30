@@ -1,6 +1,6 @@
 
-BOARD_CONFIG = stm32f4discovery/audio
-#BOARD_CONFIG = axoloti/ggm
+#BOARD_CONFIG = stm32f4discovery/audio
+BOARD_CONFIG = axoloti/ggm
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
