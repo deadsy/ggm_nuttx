@@ -39,6 +39,7 @@ src: .stamp_src
 .PHONY: flash
 flash: .stamp_build
 	st-flash write $(BIN_FILE) 0x08000000
+	st-flash reset
 
 .PHONY: clean
 clean:

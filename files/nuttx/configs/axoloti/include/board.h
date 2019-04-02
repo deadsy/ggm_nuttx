@@ -103,15 +103,13 @@
 
 //-----------------------------------------------------------------------------
 
+// USART1 - console on header pins
+#define GPIO_USART1_RX GPIO_USART1_RX_2	// (AF7, PB7)
+#define GPIO_USART1_TX GPIO_USART1_TX_2	// (AF7, PB6)
+
 // USART6 - midi in/out
 #define GPIO_USART6_RX GPIO_USART6_RX_2	// (AF8, PG9)
 #define GPIO_USART6_TX GPIO_USART6_TX_2	// (AF8, PG14)
-
-//-----------------------------------------------------------------------------
-// MIDI
-
-// In - USART6, PG9
-// Out - USART6, PG14
 
 //-----------------------------------------------------------------------------
 
