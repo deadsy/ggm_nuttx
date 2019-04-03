@@ -10,6 +10,7 @@ import fnmatch
 # *.c and *.h files in these directories will be auto-formatted.
 src_dirs = (
 	'files/nuttx/configs/axoloti',
+	'files/apps/ggm',
 )
 
 # don't format files in this list

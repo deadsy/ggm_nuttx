@@ -1,0 +1,3 @@
+ifneq ($(CONFIG_GGM_SINOSC),)
+CONFIGURED_APPS += ggm/sinosc
+endif

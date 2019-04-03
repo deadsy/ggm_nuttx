@@ -30,16 +30,22 @@ PATCH_CMD = \
 
 COPY_CMD = tar cf - -C files . | tar xf - -C $(SRC)
 
+RESET_CMD =	st-flash reset
+
 .PHONY: all
 all: .stamp_build
 
 .PHONY: src
 src: .stamp_src
 
+.PHONY: reset
+reset:
+	$(RESET_CMD)
+
 .PHONY: flash
 flash: .stamp_build
 	st-flash write $(BIN_FILE) 0x08000000
-	st-flash reset
+	$(RESET_CMD)
 
 .PHONY: clean
 clean:
