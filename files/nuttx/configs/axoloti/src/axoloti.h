@@ -13,6 +13,11 @@
 #include <arch/stm32/chip.h>
 
 //-----------------------------------------------------------------------------
+
+int stm32_sdio_initialize(void);
+int stm32_bringup(void);
+
+//-----------------------------------------------------------------------------
 // SDIO Configuration
 
 #define HAVE_SDIO 1
@@ -26,8 +31,6 @@
 #define SDIO_SLOTNO 0		// Only one slot
 
 #ifdef HAVE_SDIO
-
-int stm32_sdio_initialize(void);
 
 #if !defined(CONFIG_NSH_MMCSDSLOTNO)
 #define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
