@@ -102,6 +102,13 @@
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 
 //-----------------------------------------------------------------------------
+// Buttons
+
+#define BUTTON_USER        0
+#define NUM_BUTTONS        1
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+
+//-----------------------------------------------------------------------------
 
 // USART1 - console on header pins
 #define GPIO_USART1_RX GPIO_USART1_RX_2	// (AF7, PB7)

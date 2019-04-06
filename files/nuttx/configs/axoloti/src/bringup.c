@@ -18,20 +18,14 @@ Axoloti Board Bringup
 #include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include "stm32.h"
-//#include "stm32_romfs.h"
-
 #ifdef CONFIG_STM32_OTGFS
 #include "stm32_usbhost.h"
 #endif
 
-#ifdef CONFIG_BUTTONS
+#include "stm32.h"
+//#include "stm32_romfs.h"
 #include <nuttx/input/buttons.h>
-#endif
-
-#ifdef CONFIG_USERLED
 #include <nuttx/leds/userled.h>
-#endif
 
 #include "axoloti.h"
 
