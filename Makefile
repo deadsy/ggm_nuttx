@@ -52,6 +52,12 @@ clean:
 	-rm -rf $(SRC)
 	-rm .stamp*
 
+.PHONY: config
+config:
+	make -C $(NUTTX_SRC) menuconfig
+	make -C $(NUTTX_SRC) savedefconfig
+	cp $(NUTTX_SRC)/defconfig files/nuttx/configs/$(BOARD_CONFIG)/defconfig
+
 .PHONY: distclean
 distclean: clean
 	-rm -rf $(DL)

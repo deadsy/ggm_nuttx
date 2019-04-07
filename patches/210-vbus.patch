@@ -1,0 +1,28 @@
+--- ./nuttx/arch/arm/src/stm32/stm32_usbhost.h	2019-04-07 08:49:03.081558582 -0700
++++ ./nuttx/arch/arm/src/stm32/stm32_usbhost.h	2019-04-07 09:45:49.343487076 -0700
+@@ -280,7 +280,7 @@
+  *
+  ***********************************************************************************/
+ 
+-#ifdef CONFIG_STM32_OTGFS_VBUS_CONTROL
++#if defined(CONFIG_STM32_OTGFS_VBUS_CONTROL) || defined(CONFIG_STM32_OTGHS_VBUS_CONTROL)
+ void stm32_usbhost_vbusdrive(int iface, bool enable);
+ #endif
+ 
+--- ./nuttx/arch/arm/src/stm32/Kconfig	2019-04-07 09:48:29.898895150 -0700
++++ ./nuttx/arch/arm/src/stm32/Kconfig	2019-04-07 09:49:51.434577216 -0700
+@@ -9237,6 +9237,14 @@
+ 	---help---
+ 		Enable SOF interrupts.  Why would you ever want to do that?
+ 
++config STM32_OTGHS_VBUS_CONTROL
++	bool "Enable VBus Control"
++	default y
++	---help---
++		Enable VBus control.  Used when the board has VBus sensing and
++		a power switch for the OTG HS USB port.  Disable this config
++		if the board lacks this USB VBus control circuitry.
++
+ endmenu
+ 
+ menu "USB Host Debug Configuration"
