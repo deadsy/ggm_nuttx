@@ -1,6 +1,6 @@
 
-#BOARD_CONFIG = stm32f4discovery/audio
 BOARD_CONFIG = axoloti/ggm
+#BOARD_CONFIG = stm32f4discovery/ggm
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
@@ -8,7 +8,14 @@ DL = $(PWD)/dl
 SRC = $(PWD)/src
 
 NUTTX_SITE = https://bitbucket.org/nuttx/nuttx/downloads
-NUTTX_VER = 7.28
+
+NUTTX_VER = 7.29
+NUTTX_HASH = "c8b6e83c7d30449306113dbd936340ec4422bc87b5dde8b06a7d0db3b79bb19f"
+APPS_HASH = "d42ae57f903f6d52db6f634ddc4e768f4cc497b456aa46eb5201a7fa00956226"
+
+#NUTTX_VER = 7.28
+#NUTTX_HASH = "92fde612a542c47d11eb0bd85dc1d53ccf236f8106ad6b216fdfbc77f3b8ce1d"
+#APPS_HASH = "8325b36bbe992474ddcb7bb965804ce45d7959ef18fefa35c3c9948089ec9fc5"
 
 NUTTX_NAME = nuttx-$(NUTTX_VER)
 NUTTX_TGZ = $(DL)/$(NUTTX_NAME).tar.gz
@@ -82,10 +89,10 @@ distclean: clean
 $(NUTTX_TGZ):
 	mkdir -p $(DL)
 	wget -P $(DL) $(NUTTX_SITE)/$(NUTTX_NAME).tar.gz
-	echo "92fde612a542c47d11eb0bd85dc1d53ccf236f8106ad6b216fdfbc77f3b8ce1d *$(NUTTX_TGZ)" | sha256sum --check --strict
+	echo "$(NUTTX_HASH) *$(NUTTX_TGZ)" | sha256sum --check --strict
 
 $(APPS_TGZ):
 	mkdir -p $(DL)
 	wget -P $(DL) $(NUTTX_SITE)/$(APPS_NAME).tar.gz
-	echo "8325b36bbe992474ddcb7bb965804ce45d7959ef18fefa35c3c9948089ec9fc5 *$(APPS_TGZ)" | sha256sum --check --strict
+	echo "$(APPS_HASH) *$(APPS_TGZ)" | sha256sum --check --strict
 
