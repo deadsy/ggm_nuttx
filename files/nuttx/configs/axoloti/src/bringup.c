@@ -18,7 +18,7 @@ Axoloti Board Bringup
 #include <nuttx/usb/usbmonitor.h>
 #endif
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32_OTGHS
 #include "stm32_usbhost.h"
 #endif
 

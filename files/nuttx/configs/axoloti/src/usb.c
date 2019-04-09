@@ -85,36 +85,16 @@ void stm32_usbinitialize(void) {
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void) {
 	int pid;
-#if defined(CONFIG_USBHOST_HUB)    || defined(CONFIG_USBHOST_MSC) || \
-    defined(CONFIG_USBHOST_HIDKBD) || defined(CONFIG_USBHOST_HIDMOUSE) || \
-    defined(CONFIG_USBHOST_XBOXCONTROLLER)
 	int ret;
-#endif
 
 	// First, register all of the class drivers needed to support the drivers that we care about:
 	uinfo("Register class drivers\n");
-
-#ifdef CONFIG_USBHOST_HUB
-	// Initialize USB hub class support
-	ret = usbhost_hub_initialize();
-	if (ret < 0) {
-		uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
-	}
-#endif
 
 #ifdef CONFIG_USBHOST_MSC
 	// Register the USB mass storage class class
 	ret = usbhost_msc_initialize();
 	if (ret != OK) {
 		uerr("ERROR: Failed to register the mass storage class: %d\n", ret);
-	}
-#endif
-
-#ifdef CONFIG_USBHOST_CDCACM
-	// Register the CDC/ACM serial class
-	ret = usbhost_cdcacm_initialize();
-	if (ret != OK) {
-		uerr("ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
 	}
 #endif
 
@@ -131,14 +111,6 @@ int stm32_usbhost_initialize(void) {
 	ret = usbhost_mouse_init();
 	if (ret != OK) {
 		uerr("ERROR: Failed to register the HID mouse class\n");
-	}
-#endif
-
-#ifdef CONFIG_USBHOST_XBOXCONTROLLER
-	// Initialize the HID mouse class
-	ret = usbhost_xboxcontroller_init();
-	if (ret != OK) {
-		uerr("ERROR: Failed to register the XBox Controller class\n");
 	}
 #endif
 
