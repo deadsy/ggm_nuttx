@@ -5,6 +5,9 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
+# CONFIG_FS_PROCFS_EXCLUDE_ENVIRON is not set
+# CONFIG_FS_PROCFS_EXCLUDE_VERSION is not set
 # CONFIG_NSH_DISABLE_PRINTF is not set
 # CONFIG_STANDARD_SERIAL is not set
 CONFIG_ARCH="arm"
@@ -46,4 +49,6 @@ CONFIG_SYSTEM_NSH=y
 CONFIG_USART2_SERIAL_CONSOLE=y
 CONFIG_USBHOST=y
 CONFIG_USBHOST_HIDKBD=y
+CONFIG_USERLED=y
+CONFIG_USERLED_LOWER=y
 CONFIG_USER_ENTRYPOINT="nsh_main"
