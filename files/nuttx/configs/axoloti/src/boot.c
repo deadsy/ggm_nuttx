@@ -36,16 +36,15 @@ void stm32_boardinitialize(void) {
 	stm32_spidev_initialize();
 #endif
 
-#ifdef CONFIG_STM32_OTGHS
+#if defined(CONFIG_STM32_OTGHS) || defined(CONFIG_STM32_OTGFS)
 	stm32_usbinitialize();
 #endif
 }
 
 //-----------------------------------------------------------------------------
 
-// Perform board-specific initialization
-#ifdef CONFIG_BOARD_INITIALIZE
-void board_initialize(void) {
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void) {
 	(void)stm32_bringup();
 }
 #endif
