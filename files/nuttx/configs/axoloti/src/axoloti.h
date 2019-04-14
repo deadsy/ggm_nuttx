@@ -18,6 +18,7 @@ int stm32_sdio_initialize(void);
 int stm32_bringup(void);
 void stm32_usbinitialize(void);
 int stm32_usbhost_initialize(void);
+int rei2c_initialize(char *devname);
 
 //-----------------------------------------------------------------------------
 

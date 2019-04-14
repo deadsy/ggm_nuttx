@@ -9,7 +9,7 @@ import fnmatch
 
 # *.c and *.h files in these directories will be auto-formatted.
 src_dirs = (
-	'files/nuttx/configs/axoloti',
+	'files/nuttx',
 	'files/apps/ggm',
 )
 

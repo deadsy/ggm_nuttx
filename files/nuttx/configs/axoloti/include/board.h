@@ -111,12 +111,18 @@
 //-----------------------------------------------------------------------------
 
 // USART1 - console on header pins
-#define GPIO_USART1_RX GPIO_USART1_RX_2	// (AF7, PB7)
-#define GPIO_USART1_TX GPIO_USART1_TX_2	// (AF7, PB6)
+#define GPIO_USART1_RX GPIO_USART1_RX_2	// AF7, PB7
+#define GPIO_USART1_TX GPIO_USART1_TX_2	// AF7, PB6
 
 // USART6 - midi in/out
-#define GPIO_USART6_RX GPIO_USART6_RX_2	// (AF8, PG9)
-#define GPIO_USART6_TX GPIO_USART6_TX_2	// (AF8, PG14)
+#define GPIO_USART6_RX GPIO_USART6_RX_2	// AF8, PG9
+#define GPIO_USART6_TX GPIO_USART6_TX_2	// AF8, PG14
+
+//-----------------------------------------------------------------------------
+
+// I2C1 - user i2c bus
+#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2	// AF4, PB8
+#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2	// AF4, PB9
 
 //-----------------------------------------------------------------------------
 // SDIO

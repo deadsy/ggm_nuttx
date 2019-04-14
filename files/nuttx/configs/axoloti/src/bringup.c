@@ -114,6 +114,14 @@ int stm32_bringup(void) {
 	}
 #endif
 
+#ifdef CONFIG_INPUT_REI2C
+	// register the rei2c driver
+	ret = rei2c_initialize("/dev/re0");
+	if (ret < 0) {
+		syslog(LOG_ERR, "ERROR: rei2c_initialize() failed: %d\n", ret);
+	}
+#endif
+
 #ifdef CONFIG_USERLED
 	// Register the LED driver
 	ret = userled_lower_initialize("/dev/userleds");

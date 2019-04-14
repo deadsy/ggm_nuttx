@@ -17,4 +17,8 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  buttons.c
 endif
 
+ifeq ($(CONFIG_INPUT_REI2C),y)
+  CSRCS += rei2c.c
+endif
+
 include $(TOPDIR)/configs/Board.mk

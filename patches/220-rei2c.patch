@@ -1,0 +1,28 @@
+--- ./nuttx/drivers/input/Make.defs.original	2019-04-13 18:47:41.690380464 -0700
++++ ./nuttx/drivers/input/Make.defs	2019-04-13 18:48:15.138437548 -0700
+@@ -99,6 +99,10 @@
+   CSRCS += nunchuck.c
+ endif
+ 
++ifeq ($(CONFIG_INPUT_REI2C),y)
++  CSRCS += rei2c.c
++endif
++
+ # Include input device driver build support
+ 
+ DEPPATH += --dep-path input
+--- ./nuttx/drivers/input/Kconfig.original	2019-04-13 18:44:26.505798892 -0700
++++ ./nuttx/drivers/input/Kconfig	2019-04-13 18:47:28.734355401 -0700
+@@ -519,3 +519,12 @@
+ 	depends on !DISABLE_POLL
+ 
+ endif # INPUT_NUNCHUCK
++
++config INPUT_REI2C
++	bool "I2C Controlled Rotary Encoder with RGB LED"
++	default n
++	select I2C
++	---help---
++		I2C Controlled Rotary Encoder with RGB LED
++		https://github.com/Fattoresaimon/I2CEncoderV2
++		https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
