@@ -63,10 +63,17 @@
 
 //-----------------------------------------------------------------------------
 
-// rei2c configuration
-struct rei2c_cfg {
+// rei2c user provided register values
+struct rei2c_regs {
 	uint8_t reg;
 	uint32_t val;
+};
+
+// rei2c configuration
+struct rei2c_cfg {
+	uint32_t speed;		// i2c bus speed
+	uint8_t addr;		// i2c device address
+	const struct rei2c_regs *regs;	// user provided register values
 };
 
 int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct rei2c_cfg *cfg);

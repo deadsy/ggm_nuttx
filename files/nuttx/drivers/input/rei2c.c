@@ -20,14 +20,9 @@ https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
 
 //-----------------------------------------------------------------------------
 
-#define REI2C_ADDR 0x55
-
-//-----------------------------------------------------------------------------
-
 struct rei2c_dev_s {
 	struct i2c_master_s *i2c;	// I2C interface connected to rei2c
 	sem_t sem;		// Supports exclusive access to the device
-	uint8_t addr;		// i2c device address
 	const struct rei2c_cfg *cfg;	// user provided device configuration
 };
 
@@ -35,51 +30,53 @@ struct rei2c_dev_s {
 // basic read/write functions
 
 static int rei2c_i2c_read(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, size_t len) {
+	const struct rei2c_cfg *cfg = dev->cfg;
 	struct i2c_msg_s msgv[2] = {
 		{
-		 .frequency = I2C_SPEED_STANDARD,
-		 .addr = dev->addr,
+		 .frequency = cfg->speed,
+		 .addr = cfg->addr,
 		 .flags = 0,
 		 .buffer = &reg,
 		 .length = 1,
 		 },
 		{
-		 .frequency = I2C_SPEED_STANDARD,
-		 .addr = dev->addr,
+		 .frequency = cfg->speed,
+		 .addr = cfg->addr,
 		 .flags = I2C_M_READ,
 		 .buffer = data,
 		 .length = len,
 		 }
 	};
-	int ret = I2C_TRANSFER(dev->i2c, msgv, 2);
-	if (ret < 0) {
-		ierr("I2C_TRANSFER failed %d\n", ret);
-		return ret;
+	int rc = I2C_TRANSFER(dev->i2c, msgv, 2);
+	if (rc < 0) {
+		ierr("I2C_TRANSFER failed %d\n", rc);
+		return rc;
 	}
 	return OK;
 }
 
 static int rei2c_i2c_write(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, size_t len) {
+	const struct rei2c_cfg *cfg = dev->cfg;
 	struct i2c_msg_s msgv[2] = {
 		{
-		 .frequency = I2C_SPEED_STANDARD,
-		 .addr = dev->addr,
+		 .frequency = cfg->speed,
+		 .addr = cfg->addr,
 		 .flags = 0,
 		 .buffer = &reg,
 		 .length = 1,
 		 },
 		{
-		 .frequency = I2C_SPEED_STANDARD,
-		 .addr = dev->addr,
+		 .frequency = cfg->speed,
+		 .addr = cfg->addr,
 		 .flags = I2C_M_NOSTART,
 		 .buffer = data,
 		 .length = len,
 		 }
 	};
-	int ret = I2C_TRANSFER(dev->i2c, msgv, 2);
-	if (ret < 0) {
-		ierr("I2C_TRANSFER failed %d\n", ret);
-		return ret;
+	int rc = I2C_TRANSFER(dev->i2c, msgv, 2);
+	if (rc < 0) {
+		ierr("I2C_TRANSFER failed %d\n", rc);
+		return rc;
 	}
 	return OK;
 }
@@ -111,12 +108,12 @@ static int rei2c_wr32(struct rei2c_dev_s *dev, uint8_t reg, uint32_t val) {
 //-----------------------------------------------------------------------------
 
 static inline int rei2c_takesem(sem_t * sem) {
-	int ret;
+	int rc;
 	// Take a count from the semaphore, possibly waiting */
-	ret = nxsem_wait(sem);
+	rc = nxsem_wait(sem);
 	// The only case that an error should occur here is if the wait was awakened by a signal
-	DEBUGASSERT(ret == OK || ret == -EINTR);
-	return ret;
+	DEBUGASSERT(rc == OK || rc == -EINTR);
+	return rc;
 }
 
 static inline int rei2c_givesem(sem_t * sem) {
@@ -126,7 +123,7 @@ static inline int rei2c_givesem(sem_t * sem) {
 //-----------------------------------------------------------------------------
 
 static int rei2c_init(struct rei2c_dev_s *dev) {
-	int idx = 0;
+	const struct rei2c_cfg *cfg = dev->cfg;
 	int rc;
 
 	rc = rei2c_wr8(dev, REI2C_GCONF, REI2C_GCONF_RESET);
@@ -145,14 +142,16 @@ static int rei2c_init(struct rei2c_dev_s *dev) {
 		ierr("bad device values\n");
 		goto exit;
 	}
-	// apply the per-object register configuration
-	if (dev->cfg != NULL) {
-		while (dev->cfg[idx].reg != 0xff) {
-			uint8_t reg = dev->cfg[idx].reg;
+	// apply the user register configuration
+	if (cfg->regs != NULL) {
+		int idx = 0;
+		while (cfg->regs[idx].reg != 0xff) {
+			uint8_t reg = cfg->regs[idx].reg;
+			uint32_t val = cfg->regs[idx].val;
 			if ((reg == REI2C_CVAL) || (reg == REI2C_CMAX) || (reg == REI2C_CMIN) || (reg == REI2C_ISTEP)) {
-				rei2c_wr32(dev, reg, dev->cfg[idx].val);
+				rei2c_wr32(dev, reg, val);
 			} else {
-				rei2c_wr8(dev, reg, (uint8_t) dev->cfg[idx].val);
+				rei2c_wr8(dev, reg, (uint8_t) val);
 			}
 			idx += 1;
 		}
@@ -234,30 +233,33 @@ static const struct file_operations rei2c_fops = {
 
 int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct rei2c_cfg *cfg) {
 	struct rei2c_dev_s *dev;
-	int ret;
+	int rc;
 
 	iinfo("%s\n", devname);
 
-	DEBUGASSERT(devname && i2c);
+	DEBUGASSERT(devname && i2c && cfg);
 
 	// Allocate a new rei2c driver instance
 	dev = (struct rei2c_dev_s *)kmm_zalloc(sizeof(struct rei2c_dev_s));
 	if (!dev) {
-		ierr("ERROR: Failed to allocate device structure\n");
+		ierr("failed to allocate device structure\n");
 		return -ENOMEM;
 	}
-	// Save the i2c device
+	// setup the device structure
 	dev->i2c = i2c;
-	dev->addr = REI2C_ADDR;
 	dev->cfg = cfg;
-
-	// initialize the new rei2c driver instance
 	nxsem_init(&dev->sem, 0, 1);
 
+	// initialize the hardware
+	rc = rei2c_init(dev);
+	if (rc < 0) {
+		ierr("rei2c_init failed %d\n", rc);
+		goto exit;
+	}
 	// register the rei2c driver
-	ret = register_driver(devname, &rei2c_fops, 0666, dev);
-	if (ret < 0) {
-		ierr("ERROR: register_driver failed: %d\n", ret);
+	rc = register_driver(devname, &rei2c_fops, 0666, dev);
+	if (rc < 0) {
+		ierr("register_driver failed %d\n", rc);
 		goto exit;
 	}
 
@@ -266,7 +268,7 @@ int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct r
  exit:
 	nxsem_destroy(&dev->sem);
 	kmm_free(dev);
-	return ret;
+	return rc;
 }
 
 //-----------------------------------------------------------------------------
