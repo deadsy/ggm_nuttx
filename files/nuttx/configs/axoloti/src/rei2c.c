@@ -21,7 +21,7 @@
 // configuration
 
 #define REI2C_I2C_PORTNO 1	// On I2C1
-#define REI2C_ADDR 0x55
+#define REI2C_ADDR 0x36
 
 static const struct rei2c_regs regs[] = {
 	{REI2C_GCONF, REI2C_GCONF_ETYPE},

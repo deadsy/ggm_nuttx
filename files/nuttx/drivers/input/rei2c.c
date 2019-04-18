@@ -23,25 +23,25 @@ https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
 struct rei2c_dev_s {
 	struct i2c_master_s *i2c;	// I2C interface connected to rei2c
 	sem_t sem;		// Supports exclusive access to the device
-	const struct rei2c_cfg *cfg;	// user provided device configuration
+	uint32_t speed;		// i2c bus speed
+	uint8_t addr;		// i2c device address
 };
 
 //-----------------------------------------------------------------------------
 // basic read/write functions
 
 static int rei2c_i2c_read(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, size_t len) {
-	const struct rei2c_cfg *cfg = dev->cfg;
 	struct i2c_msg_s msgv[2] = {
 		{
-		 .frequency = cfg->speed,
-		 .addr = cfg->addr,
+		 .frequency = dev->speed,
+		 .addr = dev->addr,
 		 .flags = 0,
 		 .buffer = &reg,
 		 .length = 1,
 		 },
 		{
-		 .frequency = cfg->speed,
-		 .addr = cfg->addr,
+		 .frequency = dev->speed,
+		 .addr = dev->addr,
 		 .flags = I2C_M_READ,
 		 .buffer = data,
 		 .length = len,
@@ -56,18 +56,17 @@ static int rei2c_i2c_read(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, 
 }
 
 static int rei2c_i2c_write(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, size_t len) {
-	const struct rei2c_cfg *cfg = dev->cfg;
 	struct i2c_msg_s msgv[2] = {
 		{
-		 .frequency = cfg->speed,
-		 .addr = cfg->addr,
+		 .frequency = dev->speed,
+		 .addr = dev->addr,
 		 .flags = 0,
 		 .buffer = &reg,
 		 .length = 1,
 		 },
 		{
-		 .frequency = cfg->speed,
-		 .addr = cfg->addr,
+		 .frequency = dev->speed,
+		 .addr = dev->addr,
 		 .flags = I2C_M_NOSTART,
 		 .buffer = data,
 		 .length = len,
@@ -122,8 +121,7 @@ static inline int rei2c_givesem(sem_t * sem) {
 
 //-----------------------------------------------------------------------------
 
-static int rei2c_init(struct rei2c_dev_s *dev) {
-	const struct rei2c_cfg *cfg = dev->cfg;
+static int rei2c_init(struct rei2c_dev_s *dev, const struct rei2c_regs *regs) {
 	int rc;
 
 	rc = rei2c_wr8(dev, REI2C_GCONF, REI2C_GCONF_RESET);
@@ -140,14 +138,15 @@ static int rei2c_init(struct rei2c_dev_s *dev) {
 	rei2c_rd8(dev, REI2C_ANTBOUNC, &val1);
 	if ((val0 != 0) || (val1 != 25)) {
 		ierr("bad device values\n");
+		rc = -1;
 		goto exit;
 	}
 	// apply the user register configuration
-	if (cfg->regs != NULL) {
+	if (regs != NULL) {
 		int idx = 0;
-		while (cfg->regs[idx].reg != 0xff) {
-			uint8_t reg = cfg->regs[idx].reg;
-			uint32_t val = cfg->regs[idx].val;
+		while (regs[idx].reg != 0xff) {
+			uint8_t reg = regs[idx].reg;
+			uint32_t val = regs[idx].val;
 			if ((reg == REI2C_CVAL) || (reg == REI2C_CMAX) || (reg == REI2C_CMIN) || (reg == REI2C_ISTEP)) {
 				rei2c_wr32(dev, reg, val);
 			} else {
@@ -247,11 +246,12 @@ int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct r
 	}
 	// setup the device structure
 	dev->i2c = i2c;
-	dev->cfg = cfg;
+	dev->speed = cfg->speed;
+	dev->addr = cfg->addr;
 	nxsem_init(&dev->sem, 0, 1);
 
 	// initialize the hardware
-	rc = rei2c_init(dev);
+	rc = rei2c_init(dev, cfg->regs);
 	if (rc < 0) {
 		ierr("rei2c_init failed %d\n", rc);
 		goto exit;

@@ -39,11 +39,11 @@ static void stm32_i2c_register(int bus) {
 
 	i2c = stm32_i2cbus_initialize(bus);
 	if (i2c == NULL) {
-		syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+		syslog(LOG_ERR, "stm32_i2cbus_initialize failed for I2C%d\n", bus);
 	} else {
 		ret = i2c_register(i2c, bus);
 		if (ret < 0) {
-			syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+			syslog(LOG_ERR, "i2c_register failed for I2C%d %d\n", bus, ret);
 			stm32_i2cbus_uninitialize(i2c);
 		}
 	}
@@ -82,7 +82,7 @@ int stm32_bringup(void) {
 	// Initialize the SDIO block driver
 	ret = stm32_sdio_initialize();
 	if (ret != OK) {
-		ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+		ferr("stm32_sdio_initialize failed %d\n", ret);
 		return ret;
 	}
 #endif
@@ -92,7 +92,7 @@ int stm32_bringup(void) {
 	// thread will monitor for USB connection and disconnection events.
 	ret = stm32_usbhost_initialize();
 	if (ret != OK) {
-		uerr("ERROR: Failed to initialize USB host: %d\n", ret);
+		uerr("stm32_usbhost_initialize failed %d\n", ret);
 		return ret;
 	}
 #endif
@@ -101,7 +101,7 @@ int stm32_bringup(void) {
 	// Start the USB Monitor
 	ret = usbmonitor_start();
 	if (ret != OK) {
-		uerr("ERROR: Failed to start USB monitor: %d\n", ret);
+		uerr("usbmonitor_start failed %d\n", ret);
 		return ret;
 	}
 #endif
@@ -110,7 +110,7 @@ int stm32_bringup(void) {
 	// Register the BUTTON driver
 	ret = btn_lower_initialize("/dev/buttons");
 	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+		syslog(LOG_ERR, "btn_lower_initialize failed %d\n", ret);
 	}
 #endif
 
@@ -118,7 +118,7 @@ int stm32_bringup(void) {
 	// register the rei2c driver
 	ret = rei2c_initialize("/dev/re0");
 	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: rei2c_initialize() failed: %d\n", ret);
+		syslog(LOG_ERR, "rei2c_initialize failed %d\n", ret);
 	}
 #endif
 
@@ -126,7 +126,7 @@ int stm32_bringup(void) {
 	// Register the LED driver
 	ret = userled_lower_initialize("/dev/userleds");
 	if (ret < 0) {
-		syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+		syslog(LOG_ERR, "userled_lower_initialize failed %d\n", ret);
 	}
 #endif
 
@@ -134,7 +134,7 @@ int stm32_bringup(void) {
 	// Mount the procfs file system
 	ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
 	if (ret < 0) {
-		serr("ERROR: Failed to mount procfs at %s: %d\n", STM32_PROCFS_MOUNTPOINT, ret);
+		serr("failed to mount procfs at %s: %d\n", STM32_PROCFS_MOUNTPOINT, ret);
 	}
 #endif
 
