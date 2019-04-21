@@ -63,6 +63,14 @@
 
 //-----------------------------------------------------------------------------
 
+// status returned by rei2c_read operation
+struct rei2c_status {
+	uint8_t enc;		// Encoder Status
+	uint8_t int2;		// Secondary interrupt status
+	uint8_t fade;		// Fade process status
+	uint32_t cnt;		// Counter Value
+};
+
 // rei2c user provided register values
 struct rei2c_regs {
 	uint8_t reg;

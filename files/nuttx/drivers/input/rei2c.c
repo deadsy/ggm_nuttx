@@ -25,6 +25,7 @@ struct rei2c_dev_s {
 	sem_t sem;		// Supports exclusive access to the device
 	uint32_t speed;		// i2c bus speed
 	uint8_t addr;		// i2c device address
+	uint8_t crefs;		// Number of times the device has been opened
 };
 
 //-----------------------------------------------------------------------------
@@ -164,22 +165,26 @@ static int rei2c_init(struct rei2c_dev_s *dev, const struct rei2c_regs *regs) {
 // file operations
 
 static int rei2c_open(struct file *filep) {
-	struct inode *inode;
-	struct rei2c_dev_s *dev;
-	int ret;
-
-	DEBUGASSERT(filep && filep->f_inode);
-	inode = filep->f_inode;
-	DEBUGASSERT(inode->i_private);
-	dev = (struct rei2c_dev_s *)inode->i_private;
-
 	iinfo("filep %p\n", filep);
 
-	ret = rei2c_takesem(&dev->sem);
+	DEBUGASSERT(filep && filep->f_inode);
+	struct inode *inode = filep->f_inode;
+	DEBUGASSERT(inode->i_private);
+	struct rei2c_dev_s *dev = (struct rei2c_dev_s *)inode->i_private;
+
+	int ret = rei2c_takesem(&dev->sem);
 	if (ret < 0) {
 		ierr("ERROR: rei2c_takesem failed: %d\n", ret);
 		return ret;
 	}
+	// Increment the reference count
+	uint8_t tmp = dev->crefs + 1;
+	if (tmp == 0) {
+		// More than 255 opens; uint8_t overflows to zero
+		ret = -EMFILE;
+		goto exit;
+	}
+	dev->crefs = tmp;
 
  exit:
 	rei2c_givesem(&dev->sem);
@@ -188,13 +193,73 @@ static int rei2c_open(struct file *filep) {
 
 static int rei2c_close(struct file *filep) {
 	iinfo("filep %p\n", filep);
-	return OK;
+
+	DEBUGASSERT(filep && filep->f_inode);
+	struct inode *inode = filep->f_inode;
+	DEBUGASSERT(inode->i_private);
+	struct rei2c_dev_s *dev = (struct rei2c_dev_s *)inode->i_private;
+
+	int ret = rei2c_takesem(&dev->sem);
+	if (ret < 0) {
+		ierr("ERROR: rei2c_takesem failed: %d\n", ret);
+		return ret;
+	}
+	// Decrement the reference count
+	if (dev->crefs >= 1) {
+		dev->crefs--;
+	}
+
+	rei2c_givesem(&dev->sem);
+	return ret;
+}
+
+//-----------------------------------------------------------------------------
+
+static int rei2c_rd_status(struct rei2c_dev_s *dev, struct rei2c_status *status) {
+	uint8_t buf[7];
+	int ret = rei2c_i2c_read(dev, REI2C_ESTATUS, buf, sizeof(buf));
+	if (ret < 0) {
+		goto exit;
+	}
+	status->enc = buf[0];
+	status->int2 = buf[1];
+	status->fade = buf[2];
+	status->cnt = *(uint32_t *) & buf[3];
+ exit:
+	return ret;
 }
 
 static ssize_t rei2c_read(struct file *filep, char *buffer, size_t buflen) {
 	iinfo("filep %p buffer %p buflen %d\n", filep, buffer, buflen);
-	return 0;
+
+	DEBUGASSERT(filep && filep->f_inode);
+	struct inode *inode = filep->f_inode;
+	DEBUGASSERT(inode->i_private);
+	struct rei2c_dev_s *dev = (struct rei2c_dev_s *)inode->i_private;
+
+	if (buflen < sizeof(struct rei2c_status)) {
+		ierr("read buffer is too small %d < %d\n", buflen, sizeof(struct rei2c_status));
+		return -ENOSYS;
+	}
+
+	int ret = rei2c_takesem(&dev->sem);
+	if (ret < 0) {
+		ierr("ERROR: rei2c_takesem failed: %d\n", ret);
+		return ret;
+	}
+	// read the status value
+	struct rei2c_status *status = (struct rei2c_status *)buffer;
+	ret = rei2c_rd_status(dev, status);
+	if (ret >= 0) {
+		iinfo("enc %02x int2 %02x fade %02x cnt %08x\n", status->enc, status->int2, status->fade, status->cnt);
+		ret = sizeof(struct rei2c_status);
+	}
+
+	rei2c_givesem(&dev->sem);
+	return ret;
 }
+
+//-----------------------------------------------------------------------------
 
 static ssize_t rei2c_write(struct file *filep, const char *buffer, size_t buflen) {
 	iinfo("filep %p buffer %p buflen %d\n", filep, buffer, buflen);

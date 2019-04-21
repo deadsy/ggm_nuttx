@@ -33,7 +33,7 @@ static const struct rei2c_regs regs[] = {
 };
 
 static const struct rei2c_cfg config = {
-	.speed = I2C_SPEED_STANDARD,
+	.speed = I2C_SPEED_FAST,
 	.addr = REI2C_ADDR,
 	.regs = regs,
 };
