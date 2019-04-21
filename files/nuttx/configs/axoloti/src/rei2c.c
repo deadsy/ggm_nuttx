@@ -20,7 +20,7 @@
 //-----------------------------------------------------------------------------
 // configuration
 
-#define REI2C_I2C_PORTNO 1	// On I2C1
+#define REI2C_I2C_BUS 1		// On I2C1
 #define REI2C_ADDR 0x36
 
 static const struct rei2c_regs regs[] = {
@@ -41,12 +41,10 @@ static const struct rei2c_cfg config = {
 //-----------------------------------------------------------------------------
 
 int rei2c_initialize(char *devname) {
-	struct i2c_master_s *i2c;
-
 	iinfo("%s\n", devname);
 
 	// Initialize I2C
-	i2c = stm32_i2cbus_initialize(REI2C_I2C_PORTNO);
+	struct i2c_master_s *i2c = stm32_i2cbus_initialize(REI2C_I2C_BUS);
 	if (i2c == NULL) {
 		return -ENODEV;
 	}

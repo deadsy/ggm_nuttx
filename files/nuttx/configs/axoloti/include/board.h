@@ -121,8 +121,9 @@
 //-----------------------------------------------------------------------------
 
 // I2C1 - user i2c bus
-#define GPIO_I2C1_SCL GPIO_I2C1_SCL_2	// AF4, PB8
-#define GPIO_I2C1_SDA GPIO_I2C1_SDA_2	// AF4, PB9
+// add internal pullups, since we don't have them externally
+#define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_PULLUP)	// AF4, PB8
+#define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_PULLUP)	// AF4, PB9
 
 //-----------------------------------------------------------------------------
 // SDIO

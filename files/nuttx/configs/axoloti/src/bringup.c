@@ -31,40 +31,6 @@ Axoloti Board Bringup
 
 //-----------------------------------------------------------------------------
 
-// stm32_i2c_register: Register one I2C drivers for the I2C tool.
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2c_register(int bus) {
-	FAR struct i2c_master_s *i2c;
-	int ret;
-
-	i2c = stm32_i2cbus_initialize(bus);
-	if (i2c == NULL) {
-		syslog(LOG_ERR, "stm32_i2cbus_initialize failed for I2C%d\n", bus);
-	} else {
-		ret = i2c_register(i2c, bus);
-		if (ret < 0) {
-			syslog(LOG_ERR, "i2c_register failed for I2C%d %d\n", bus, ret);
-			stm32_i2cbus_uninitialize(i2c);
-		}
-	}
-}
-#endif
-
-// stm32_i2ctool: Register I2C drivers for the I2C tool.
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-static void stm32_i2ctool(void) {
-	stm32_i2c_register(1);
-#if 0
-	stm32_i2c_register(1);
-	stm32_i2c_register(2);
-#endif
-}
-#else
-#define stm32_i2ctool()
-#endif
-
-//-----------------------------------------------------------------------------
-
 // stm32_bringup: Perform architecture-specific initialization
 // CONFIG_BOARD_INITIALIZE=y: Called from board_initialize().
 // CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y : Called from the NSH library
@@ -73,10 +39,6 @@ int stm32_bringup(void) {
 	FAR struct rtc_lowerhalf_s *lower;
 #endif
 	int ret = OK;
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
-	stm32_i2ctool();
-#endif
 
 #ifdef HAVE_SDIO
 	// Initialize the SDIO block driver
