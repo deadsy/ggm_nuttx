@@ -1,3 +1,4 @@
+Too much const...
 --- ./nuttx/drivers/usbhost/usbhost_storage.c	2019-03-22 16:35:39.842319054 -0700
 +++ ./nuttx/drivers/usbhost/usbhost_storage.c	2019-03-22 16:36:00.382244095 -0700
 @@ -261,7 +261,7 @@

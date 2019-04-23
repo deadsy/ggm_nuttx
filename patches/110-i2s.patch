@@ -1,0 +1,31 @@
+Initialising the stm32 audio subsystem hits this debug assert.
+It asserts on a sample rate of 0, but based on other code comments this value implies disabling the i2s master clock.
+--- ./nuttx/arch/arm/src/stm32/stm32_i2s.c	2019-04-22 22:20:49.731002532 -0700
++++ ./nuttx/arch/arm/src/stm32/stm32_i2s.c	2019-04-22 22:21:42.702018427 -0700
+@@ -1785,7 +1785,7 @@
+ {
+ #if defined(I2S_HAVE_RX) && defined(I2S_HAVE_MCK)
+   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
+-  DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
++  DEBUGASSERT(priv && priv->samplerate >= 0 && rate > 0);
+ 
+   /* Check if the receiver is driven by the MCK */
+ 
+@@ -1985,7 +1985,7 @@
+ #if defined(I2S_HAVE_TX) && defined(I2S_HAVE_MCK)
+   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
+ 
+-  DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
++  DEBUGASSERT(priv && priv->samplerate >= 0 && rate > 0);
+ 
+   /* Check if the receiver is driven by the MCK/2 */
+ 
+@@ -2182,7 +2182,7 @@
+ 
+   uint16_t pllr = 5, plln = 256, div = 12, odd = 1;
+ 
+-  DEBUGASSERT(priv && priv->samplerate > 0 && priv->datalen > 0);
++  DEBUGASSERT(priv && priv->samplerate >= 0 && priv->datalen > 0);
+ 
+   /* A zero sample rate means to disable the MCK/2 clock */
+ 

@@ -1,0 +1,21 @@
+Nobody has tried to build this recently with debug turned on.
+--- ./apps/system/nxplayer/nxplayer.c	2019-04-23 07:01:33.139237001 -0700
++++ ./apps/system/nxplayer/nxplayer.c	2019-04-23 07:02:04.546951192 -0700
+@@ -669,7 +669,7 @@
+       int errcode   = errno;
+ 
+       audinfo("Closing audio file, nbytes=%d errcode=%d\n",
+-              apb->nbytes, errorcode);
++              apb->nbytes, errcode);
+ #endif
+ 
+       /* End of file or read error.. We are finished with this file in any
+@@ -686,7 +686,7 @@
+ #ifdef CONFIG_DEBUG_AUDIO_ERROR
+       /* Was this a file read error */
+ 
+-      if (apb->nbytes == 0 && readerror)
++      if (apb->nbytes == 0 && errcode)
+         {
+           DEBUGASSERT(errcode > 0);
+           auderr("ERROR: fread failed: %d\n", errcode);
