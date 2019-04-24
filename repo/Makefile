@@ -1,9 +1,7 @@
 TOP = ..
+include $(TOP)/mk/common.mk
 
-NUTTX_HASH = 2609b0dff3d67c555a966beacf1d7da1386bbaf1
 NUTTX_TGZ = $(PWD)/../dl/nuttx-$(NUTTX_HASH).tar.gz
-
-APPS_HASH = 04a05b3e7bc7820010661c539c412f9d51f26c31
 APPS_TGZ = $(PWD)/../dl/apps-$(APPS_HASH).tar.gz
 
 .PHONY: update
