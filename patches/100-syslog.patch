@@ -1,0 +1,20 @@
+up_initialize.c needs to know about ramlog_consoleinit()
+--- ./nuttx/include/nuttx/syslog/syslog_console.h	2019-04-24 08:03:18.144764056 -0700
++++ ./nuttx/include/nuttx/syslog/syslog_console.h	2019-04-24 08:03:35.540764026 -0700
+@@ -1,5 +1,5 @@
+ /****************************************************************************
+- * include/nuttx/syslog/ramlog.h
++ * include/nuttx/syslog/syslog_console.h
+  *
+  *   Copyright (C) 2015 Pierre-noel Bouteville. All rights reserved.
+  *   Author: Pierre-noel Bouteville <pnb990@gmail.com>
+--- ./nuttx/arch/arm/src/common/up_initialize.c.original	2019-04-24 08:00:53.792681666 -0700
++++ ./nuttx/arch/arm/src/common/up_initialize.c	2019-04-24 08:08:03.116558526 -0700
+@@ -51,6 +51,7 @@
+ #include <nuttx/net/tun.h>
+ #include <nuttx/net/telnet.h>
+ #include <nuttx/syslog/syslog.h>
++#include <nuttx/syslog/ramlog.h>
+ #include <nuttx/syslog/syslog_console.h>
+ #include <nuttx/serial/pty.h>
+ #include <nuttx/crypto/crypto.h>
