@@ -1,0 +1,30 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config GGM_REI2C
+	tristate "rei2c test program"
+	default n
+	---help---
+		Enable the rei2c test program
+
+if GGM_REI2C
+
+config GGM_REI2C_PROGNAME
+	string "Program name"
+	default "rei2c"
+	depends on BUILD_LOADABLE
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config GGM_REI2C_PRIORITY
+	int "task priority"
+	default 100
+
+config GGM_REI2C_STACKSIZE
+	int "stack size"
+	default 2048
+
+endif

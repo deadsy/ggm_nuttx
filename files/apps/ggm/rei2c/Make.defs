@@ -1,0 +1,3 @@
+ifneq ($(CONFIG_GGM_REI2C),)
+CONFIGURED_APPS += ggm/rei2c
+endif
