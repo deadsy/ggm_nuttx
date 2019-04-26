@@ -5,13 +5,14 @@
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
 
 #include <nuttx/audio/audio.h>
+
+#include "scnprintf.h"
 
 //-----------------------------------------------------------------------------
 
@@ -21,10 +22,10 @@
 
 static char *audio_caps_str(struct audio_caps_s *caps, char *str, size_t n) {
 	int ofs = 0;
-	ofs += snprintf(&str[ofs], n - ofs, "ac_len %d\n", caps->ac_len);
-	ofs += snprintf(&str[ofs], n - ofs, "ac_type %d\n", caps->ac_type);
-	ofs += snprintf(&str[ofs], n - ofs, "ac_subtype %d\n", caps->ac_subtype);
-	ofs += snprintf(&str[ofs], n - ofs, "ac_channels %d\n", caps->ac_channels);
+	ofs += scnprintf(&str[ofs], n - ofs, "ac_len %d\n", caps->ac_len);
+	ofs += scnprintf(&str[ofs], n - ofs, "ac_type %d\n", caps->ac_type);
+	ofs += scnprintf(&str[ofs], n - ofs, "ac_subtype %d\n", caps->ac_subtype);
+	ofs += scnprintf(&str[ofs], n - ofs, "ac_channels %d\n", caps->ac_channels);
 	return str;
 }
 
