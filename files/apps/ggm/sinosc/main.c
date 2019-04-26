@@ -12,8 +12,6 @@
 
 #include <nuttx/audio/audio.h>
 
-#include "scnprintf.h"
-
 //-----------------------------------------------------------------------------
 
 #define AUDIO_DEVICE "/dev/audio/pcm1"

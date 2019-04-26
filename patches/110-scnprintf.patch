@@ -1,0 +1,31 @@
+--- ./nuttx/libs/libc/stdio/Make.defs	2019-04-23 10:11:11.000000000 -0700
++++ ./nuttx/libs/libc/stdio/Make.defs	2019-04-26 10:15:25.889107257 -0700
+@@ -39,6 +39,7 @@
+ CSRCS += lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
+ CSRCS += lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
+ CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c
++CSRCS += lib_vscnprintf.c lib_scnprintf.c
+ CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
+ CSRCS += lib_memsostream.c lib_lowoutstream.c
+ CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
+--- ./nuttx/include/stdio.h	2019-04-26 10:21:14.636711442 -0700
++++ ./nuttx/include/stdio.h	2019-04-26 10:24:52.971877399 -0700
+@@ -181,7 +181,6 @@
+ int    snprintf(FAR char *buf, size_t size,
+          FAR const IPTR char *fmt, ...);
+ int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...);
+-
+ int    scanf(FAR const IPTR char *fmt, ...);
+ int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap);
+ int    vfprintf(FAR FILE *stream, FAR const IPTR char *fmt,
+@@ -192,6 +191,10 @@
+          va_list ap);
+ int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap);
+ int    vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
++int    scnprintf(FAR char *buf, size_t size,
++         FAR const IPTR char *fmt, ...);
++int    vscnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
++         va_list ap);
+ 
+ /* Operations on file descriptors including:
+  *
