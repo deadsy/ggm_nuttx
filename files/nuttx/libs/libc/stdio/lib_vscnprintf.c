@@ -52,8 +52,7 @@
  * Name: vscnprintf
  ****************************************************************************/
 
-int vscnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, va_list args)
-{
+int vscnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, va_list args) {
 	int i;
 
 	i = vsnprintf(buf, size, fmt, args);

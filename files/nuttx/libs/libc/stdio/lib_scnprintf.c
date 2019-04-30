@@ -52,8 +52,7 @@
  * scnprintf
  ****************************************************************************/
 
-int scnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, ...)
-{
+int scnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, ...) {
 	va_list args;
 	int i;
 
