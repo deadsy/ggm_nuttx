@@ -52,14 +52,20 @@
  * Name: vscnprintf
  ****************************************************************************/
 
-int vscnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, va_list args) {
-	int i;
+int vscnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
+               va_list args)
+{
+  int i;
 
-	i = vsnprintf(buf, size, fmt, args);
+  i = vsnprintf(buf, size, fmt, args);
 
-	if (i < size)
-		return i;
-	if (size != 0)
-		return size - 1;
-	return 0;
+  if (i < size)
+    {
+      return i;
+    }
+  if (size != 0)
+    {
+      return size - 1;
+    }
+  return 0;
 }

@@ -52,13 +52,14 @@
  * scnprintf
  ****************************************************************************/
 
-int scnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, ...) {
-	va_list args;
-	int i;
+int scnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, ...)
+{
+  va_list   args;
+  int       i;
 
-	va_start(args, fmt);
-	i = vscnprintf(buf, size, fmt, args);
-	va_end(args);
+  va_start(args, fmt);
+  i = vscnprintf(buf, size, fmt, args);
+  va_end(args);
 
-	return i;
+  return i;
 }
