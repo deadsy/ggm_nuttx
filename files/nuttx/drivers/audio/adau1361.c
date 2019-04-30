@@ -13,6 +13,9 @@ Analog Devices ADAU1361 Stereo CODEC
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/audio/audio.h>
+#include <nuttx/audio/adau1361.h>
+
+#include "adau1361.h"
 
 //-----------------------------------------------------------------------------
 
@@ -69,7 +72,7 @@ struct adau1361_dev_s {
 	struct audio_lowerhalf_s dev;	// ADAU1361 audio lower half (this device)
 
 	// Our specific driver data goes here
-	const struct adau1361_lower_s *lower;	// Pointer to the board lower functions
+	const struct adau1361_lower_s *lower;	// Low-level board specific functions
 	struct i2c_master_s *i2c;	// I2C driver to use
 	struct i2s_dev_s *i2s;	// I2S driver to use
 	struct dq_queue_s pendq;	// Queue of pending buffers to be sent
@@ -152,85 +155,121 @@ void adau1361_dump_registers(struct audio_lowerhalf_s *dev, const char *msg) {
 
 //-----------------------------------------------------------------------------
 
+// Reset the ADAU1361 chip
+static void adau1361_hw_reset(const struct adau1361_lower_s *lower) {
+	DEBUGASSERT(lower && lower->reset);
+	lower->reset(lower);
+}
+
+// Reset and re-initialize the ADAU1361
+static void adau1361_reset(struct adau1361_dev_s *priv) {
+}
+
+//-----------------------------------------------------------------------------
+
 // Get the lower-half device capabilities
 static int adau1361_getcaps(struct audio_lowerhalf_s *dev, int type, struct audio_caps_s *pCaps) {
+	audinfo("\n");
 	return 0;
 }
 
 // Shutdown the driver (called after close)
 static int adau1361_shutdown(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
+#if 0
 // Allocate an audio pipeline buffer
 static int adau1361_allocbuffer(struct audio_lowerhalf_s *dev, struct audio_buf_desc_s *apb) {
+	audinfo("\n");
 	return 0;
 }
+#endif
 
+#if 0
 // Free an audio pipeline buffer
 static int adau1361_freebuffer(struct audio_lowerhalf_s *dev, struct audio_buf_desc_s *apb) {
+	audinfo("\n");
 	return 0;
 }
+#endif
 
 // Enqueue a buffer for processing
 static int adau1361_enqueuebuffer(struct audio_lowerhalf_s *dev, struct ap_buffer_s *apb) {
+	audinfo("\n");
 	return 0;
 }
 
 // Cancel a previously enqueued buffer
 static int adau1361_cancelbuffer(struct audio_lowerhalf_s *dev, struct ap_buffer_s *apb) {
+	audinfo("\n");
 	return 0;
 }
 
 // Driver specific ioctl commands
 static int adau1361_ioctl(struct audio_lowerhalf_s *dev, int cmd, unsigned long arg) {
+	audinfo("\n");
 	return 0;
 }
 
+#if 0
 // Driver specific read commands
 static int adau1361_read(struct audio_lowerhalf_s *dev, char *buffer, size_t buflen) {
+	audinfo("\n");
 	return 0;
 }
+#endif
 
+#if 0
 // Driver specific write commands
 static int adau1361_write(struct audio_lowerhalf_s *dev, const char *buffer, size_t buflen) {
+	audinfo("\n");
 	return 0;
 }
+#endif
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 
 // Release a session
 static int adau1361_release(struct audio_lowerhalf_s *dev, void *session) {
+	audinfo("\n");
 	return 0;
 }
 
 // Reserve a session
 static int adau1361_reserve(struct audio_lowerhalf_s *dev, void **psession) {
+	audinfo("\n");
 	return 0;
 }
 
 // Resumes audio streaming after a pause
 static int adau1361_resume(struct audio_lowerhalf_s *dev, void *session) {
+	audinfo("\n");
 	return 0;
 }
 
 // Pause the audio stream
 static int adau1361_pause(struct audio_lowerhalf_s *dev, void *session) {
+	audinfo("\n");
 	return 0;
 }
 
 // Start audio streaming
 static int adau1361_start(struct audio_lowerhalf_s *dev, void *session) {
+	audinfo("\n");
 	return 0;
 }
 
 // Stop audio streaming
 static int adau1361_stop(struct audio_lowerhalf_s *dev, void *session) {
+	audinfo("\n");
 	return 0;
 }
 
 // Configure the driver
 static int adau1361_configure(struct audio_lowerhalf_s *dev, void *session, const struct audio_caps_s *pCaps) {
+	audinfo("\n");
 	return 0;
 }
 
@@ -238,40 +277,47 @@ static int adau1361_configure(struct audio_lowerhalf_s *dev, void *session, cons
 
 // Release a session
 static int adau1361_release(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Reserve a session
 static int adau1361_reserve(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Resumes audio streaming after a pause
 static int adau1361_resume(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Pause the audio stream
 static int adau1361_pause(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Start audio streaming
 static int adau1361_start(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Stop audio streaming
 static int adau1361_stop(struct audio_lowerhalf_s *dev) {
+	audinfo("\n");
 	return 0;
 }
 
 // Configure the driver
 static int adau1361_configure(struct audio_lowerhalf_s *dev, const struct audio_caps_s *pCaps) {
+	audinfo("\n");
 	return 0;
 }
 
-#endif
+#endif				// not CONFIG_AUDIO_MULTI_SESSION
 
 //-----------------------------------------------------------------------------
 
@@ -283,13 +329,13 @@ static const struct audio_ops_s g_audioops = {
 	.stop = adau1361_stop,
 	.pause = adau1361_pause,
 	.resume = adau1361_resume,
-	.allocbuffer = adau1361_allocbuffer,
-	.freebuffer = adau1361_freebuffer,
+	.allocbuffer = NULL,	// adau1361_allocbuffer,
+	.freebuffer = NULL,	// adau1361_freebuffer,
 	.enqueuebuffer = adau1361_enqueuebuffer,
 	.cancelbuffer = adau1361_cancelbuffer,
 	.ioctl = adau1361_ioctl,
-	.read = adau1361_read,
-	.write = adau1361_write,
+	.read = NULL,		// adau1361_read,
+	.write = NULL,		// adau1361_write,
 	.reserve = adau1361_reserve,
 	.release = adau1361_release,
 };
@@ -318,8 +364,8 @@ struct audio_lowerhalf_s *adau1361_initialize(struct i2c_master_s *i2c, struct i
 		// Initialize I2C
 		audinfo("address=%02x frequency=%d\n", lower->address, lower->frequency);
 
-		// Software reset. Put all ADAU1361 registers to their default state.
-		ADAU1361_HW_RESET(priv->lower);
+		// Reset the ADAU1361
+		adau1361_hw_reset(priv->lower);
 		adau1361_dump_registers(&priv->dev, "After reset");
 
 		// Verify the ADAU1361 is present and available on this I2C
