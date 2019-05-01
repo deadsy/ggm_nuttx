@@ -66,44 +66,46 @@ def fmt_linux(fname):
 #------------------------------------------------------------------------------
 
 nuttx_indent_opts = (
-  'nbad',
-  'bap',
-  'bbb',
-  'nbbo',
-  'nbc',
-  'bl',
-  'bl2',
-  'bls',
-  'nbs',
-  'cbi2',
-  'ncdw',
-  'nce',
-  'ci2',
-  'cli0',
-  'cp40',
-  'ncs',
-  'nbfda',
-  'nbfde',
-  'di1',
-  'nfc1',
-  'fca',
-  'i2',
-  'l80',
-  'lp',
-  'ppi2',
-  'lps',
-  'npcs',
-  'pmt',
-  'nprs',
-  'npsl',
-  'saf',
-  'sai',
-  'sbi2',
-  'saw',
-  'sc',
-  'sob',
-  'nss',
-  'nut',
+  'nbad', # Do not force blank lines after declarations.
+  'bap', # Force blank lines after procedure bodies.
+  'bbb', # Force blank lines before block comments.
+  'nbbo', # Do not prefer to break long lines before boolean operators.
+  'nbc', # Do not force newlines after commas in declarations.
+  'bl', # Put braces on line after if, etc.
+  'bl2', # ??
+  'bli2', # Indent braces n spaces.
+  'bls', # Put braces on the line after struct declaration lines.
+  'nbs', # Do not put a space between sizeof and its argument.
+  'cbi2', # Indent braces after a case label N spaces.
+  'ncdw', # Do not cuddle } and the while of a do {} while;
+  'nce', # Do not cuddle } and else.
+  'ci2', # Continuation indent of n spaces.
+  'cli0', # Case label indent of n spaces.
+  'cp40', # Put comments to the right of #else and #endif statements in column n.
+  'ncs', # no-space-after-casts
+  'nbfda', # dont-break-function-decl-args
+  'nbfde', # dont-break-function-decl-args-end
+  'di1', # Put variables in column n.
+  'nfc1', # Do not format comments in the first column as normal.
+  'fca', # Do not disable all formatting of comments.
+  'i2', # Set indentation level to n spaces.
+  'l80', # Set maximum line length for non-comment lines to n.
+  'lc80', # Set maximum line length for comment formatting to n.
+  'lp', # Line up continued lines at parentheses.
+  'ppi2',# Specify the indentation for preprocessor conditional statements.
+  'lps', # Leave space between ‘#’ and preprocessor directive.
+  'npcs', # Do not put space after the function in function calls.
+  'pmt', # Preserve access and modification times on output files.
+  'nprs', # Do not put a space after every ’(’ and before every ’)’.
+  'npsl',# Put the type of a procedure on the same line as its name.
+  'saf', # Put a space after each for.
+  'sai', # Put a space after each if.
+  'sbi2',# Indent braces of a struct, union or enum N spaces.
+  'saw', # Put a space after each while.
+  'sc',  # Put the ‘*’ character at the left of comments.
+  'sob', # Swallow optional blank lines.
+  'nss', # Do not force a space before the semicolon after certain statements.
+  'nut', # Use spaces instead of tabs.
 )
 
 def fmt_nuttx(fname):
