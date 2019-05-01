@@ -7,6 +7,7 @@ import glob
 import subprocess
 import os
 import fnmatch
+import sys
 
 #------------------------------------------------------------------------------
 
@@ -95,9 +96,14 @@ filter_files = (
 #------------------------------------------------------------------------------
 
 def main():
-  flist = get_files(src_dirs, filter_files, filter_dirs)
-  for f in flist:
+  if len(sys.argv) == 2:
+    f = srcfile(sys.argv[1], fmt_nuttx)
     f.format()
+  else:
+    flist = get_files(src_dirs, filter_files, filter_dirs)
+    for f in flist:
+      f.format()
+  sys.exit(0)
 
 main()
 
