@@ -1,14 +1,42 @@
-//-----------------------------------------------------------------------------
-/*
-
-I2C Rotary Encoder V2 Driver
-Author: Jason Harris (https://github.com/deadsy)
-
-https://github.com/Fattoresaimon/I2CEncoderV2
-https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
-
-*/
-//-----------------------------------------------------------------------------
+/****************************************************************************
+ * drivers/input/rei2c.c
+ *
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Jason T Harris <sirmnalypowers@gmail.com>
+ *
+ * I2C Rotary Encoder V2 Driver
+ * References:
+ * https://github.com/Fattoresaimon/I2CEncoderV2
+ * https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -18,7 +46,7 @@ https://www.kickstarter.com/projects/1351830006/i2c-encoder-v2
 
 #include <nuttx/input/rei2c.h>
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 struct rei2c_dev_s {
 	struct i2c_master_s *i2c;	// I2C interface connected to rei2c
@@ -28,7 +56,7 @@ struct rei2c_dev_s {
 	uint8_t crefs;		// Number of times the device has been opened
 };
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 // basic read/write functions
 
 static int rei2c_i2c_read(struct rei2c_dev_s *dev, uint8_t reg, uint8_t * data, size_t len) {
@@ -105,7 +133,7 @@ static int rei2c_wr32(struct rei2c_dev_s *dev, uint8_t reg, uint32_t val) {
 	return rei2c_i2c_write(dev, reg, (uint8_t *) & val, 4);
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 static inline int rei2c_takesem(sem_t * sem) {
 	int rc;
@@ -120,7 +148,7 @@ static inline int rei2c_givesem(sem_t * sem) {
 	return nxsem_post(sem);
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 static int rei2c_init(struct rei2c_dev_s *dev, const struct rei2c_regs *regs) {
 	int rc;
@@ -161,7 +189,7 @@ static int rei2c_init(struct rei2c_dev_s *dev, const struct rei2c_regs *regs) {
 	return rc;
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 // file operations
 
 static int rei2c_open(struct file *filep) {
@@ -213,7 +241,7 @@ static int rei2c_close(struct file *filep) {
 	return ret;
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 static int rei2c_rd_status(struct rei2c_dev_s *dev, struct rei2c_status *status) {
 	uint8_t buf[7];
@@ -259,7 +287,7 @@ static ssize_t rei2c_read(struct file *filep, char *buffer, size_t buflen) {
 	return ret;
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 static ssize_t rei2c_write(struct file *filep, const char *buffer, size_t buflen) {
 	iinfo("filep %p buffer %p buflen %d\n", filep, buffer, buflen);
@@ -293,7 +321,7 @@ static const struct file_operations rei2c_fops = {
 #endif
 };
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
 
 int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct rei2c_cfg *cfg) {
 	struct rei2c_dev_s *dev;
@@ -336,4 +364,4 @@ int rei2c_register(const char *devname, struct i2c_master_s *i2c, const struct r
 	return rc;
 }
 
-//-----------------------------------------------------------------------------
+/****************************************************************************/
