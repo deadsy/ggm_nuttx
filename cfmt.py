@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Format the project source code.
+# Format project source code.
 
 #------------------------------------------------------------------------------
 
@@ -11,11 +11,17 @@ import sys
 
 #------------------------------------------------------------------------------
 
+indent_exec = '/usr/bin/indent'
+uncrustify_exec = '/usr/local/bin/uncrustify'
+nxstyle_exec = '/usr/local/bin/nxstyle'
+
+#------------------------------------------------------------------------------
+
 class srcfile(object):
 
   def __init__(self, name, formatter):
-    self.name = name  
-    self.formatter = formatter  
+    self.name = name
+    self.formatter = formatter
 
   def dfilter(self, dlist):
     """return true if the file is in a filtered directory"""
@@ -46,22 +52,66 @@ def exec_cmd(cmd):
 
 #------------------------------------------------------------------------------
 
-indent_exec = '/usr/bin/indent'
-
-def fmt_linux(fname):
-  print("fmt_linux %s" % fname)
-  exec_cmd('%s -brf -linux -l10000 %s' % (indent_exec, fname))
+def exec_indent(fname, opts):
+  exec_cmd('%s %s %s' % (indent_exec, opts, fname))
   os.unlink('%s~' % fname)
 
 #------------------------------------------------------------------------------
 
-uncrustify_exec = '/usr/local/bin/uncrustify'
-nxstyle_exec = '/usr/local/bin/nxstyle'
+def fmt_linux(fname):
+  print("fmt_linux %s" % fname)
+  opts = '-brf -linux -l10000'
+  exec_indent(fname, opts)
+
+#------------------------------------------------------------------------------
+
+nuttx_indent_opts = (
+  'nbad',
+  'bap',
+  'bbb',
+  'nbbo',
+  'nbc',
+  'bl',
+  'bl2',
+  'bls',
+  'nbs',
+  'cbi2',
+  'ncdw',
+  'nce',
+  'ci2',
+  'cli0',
+  'cp40',
+  'ncs',
+  'nbfda',
+  'nbfde',
+  'di1',
+  'nfc1',
+  'fca',
+  'i2',
+  'l80',
+  'lp',
+  'ppi2',
+  'lps',
+  'npcs',
+  'pmt',
+  'nprs',
+  'npsl',
+  'saf',
+  'sai',
+  'sbi2',
+  'saw',
+  'sc',
+  'sob',
+  'nss',
+  'nut',
+)
 
 def fmt_nuttx(fname):
   print("fmt_nuttx on %s" % fname)
-  exec_cmd('%s -c ./tools/uncrustify.cfg -q --no-backup %s' % (uncrustify_exec, fname))
-  exec_cmd('%s -m 90 %s' % (nxstyle_exec, fname))
+  opts = ' '.join(["-%s" % opt for opt in nuttx_indent_opts])
+  exec_indent(fname, opts)
+  #exec_cmd('%s -c ./tools/uncrustify.cfg -q --no-backup %s' % (uncrustify_exec, fname))
+  #exec_cmd('%s -m 90 %s' % (nxstyle_exec, fname))
 
 #------------------------------------------------------------------------------
 
