@@ -54,13 +54,13 @@ def fmt_linux(fname):
 
 #------------------------------------------------------------------------------
 
-uncrustify_exec = '/usr/bin/uncrustify'
+uncrustify_exec = '/usr/local/bin/uncrustify'
 nxstyle_exec = '/usr/local/bin/nxstyle'
 
 def fmt_nuttx(fname):
   print("fmt_nuttx on %s" % fname)
   exec_cmd('%s -c ./tools/uncrustify.cfg -q --no-backup %s' % (uncrustify_exec, fname))
-  exec_cmd('%s %s' % (nxstyle_exec, fname))
+  exec_cmd('%s -m 90 %s' % (nxstyle_exec, fname))
 
 #------------------------------------------------------------------------------
 
