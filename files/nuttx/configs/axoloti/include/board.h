@@ -1,11 +1,42 @@
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
+/************************************************************************************
+ * configs/axoloti/include/board.h
+ *
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************************************/
 
 #ifndef __CONFIG_AXOLOTI_INCLUDE_BOARD_H
 #define __CONFIG_AXOLOTI_INCLUDE_BOARD_H
 
-//-----------------------------------------------------------------------------
+/************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -14,9 +45,9 @@
 #include <stdbool.h>
 #endif
 
-//-----------------------------------------------------------------------------
-/* Clocking
-/* The Axoloti board has an external 8MHz crystal.
+/************************************************************************************
+ * Clocking
+ * The Axoloti board has an external 8MHz crystal.
  * The SoC can run at 180MHz, but the required USB clock of 48MHz cannot be
  * configured at that system clock rate, so the core clock is 168MHz.
  *
@@ -74,100 +105,122 @@
 
 #define STM32_SYSCLK_FREQUENCY  168000000ul
 
-// AHB clock (HCLK) is SYSCLK (168MHz)
-#define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK	/* HCLK  = SYSCLK / 1 */
+/* AHB clock (HCLK) is SYSCLK (168MHz) */
+#define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK    /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY	/* same as above, to satisfy compiler */
+#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY    /* same as above, to satisfy compiler */
 
-// APB1 clock (PCLK1) is HCLK/4 (42MHz)
-#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4	/* PCLK1 = HCLK / 4 */
+/* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4   /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
 
-// APB2 clock (PCLK2) is HCLK/2 (84MHz)
-#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2	/* PCLK2 = HCLK / 2 */
+/* APB2 clock (PCLK2) is HCLK/2 (84MHz) */
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLKd2   /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
 
-//-----------------------------------------------------------------------------
-// LEDs
+/************************************************************************************
+ * LED Definitions
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
 
-//LED index values for use with board_userled()
+/* LED index values for use with board_userled() */
+
 #define BOARD_LED1        0
 #define BOARD_LED2        1
 #define BOARD_NLEDS       2
 #define BOARD_LED_GREEN   BOARD_LED1
 #define BOARD_LED_RED     BOARD_LED2
 
-// LED bits for use with board_userled_all()
+/* LED bits for use with board_userled_all() */
+
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
 
-//-----------------------------------------------------------------------------
-// Buttons
+/************************************************************************************
+ * Button Definitions
+ * There are two buttons on the axoloti, one of them is GPIO connected. The other
+ * is a reset button and is not under software control.
+ */
 
 #define BUTTON_USER        0
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-//-----------------------------------------------------------------------------
+/************************************************************************************
+ * UARTs
+ * The MIDI in/out ports of the axoloti are connected on USART6.
+ * Sometimes it's convenient to run a serial port connected to the header pins,
+ * so we can optionally use USART1 for that.
+ */
 
-// USART1 - console on header pins
-#define GPIO_USART1_RX GPIO_USART1_RX_2	// AF7, PB7
-#define GPIO_USART1_TX GPIO_USART1_TX_2	// AF7, PB6
+/* USART1 - console on header pins */
+#define GPIO_USART1_RX GPIO_USART1_RX_2 /* AF7, PB7 */
+#define GPIO_USART1_TX GPIO_USART1_TX_2 /* AF7, PB6 */
 
-// USART6 - midi in/out
-#define GPIO_USART6_RX GPIO_USART6_RX_2	// AF8, PG9
-#define GPIO_USART6_TX GPIO_USART6_TX_2	// AF8, PG14
+/* USART6 - midi in/out */
+#define GPIO_USART6_RX GPIO_USART6_RX_2 /* AF8, PG9 */
+#define GPIO_USART6_TX GPIO_USART6_TX_2 /* AF8, PG14 */
 
-//-----------------------------------------------------------------------------
+/************************************************************************************
+ * I2C Bus
+ * Turn on the internal pullups since there are no external pullups.
+ */
 
-// I2C1 - user i2c bus
-// add internal pullups, since we don't have them externally
-#define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_PULLUP)	// AF4, PB8
-#define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_PULLUP)	// AF4, PB9
+/* I2C1 */
+#define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_PULLUP)     /* AF4, PB8 */
+#define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_PULLUP)     /* AF4, PB9 */
 
-//-----------------------------------------------------------------------------
-// SDIO
+/************************************************************************************
+ * SDIO
+ * Used for the SD card interface.
+ * d0 (AF12, PC8)
+ * d1 (AF12, PC9)
+ * d2 (AF12, PC10)
+ * d3 (AF12, PC11)
+ * cmd (AF12, PD2)
+ * clk (AF12, PC12)
+ * cd1 PD13
+ */
 
-// d0 (AF12, PC8)
-// d1 (AF12, PC9)
-// d2 (AF12, PC10)
-// d3 (AF12, PC11)
-// cmd (AF12, PD2)
-// clk (AF12, PC12)
-// cd1 PD13
+/* SDIO dividers. Note that slower clocking is required when DMA is disabled
+ * in order to avoid RX overrun/TX underrun errors due to delayed responses
+ * to service FIFOs in interrupt driven mode.  These values have not been
+ * tuned!!!
+ *
+ * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
+ */
 
-// SDIO dividers.  Note that slower clocking is required when DMA is disabled
-// in order to avoid RX overrun/TX underrun errors due to delayed responses
-// to service FIFOs in interrupt driven mode.
+#define SDIO_INIT_CLKDIV        (118 << SDIO_CLKCR_CLKDIV_SHIFT)
 
-// SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
-#define SDIO_INIT_CLKDIV (118 << SDIO_CLKCR_CLKDIV_SHIFT)
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
 
-// DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
-// DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
 #ifdef CONFIG_SDIO_DMA
-#define SDIO_MMCXFR_CLKDIV (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
-#define SDIO_MMCXFR_CLKDIV (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_MMCXFR_CLKDIV    (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-// DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
-// DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+/* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
+ * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
+ */
+
 #ifdef CONFIG_SDIO_DMA
-#define SDIO_SDXFR_CLKDIV (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_SDXFR_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
-#define SDIO_SDXFR_CLKDIV (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-//-----------------------------------------------------------------------------
-// DMS Channel/Stream Setup
+/************************************************************************************
+ * DMA Channel/Stream Setup
+ */
 
-// DMAMAP_SDIO_1 = Channel 4, Stream 3
-// DMAMAP_SDIO_2 = Channel 4, Stream 6
 #define DMAMAP_SDIO DMAMAP_SDIO_1
 
-//-----------------------------------------------------------------------------
+/************************************************************************************/
 
-#endif				// __CONFIG_AXOLOTI_INCLUDE_BOARD_H
+#endif /* __CONFIG_AXOLOTI_INCLUDE_BOARD_H */
 
-//-----------------------------------------------------------------------------
+/************************************************************************************/
