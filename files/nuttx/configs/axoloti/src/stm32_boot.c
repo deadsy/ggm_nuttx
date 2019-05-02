@@ -24,28 +24,30 @@ Axoloti Board Boot Code
 // All STM32 architectures must provide the following entry point.  This
 // entry point is called early in the initialization -- after all memory
 // has been configured and mapped but before any devices have been initialized.
-void stm32_boardinitialize(void) {
+void stm32_boardinitialize(void)
+{
 #ifdef CONFIG_SCHED_CRITMONITOR
-	// Make sure the high speed cycle counter is running.  It will be started
-	// automatically only if a debugger is connected.
-	putreg32(0xc5acce55, ITM_LAR);
-	modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+  // Make sure the high speed cycle counter is running.  It will be started
+  // automatically only if a debugger is connected.
+  putreg32(0xc5acce55, ITM_LAR);
+  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
 #endif
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-	stm32_spidev_initialize();
+  stm32_spidev_initialize();
 #endif
 
 #if defined(CONFIG_STM32_OTGHS) || defined(CONFIG_STM32_OTGFS)
-	stm32_usbinitialize();
+  stm32_usbinitialize();
 #endif
 }
 
 //-----------------------------------------------------------------------------
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void) {
-	(void)stm32_bringup();
+void board_late_initialize(void)
+{
+  (void)stm32_bringup();
 }
 #endif
 
