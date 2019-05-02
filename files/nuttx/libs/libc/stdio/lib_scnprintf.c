@@ -54,8 +54,8 @@
 
 int scnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt, ...)
 {
-  va_list   args;
-  int       i;
+  va_list args;
+  int i;
 
   va_start(args, fmt);
   i = vscnprintf(buf, size, fmt, args);

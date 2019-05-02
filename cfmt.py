@@ -66,6 +66,23 @@ def fmt_linux(fname):
 #------------------------------------------------------------------------------
 
 nuttx_indent_opts = (
+  'l80', # Set maximum line length for non-comment lines to n.
+  'lc200', # Set maximum line length for comment formatting to n.
+  'nut', # Use spaces instead of tabs.
+  'i2', # Set indentation level to n spaces.
+  'saf', # Put a space after each for.
+  'sai', # Put a space after each if.
+  'sob', # Swallow optional blank lines.
+  'nbs', # Do not put a space between sizeof and its argument.
+  'bli2', # Indent braces n spaces.
+  'nprs', # Do not put a space after every ’(’ and before every ’)’.
+  'npsl',# Put the type of a procedure on the same line as its name.
+  'ncs', # no-space-after-casts
+  'npcs', # Do not put space after the function in function calls.
+  'pmt', # Preserve access and modification times on output files.
+)
+
+nuttx_indent_opts_old = (
   'nbad', # Do not force blank lines after declarations.
   'bap', # Force blank lines after procedure bodies.
   'bbb', # Force blank lines before block comments.
