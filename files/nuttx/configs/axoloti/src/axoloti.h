@@ -108,6 +108,10 @@
 #define GPIO_OTGHS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN13)
 /* #define GPIO_OTGHS_VBUS no vbus monitoring.... */
 
+/* ADAU1361 CODEC */
+// TODO - fix
+#define GPIO_ADAU1361_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+
 /****************************************************************************
  * Initialize SDIO-based MMC/SD card support
  */
