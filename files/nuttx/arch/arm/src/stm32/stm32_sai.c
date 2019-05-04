@@ -69,58 +69,58 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
 #ifndef CONFIG_AUDIO
-#  error CONFIG_AUDIO required by this driver
+#error CONFIG_AUDIO required by this driver
 #endif
 
 #ifndef CONFIG_I2S
-#  error CONFIG_I2S required by this driver
+#error CONFIG_I2S required by this driver
 #endif
 
 #ifdef CONFIG_STM32_SAI_POLLING
-#  error "Polling SAI not yet supported"
+#error "Polling SAI not yet supported"
 #endif
 
 #ifdef CONFIG_STM32_SAI_INTERRUPTS
-#  error "Interrupt driven SAI not yet supported"
+#error "Interrupt driven SAI not yet supported"
 #endif
 
 #ifndef CONFIG_STM32_SAI_DEFAULT_SAMPLERATE
-#  define CONFIG_STM32_SAI_DEFAULT_SAMPLERATE  (48000)
+#define CONFIG_STM32_SAI_DEFAULT_SAMPLERATE  (48000)
 #endif
 
 #ifndef CONFIG_STM32_SAI_DEFAULT_DATALEN
-#  define CONFIG_STM32_SAI_DEFAULT_DATALEN     (16)
+#define CONFIG_STM32_SAI_DEFAULT_DATALEN     (16)
 #endif
 
 #ifndef CONFIG_STM32_SAI_MAXINFLIGHT
-#  define CONFIG_STM32_SAI_MAXINFLIGHT         (16)
+#define CONFIG_STM32_SAI_MAXINFLIGHT         (16)
 #endif
 
 #ifdef CONFIG_STM32_SAI_DMA
 /* SAI DMA priority */
 
-#  if defined(CONFIG_STM32_SAI_DMAPRIO)
-#    define SAI_DMA_PRIO       CONFIG_STM32_SAI_DMAPRIO
-#  else
-#    define SAI_DMA_PRIO       DMA_CCR_PRIMED
-#  endif
+#if defined(CONFIG_STM32_SAI_DMAPRIO)
+#define SAI_DMA_PRIO       CONFIG_STM32_SAI_DMAPRIO
+#else
+#define SAI_DMA_PRIO       DMA_CCR_PRIMED
+#endif
 
-#  if (SAI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
-#    error "Illegal value for CONFIG_STM32_SAI_DMAPRIO"
-#  endif
+#if (SAI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
+#error "Illegal value for CONFIG_STM32_SAI_DMAPRIO"
+#endif
 
 /* DMA channel configuration */
 
-#  define SAI_RXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
-#  define SAI_RXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
-#  define SAI_RXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC            )
-#  define SAI_TXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
-#  define SAI_TXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-#  define SAI_TXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#define SAI_RXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
+#define SAI_RXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
+#define SAI_RXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC            )
+#define SAI_TXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
+#define SAI_TXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
+#define SAI_TXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
 #endif
 
 /****************************************************************************
@@ -131,42 +131,42 @@
 
 struct sai_buffer_s
 {
-  struct sai_buffer_s *flink;  /* Supports a singly linked list */
-  i2s_callback_t callback;     /* Function to call when the transfer completes */
-  uint32_t timeout;            /* The timeout value to use with transfers */
-  void *arg;                   /* The argument to be returned with the callback */
-  struct ap_buffer_s *apb;     /* The audio buffer */
-  int result;                  /* The result of the transfer */
+  struct sai_buffer_s *flink;   /* Supports a singly linked list */
+  i2s_callback_t callback;      /* Function to call when the transfer completes */
+  uint32_t timeout;             /* The timeout value to use with transfers */
+  void *arg;                    /* The argument to be returned with the callback */
+  struct ap_buffer_s *apb;      /* The audio buffer */
+  int result;                   /* The result of the transfer */
 };
 
 /* The state of the one SAI peripheral */
 
 struct stm32_sai_s
 {
-  struct i2s_dev_s dev;        /* Externally visible I2S interface */
-  uintptr_t base;              /* SAI block register base address */
-  sem_t exclsem;               /* Assures mutually exclusive acess to SAI */
-  uint32_t frequency;          /* SAI clock frequency */
-  uint32_t syncen;             /* Synchronization setting */
+  struct i2s_dev_s dev;         /* Externally visible I2S interface */
+  uintptr_t base;               /* SAI block register base address */
+  sem_t exclsem;                /* Assures mutually exclusive acess to SAI */
+  uint32_t frequency;           /* SAI clock frequency */
+  uint32_t syncen;              /* Synchronization setting */
 #ifdef CONFIG_STM32_SAI_DMA
-  uint16_t dma_ch;             /* DMA channel number */
-  DMA_HANDLE dma;              /* DMA channel handle */
-  uint32_t dma_ccr;            /* DMA control register */
+  uint16_t dma_ch;              /* DMA channel number */
+  DMA_HANDLE dma;               /* DMA channel handle */
+  uint32_t dma_ccr;             /* DMA control register */
 #endif
-  uint8_t datalen;             /* Data width */
-  uint32_t samplerate;         /* Data sample rate */
-  uint8_t rxenab:1;            /* True: RX transfers enabled */
-  uint8_t txenab:1;            /* True: TX transfers enabled */
-  WDOG_ID dog;                 /* Watchdog that handles timeouts */
-  sq_queue_t pend;             /* A queue of pending transfers */
-  sq_queue_t act;              /* A queue of active transfers */
-  sq_queue_t done;             /* A queue of completed transfers */
-  struct work_s work;          /* Supports worker thread operations */
+  uint8_t datalen;              /* Data width */
+  uint32_t samplerate;          /* Data sample rate */
+  uint8_t rxenab:1;             /* True: RX transfers enabled */
+  uint8_t txenab:1;             /* True: TX transfers enabled */
+  WDOG_ID dog;                  /* Watchdog that handles timeouts */
+  sq_queue_t pend;              /* A queue of pending transfers */
+  sq_queue_t act;               /* A queue of active transfers */
+  sq_queue_t done;              /* A queue of completed transfers */
+  struct work_s work;           /* Supports worker thread operations */
 
   /* Pre-allocated pool of buffer containers */
 
-  sem_t bufsem;                   /* Buffer wait semaphore */
-  struct sai_buffer_s *freelist;  /* A list a free buffer containers */
+  sem_t bufsem;                 /* Buffer wait semaphore */
+  struct sai_buffer_s *freelist;        /* A list a free buffer containers */
   struct sai_buffer_s containers[CONFIG_STM32_SAI_MAXINFLIGHT];
 };
 
@@ -175,43 +175,41 @@ struct stm32_sai_s
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_I2S_INFO
-static void     sai_dump_regs(struct stm32_sai_s *priv, const char *msg);
+static void sai_dump_regs(struct stm32_sai_s *priv, const char *msg);
 #else
-#  define       sai_dump_regs(s,m)
+#define       sai_dump_regs(s,m)
 #endif
 
 /* Semaphore helpers */
 
-static void     sai_exclsem_take(struct stm32_sai_s *priv);
+static void sai_exclsem_take(struct stm32_sai_s *priv);
 #define         sai_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
-static void     sai_bufsem_take(struct stm32_sai_s *priv);
+static void sai_bufsem_take(struct stm32_sai_s *priv);
 #define         sai_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
 
-static struct sai_buffer_s *
-                sai_buf_allocate(struct stm32_sai_s *priv);
-static void     sai_buf_free(struct stm32_sai_s *priv,
-                  struct sai_buffer_s *bfcontainer);
-static void     sai_buf_initialize(struct stm32_sai_s *priv);
+static struct sai_buffer_s *sai_buf_allocate(struct stm32_sai_s *priv);
+static void sai_buf_free(struct stm32_sai_s *priv,
+                         struct sai_buffer_s *bfcontainer);
+static void sai_buf_initialize(struct stm32_sai_s *priv);
 
 /* DMA support */
 
 #ifdef CONFIG_STM32_SAI_DMA
-static void     sai_schedule(struct stm32_sai_s *priv, int result);
-static void     sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
+static void sai_schedule(struct stm32_sai_s *priv, int result);
+static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
 
 /* I2S methods */
 
 static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits);
-static int      sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                  i2s_callback_t callback, void *arg, uint32_t timeout);
-static int      sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                  i2s_callback_t callback, void *arg,
-                  uint32_t timeout);
+static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                       i2s_callback_t callback, void *arg, uint32_t timeout);
+static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                    i2s_callback_t callback, void *arg, uint32_t timeout);
 
 /****************************************************************************
  * Private Data
@@ -219,98 +217,93 @@ static int      sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 /* I2S device operations */
 
-static const struct i2s_ops_s g_i2sops =
-{
+static const struct i2s_ops_s g_i2sops = {
   /* Receiver methods */
 
   .i2s_rxsamplerate = sai_samplerate,
-  .i2s_rxdatawidth  = sai_datawidth,
-  .i2s_receive      = sai_receive,
+  .i2s_rxdatawidth = sai_datawidth,
+  .i2s_receive = sai_receive,
 
   /* Transmitter methods */
 
   .i2s_txsamplerate = sai_samplerate,
-  .i2s_txdatawidth  = sai_datawidth,
-  .i2s_send         = sai_send,
+  .i2s_txdatawidth = sai_datawidth,
+  .i2s_send = sai_send,
 };
 
 /* SAI1 state */
 
 #ifdef CONFIG_STM32_SAI1_A
-static struct stm32_sai_s g_sai1a_priv =
-{
-  .dev.ops     = &g_i2sops,
-  .base        = STM32_SAI1_A_BASE,
-  .frequency   = STM32_SAI1_FREQUENCY,
+static struct stm32_sai_s g_sai1a_priv = {
+  .dev.ops = &g_i2sops,
+  .base = STM32_SAI1_A_BASE,
+  .frequency = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32_SAI1_A_SYNC_WITH_B
-  .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
 #else
-  .syncen      = SAI_CR1_SYNCEN_ASYNC,
+  .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
 #ifdef CONFIG_STM32_SAI_DMA
-  .dma_ch      = DMACHAN_SAI1_A,
+  .dma_ch = DMACHAN_SAI1_A,
 #endif
-  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .datalen = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
 };
 #endif
 
 #ifdef CONFIG_STM32_SAI1_B
-static struct stm32_sai_s g_sai1b_priv =
-{
-  .dev.ops     = &g_i2sops,
-  .base        = STM32_SAI1_B_BASE,
-  .frequency   = STM32_SAI1_FREQUENCY,
+static struct stm32_sai_s g_sai1b_priv = {
+  .dev.ops = &g_i2sops,
+  .base = STM32_SAI1_B_BASE,
+  .frequency = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32_SAI1_B_SYNC_WITH_A
-  .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
 #else
-  .syncen      = SAI_CR1_SYNCEN_ASYNC,
+  .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
 #ifdef CONFIG_STM32_SAI_DMA
-  .dma_ch      = DMACHAN_SAI1_B,
+  .dma_ch = DMACHAN_SAI1_B,
 #endif
-  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .datalen = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
 };
 #endif
 
 /* SAI2 state */
 
 #ifdef CONFIG_STM32_SAI2_A
-static struct stm32_sai_s g_sai2a_priv =
-{
-  .dev.ops     = &g_i2sops,
-  .base        = STM32_SAI2_A_BASE,
-  .frequency   = STM32_SAI2_FREQUENCY,
+static struct stm32_sai_s g_sai2a_priv = {
+  .dev.ops = &g_i2sops,
+  .base = STM32_SAI2_A_BASE,
+  .frequency = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32_SAI2_A_SYNC_WITH_B
-  .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
 #else
-  .syncen      = SAI_CR1_SYNCEN_ASYNC,
+  .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
 #ifdef CONFIG_STM32_SAI_DMA
-  .dma_ch      = DMACHAN_SAI2_A,
+  .dma_ch = DMACHAN_SAI2_A,
 #endif
-  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .datalen = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
 };
 #endif
 
 #ifdef CONFIG_STM32_SAI2_B
-static struct stm32_sai_s g_sai2b_priv =
-{
-  .dev.ops     = &g_i2sops,
-  .base        = STM32_SAI2_B_BASE,
-  .frequency   = STM32_SAI2_FREQUENCY,
+static struct stm32_sai_s g_sai2b_priv = {
+  .dev.ops = &g_i2sops,
+  .base = STM32_SAI2_B_BASE,
+  .frequency = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32_SAI2_B_SYNC_WITH_A
-  .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
 #else
-  .syncen      = SAI_CR1_SYNCEN_ASYNC,
+  .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
 #ifdef CONFIG_STM32_SAI_DMA
-  .dma_ch      = DMACHAN_SAI2_B,
+  .dma_ch = DMACHAN_SAI2_B,
 #endif
-  .datalen     = CONFIG_STM32_SAI_DEFAULT_DATALEN,
-  .samplerate  = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
+  .datalen = CONFIG_STM32_SAI_DEFAULT_DATALEN,
+  .samplerate = CONFIG_STM32_SAI_DEFAULT_SAMPLERATE,
 };
 #endif
 
@@ -403,7 +396,7 @@ static void sai_modifyreg(struct stm32_sai_s *priv, uint8_t offset,
 {
   uint32_t regval;
 
-  regval  = sai_getreg(priv, offset);
+  regval = sai_getreg(priv, offset);
   regval &= ~clrbits;
   regval |= setbits;
   sai_putreg(priv, offset, regval);
@@ -428,7 +421,7 @@ static void sai_modifyreg(struct stm32_sai_s *priv, uint8_t offset,
 static void sai_dump_regs(struct stm32_sai_s *priv, const char *msg)
 {
   if (msg)
-      i2sinfo("%s\n", msg);
+    i2sinfo("%s\n", msg);
 
   i2sinfo("CR1:%08x CR2:%08x  FRCR:%08x SLOTR:%08x\n",
           sai_getreg(priv, STM32_SAI_CR1_OFFSET),
@@ -594,7 +587,7 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
 
   /* Get the transfer information, accounting for any data offset */
 
-  samp = (uintptr_t)&apb->samp[apb->curbyte];
+  samp = (uintptr_t) & apb->samp[apb->curbyte];
 
   /* Configure the DMA */
 
@@ -604,22 +597,22 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
 
       switch (priv->datalen)
         {
-          case 8:
-            priv->dma_ccr = SAI_TXDMA8_CONFIG;
-            ntransfers = nbytes;
-            break;
+        case 8:
+          priv->dma_ccr = SAI_TXDMA8_CONFIG;
+          ntransfers = nbytes;
+          break;
 
-          case 16:
-            priv->dma_ccr = SAI_TXDMA16_CONFIG;
-            DEBUGASSERT((nbytes & 0x1) == 0);
-            ntransfers = nbytes >> 1;
-            break;
+        case 16:
+          priv->dma_ccr = SAI_TXDMA16_CONFIG;
+          DEBUGASSERT((nbytes & 0x1) == 0);
+          ntransfers = nbytes >> 1;
+          break;
 
-          case 32:
-            priv->dma_ccr = SAI_TXDMA32_CONFIG;
-            DEBUGASSERT((nbytes & 0x3) == 0);
-            ntransfers = nbytes >> 2;
-            break;
+        case 32:
+          priv->dma_ccr = SAI_TXDMA32_CONFIG;
+          DEBUGASSERT((nbytes & 0x3) == 0);
+          ntransfers = nbytes >> 2;
+          break;
         }
     }
   else if (priv->rxenab)
@@ -628,22 +621,22 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
 
       switch (priv->datalen)
         {
-          case 8:
-            priv->dma_ccr = SAI_RXDMA8_CONFIG;
-            ntransfers = nbytes;
-            break;
+        case 8:
+          priv->dma_ccr = SAI_RXDMA8_CONFIG;
+          ntransfers = nbytes;
+          break;
 
-          case 16:
-            priv->dma_ccr = SAI_RXDMA16_CONFIG;
-            DEBUGASSERT((nbytes & 0x1) == 0);
-            ntransfers = nbytes >> 1;
-            break;
+        case 16:
+          priv->dma_ccr = SAI_RXDMA16_CONFIG;
+          DEBUGASSERT((nbytes & 0x1) == 0);
+          ntransfers = nbytes >> 1;
+          break;
 
-          case 32:
-            priv->dma_ccr = SAI_RXDMA32_CONFIG;
-            DEBUGASSERT((nbytes & 0x3) == 0);
-            ntransfers = nbytes >> 2;
-            break;
+        case 32:
+          priv->dma_ccr = SAI_RXDMA32_CONFIG;
+          DEBUGASSERT((nbytes & 0x3) == 0);
+          ntransfers = nbytes >> 2;
+          break;
         }
     }
 
@@ -654,7 +647,7 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
 
   /* Add the container to the list of active DMAs */
 
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->act);
+  sq_addlast((sq_entry_t *) bfcontainer, &priv->act);
 
   /* Start the DMA, saving the container as the current active transfer */
 
@@ -668,8 +661,8 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
 
   if (bfcontainer->timeout > 0)
     {
-      ret = wd_start(priv->dog, bfcontainer->timeout, (wdentry_t)sai_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(priv->dog, bfcontainer->timeout, (wdentry_t) sai_timeout,
+                     1, (uint32_t) priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -806,7 +799,7 @@ static void sai_schedule(struct stm32_sai_s *priv, int result)
 
       /* Add the completed buffer container to the tail of the done queue */
 
-      sq_addlast((sq_entry_t *)bfcontainer, &priv->done);
+      sq_addlast((sq_entry_t *) bfcontainer, &priv->done);
     }
 
   /* If the worker has completed running, then reschedule the working thread.
@@ -912,21 +905,21 @@ static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
 
   switch (bits)
     {
-      case 8:
-        setbits = SAI_CR1_DS_8BITS;
-        break;
+    case 8:
+      setbits = SAI_CR1_DS_8BITS;
+      break;
 
-      case 16:
-        setbits = SAI_CR1_DS_16BITS;
-        break;
+    case 16:
+      setbits = SAI_CR1_DS_16BITS;
+      break;
 
-      case 32:
-        setbits = SAI_CR1_DS_32BITS;
-        break;
+    case 32:
+      setbits = SAI_CR1_DS_32BITS;
+      break;
 
-      default:
-        i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
-        return 0;
+    default:
+      i2serr("ERROR: Unsupported or invalid data width: %d\n", bits);
+      return 0;
     }
 
   sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_DS_MASK, setbits);
@@ -1014,15 +1007,15 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   /* Initialize the buffer container structure */
 
   bfcontainer->callback = (void *)callback;
-  bfcontainer->timeout  = timeout;
-  bfcontainer->arg      = arg;
-  bfcontainer->apb      = apb;
-  bfcontainer->result   = -EBUSY;
+  bfcontainer->timeout = timeout;
+  bfcontainer->arg = arg;
+  bfcontainer->apb = apb;
+  bfcontainer->result = -EBUSY;
 
   /* Add the buffer container to the end of the pending queue */
 
   flags = enter_critical_section();
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
+  sq_addlast((sq_entry_t *) bfcontainer, &priv->pend);
 
   /* Then start the next transfer.  If there is already a transfer in progess,
    * then this will do nothing.
@@ -1114,15 +1107,15 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   /* Initialize the buffer container structure */
 
   bfcontainer->callback = (void *)callback;
-  bfcontainer->timeout  = timeout;
-  bfcontainer->arg      = arg;
-  bfcontainer->apb      = apb;
-  bfcontainer->result   = -EBUSY;
+  bfcontainer->timeout = timeout;
+  bfcontainer->arg = arg;
+  bfcontainer->apb = apb;
+  bfcontainer->result = -EBUSY;
 
   /* Add the buffer container to the end of the pending queue */
 
   flags = enter_critical_section();
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
+  sq_addlast((sq_entry_t *) bfcontainer, &priv->pend);
 
   /* Then start the next transfer.  If there is already a transfer in progess,
    * then this will do nothing.
@@ -1235,14 +1228,15 @@ static struct sai_buffer_s *sai_buf_allocate(struct stm32_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_buf_free(struct stm32_sai_s *priv, struct sai_buffer_s *bfcontainer)
+static void sai_buf_free(struct stm32_sai_s *priv,
+                         struct sai_buffer_s *bfcontainer)
 {
   irqstate_t flags;
 
   /* Put the buffer container back on the free list */
 
   flags = enter_critical_section();
-  bfcontainer->flink  = priv->freelist;
+  bfcontainer->flink = priv->freelist;
   priv->freelist = bfcontainer;
   leave_critical_section(flags);
 
@@ -1372,70 +1366,70 @@ struct i2s_dev_s *stm32_sai_initialize(int intf)
   switch (intf)
     {
 #ifdef CONFIG_STM32_SAI1_A
-      case SAI1_BLOCK_A:
-        {
-          i2sinfo("SAI1 Block A Selected\n");
-          priv = &g_sai1a_priv;
+    case SAI1_BLOCK_A:
+      {
+        i2sinfo("SAI1 Block A Selected\n");
+        priv = &g_sai1a_priv;
 
-          stm32_configgpio(GPIO_SAI1_SD_A);
-#  ifndef CONFIG_STM32_SAI1_A_SYNC_WITH_B
-          stm32_configgpio(GPIO_SAI1_FS_A);
-          stm32_configgpio(GPIO_SAI1_SCK_A);
-          stm32_configgpio(GPIO_SAI1_MCLK_A);
-#  endif
-          break;
-        }
+        stm32_configgpio(GPIO_SAI1_SD_A);
+#ifndef CONFIG_STM32_SAI1_A_SYNC_WITH_B
+        stm32_configgpio(GPIO_SAI1_FS_A);
+        stm32_configgpio(GPIO_SAI1_SCK_A);
+        stm32_configgpio(GPIO_SAI1_MCLK_A);
+#endif
+        break;
+      }
 #endif
 #ifdef CONFIG_STM32_SAI1_B
-      case SAI1_BLOCK_B:
-        {
-          i2sinfo("SAI1 Block B Selected\n");
-          priv = &g_sai1b_priv;
+    case SAI1_BLOCK_B:
+      {
+        i2sinfo("SAI1 Block B Selected\n");
+        priv = &g_sai1b_priv;
 
-          stm32_configgpio(GPIO_SAI1_SD_B);
-#  ifndef CONFIG_STM32_SAI1_B_SYNC_WITH_A
-          stm32_configgpio(GPIO_SAI1_FS_B);
-          stm32_configgpio(GPIO_SAI1_SCK_B);
-          stm32_configgpio(GPIO_SAI1_MCLK_B);
-#  endif
-          break;
-        }
+        stm32_configgpio(GPIO_SAI1_SD_B);
+#ifndef CONFIG_STM32_SAI1_B_SYNC_WITH_A
+        stm32_configgpio(GPIO_SAI1_FS_B);
+        stm32_configgpio(GPIO_SAI1_SCK_B);
+        stm32_configgpio(GPIO_SAI1_MCLK_B);
+#endif
+        break;
+      }
 #endif
 #ifdef CONFIG_STM32_SAI2_A
-      case SAI2_BLOCK_A:
-        {
-          i2sinfo("SAI2 Block A Selected\n");
-          priv = &g_sai2a_priv;
+    case SAI2_BLOCK_A:
+      {
+        i2sinfo("SAI2 Block A Selected\n");
+        priv = &g_sai2a_priv;
 
-          stm32_configgpio(GPIO_SAI2_SD_A);
-#  ifndef CONFIG_STM32_SAI2_A_SYNC_WITH_B
-          stm32_configgpio(GPIO_SAI2_FS_A);
-          stm32_configgpio(GPIO_SAI2_SCK_A);
-          stm32_configgpio(GPIO_SAI2_MCLK_A);
-#  endif
-          break;
-        }
+        stm32_configgpio(GPIO_SAI2_SD_A);
+#ifndef CONFIG_STM32_SAI2_A_SYNC_WITH_B
+        stm32_configgpio(GPIO_SAI2_FS_A);
+        stm32_configgpio(GPIO_SAI2_SCK_A);
+        stm32_configgpio(GPIO_SAI2_MCLK_A);
+#endif
+        break;
+      }
 #endif
 #ifdef CONFIG_STM32_SAI2_B
-      case SAI2_BLOCK_B:
-        {
-          i2sinfo("SAI2 Block B Selected\n");
-          priv = &g_sai2b_priv;
+    case SAI2_BLOCK_B:
+      {
+        i2sinfo("SAI2 Block B Selected\n");
+        priv = &g_sai2b_priv;
 
-          stm32_configgpio(GPIO_SAI2_SD_B);
-#  ifndef CONFIG_STM32_SAI2_B_SYNC_WITH_A
-          stm32_configgpio(GPIO_SAI2_FS_B);
-          stm32_configgpio(GPIO_SAI2_SCK_B);
-          stm32_configgpio(GPIO_SAI2_MCLK_B);
-#  endif
-          break;
-        }
+        stm32_configgpio(GPIO_SAI2_SD_B);
+#ifndef CONFIG_STM32_SAI2_B_SYNC_WITH_A
+        stm32_configgpio(GPIO_SAI2_FS_B);
+        stm32_configgpio(GPIO_SAI2_SCK_B);
+        stm32_configgpio(GPIO_SAI2_MCLK_B);
 #endif
-      default:
-        {
-          i2sinfo("No SAI interface defined\n");
-          goto err;
-        }
+        break;
+      }
+#endif
+    default:
+      {
+        i2sinfo("No SAI interface defined\n");
+        goto err;
+      }
     }
 
   sai_portinitialize(priv);
