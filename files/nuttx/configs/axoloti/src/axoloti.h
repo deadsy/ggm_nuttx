@@ -50,7 +50,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_SDIO       1
-#define HAVE_ADAU1361   1
+#define HAVE_ADAU1391   1
 
 /* Can't support USB host if USB OTG HS is not enabled */
 #if !defined(CONFIG_STM32_OTGHS) || !defined(CONFIG_USBHOST)
@@ -71,9 +71,9 @@
  * Audio Configuration
  */
 
-#define ADAU1361_I2C_BUS 3
-#define ADAU1361_I2C_ADDRESS 0x38
-#define ADAU1361_SAI_BUS 1
+#define ADAU1391_I2C_BUS 3
+#define ADAU1391_I2C_ADDRESS 0x38
+#define ADAU1391_SAI_BUS 1
 
 /****************************************************************************
  * SDIO Configuration
@@ -116,9 +116,9 @@
 #define GPIO_OTGHS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN13)
 /* #define GPIO_OTGHS_VBUS no vbus monitoring.... */
 
-/* ADAU1361 CODEC */
+/* ADAU1391 CODEC */
 // TODO - fix
-#define GPIO_ADAU1361_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+#define GPIO_ADAU1391_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
 
 /****************************************************************************
  * Initialize SDIO-based MMC/SD card support

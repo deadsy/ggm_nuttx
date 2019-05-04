@@ -1,6 +1,6 @@
 /****************************************************************************
- * drivers/audio/adau1361.h
- * Audio device driver for Analog Devices ADAU1361 Stereo CODEC.
+ * drivers/audio/adau1391.h
+ * Audio device driver for Analog Devices ADAU1391 Stereo CODEC.
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Jason T. Harris <sirmanlypowers@gmail.com>
@@ -34,13 +34,13 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_AUDIO_ADAU1361_H
-#define __DRIVERS_AUDIO_ADAU1361_H
+#ifndef __DRIVERS_AUDIO_ADAU1391_H
+#define __DRIVERS_AUDIO_ADAU1391_H
 
 /****************************************************************************/
 
 /****************************************************************************/
 
-#endif /* __DRIVERS_AUDIO_ADAU1361_H */
+#endif /* __DRIVERS_AUDIO_ADAU1391_H */
 
 /****************************************************************************/

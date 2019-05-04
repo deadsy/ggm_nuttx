@@ -1,6 +1,6 @@
 /****************************************************************************
- * drivers/audio/adau1361.c
- * Audio device driver for Analog Devices ADAU1361 Stereo CODEC.
+ * drivers/audio/adau1391.c
+ * Audio device driver for Analog Devices ADAU1391 Stereo CODEC.
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -41,67 +41,67 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/audio/audio.h>
-#include <nuttx/audio/adau1361.h>
+#include <nuttx/audio/adau1391.h>
 
-#include "adau1361.h"
-
-/****************************************************************************/
-
-#define ADAU1361_REG_BASE 0x4000
-
-#define ADAU1361_REG_Clock_Ctl              0x00
-#define ADAU1361_REG_PLL_Ctl                0x02
-#define ADAU1361_REG_Mic_Jack_Detect        0x08
-#define ADAU1361_REG_Rec_Power_Mgmt         0x09
-#define ADAU1361_REG_Rec_Mixer_Left0        0x0A
-#define ADAU1361_REG_Rec_Mixer_Left1        0x0B
-#define ADAU1361_REG_Rec_Mixer_Right0       0x0C
-#define ADAU1361_REG_Rec_Mixer_Right1       0x0D
-#define ADAU1361_REG_Left_Diff_Input_Vol    0x0E
-#define ADAU1361_REG_Right_Diff_Input_Vol   0x0F
-#define ADAU1361_REG_Record_Mic_Bias        0x10
-#define ADAU1361_REG_ALC0                   0x11
-#define ADAU1361_REG_ALC1                   0x12
-#define ADAU1361_REG_ALC2                   0x13
-#define ADAU1361_REG_ALC3                   0x14
-#define ADAU1361_REG_Serial_Port0           0x15
-#define ADAU1361_REG_Serial_Port1           0x16
-#define ADAU1361_REG_Converter0             0x17
-#define ADAU1361_REG_Converter1             0x18
-#define ADAU1361_REG_ADC_Ctl                0x19
-#define ADAU1361_REG_Left_Digital_Vol       0x1A
-#define ADAU1361_REG_Right_Digital_Vol      0x1B
-#define ADAU1361_REG_Play_Mixer_Left0       0x1C
-#define ADAU1361_REG_Play_Mixer_Left1       0x1D
-#define ADAU1361_REG_Play_Mixer_Right0      0x1E
-#define ADAU1361_REG_Play_Mixer_Right1      0x1F
-#define ADAU1361_REG_Play_LR_Mixer_Left     0x20
-#define ADAU1361_REG_Play_LR_Mixer_Right    0x21
-#define ADAU1361_REG_Play_LR_Mixer_Mono     0x22
-#define ADAU1361_REG_Play_HP_Left_Vol       0x23
-#define ADAU1361_REG_Play_HP_Right_Vol      0x24
-#define ADAU1361_REG_Line_Output_Left_Vol   0x25
-#define ADAU1361_REG_Line_Output_Right_Vol  0x26
-#define ADAU1361_REG_Play_Mono_Output       0x27
-#define ADAU1361_REG_Pop_Click_Suppress     0x28
-#define ADAU1361_REG_Play_Power_Mgmt        0x29
-#define ADAU1361_REG_DAC_Ctl0               0x2A
-#define ADAU1361_REG_DAC_Ctl1               0x2B
-#define ADAU1361_REG_DAC_Ctl2               0x2C
-#define ADAU1361_REG_Serial_Port_Pad        0x2D
-#define ADAU1361_REG_Ctl_Port_Pad0          0x2F
-#define ADAU1361_REG_Ctl_Port_Pad1          0x30
-#define ADAU1361_REG_Jack_Detect_Pin        0x31
-#define ADAU1361_REG_Dejitter_Ctl           0x36
+#include "adau1391.h"
 
 /****************************************************************************/
 
-struct adau1361_dev_s
+#define ADAU1391_REG_BASE 0x4000
+
+#define ADAU1391_REG_Clock_Ctl              0x00
+#define ADAU1391_REG_PLL_Ctl                0x02
+#define ADAU1391_REG_Mic_Jack_Detect        0x08
+#define ADAU1391_REG_Rec_Power_Mgmt         0x09
+#define ADAU1391_REG_Rec_Mixer_Left0        0x0A
+#define ADAU1391_REG_Rec_Mixer_Left1        0x0B
+#define ADAU1391_REG_Rec_Mixer_Right0       0x0C
+#define ADAU1391_REG_Rec_Mixer_Right1       0x0D
+#define ADAU1391_REG_Left_Diff_Input_Vol    0x0E
+#define ADAU1391_REG_Right_Diff_Input_Vol   0x0F
+#define ADAU1391_REG_Record_Mic_Bias        0x10
+#define ADAU1391_REG_ALC0                   0x11
+#define ADAU1391_REG_ALC1                   0x12
+#define ADAU1391_REG_ALC2                   0x13
+#define ADAU1391_REG_ALC3                   0x14
+#define ADAU1391_REG_Serial_Port0           0x15
+#define ADAU1391_REG_Serial_Port1           0x16
+#define ADAU1391_REG_Converter0             0x17
+#define ADAU1391_REG_Converter1             0x18
+#define ADAU1391_REG_ADC_Ctl                0x19
+#define ADAU1391_REG_Left_Digital_Vol       0x1A
+#define ADAU1391_REG_Right_Digital_Vol      0x1B
+#define ADAU1391_REG_Play_Mixer_Left0       0x1C
+#define ADAU1391_REG_Play_Mixer_Left1       0x1D
+#define ADAU1391_REG_Play_Mixer_Right0      0x1E
+#define ADAU1391_REG_Play_Mixer_Right1      0x1F
+#define ADAU1391_REG_Play_LR_Mixer_Left     0x20
+#define ADAU1391_REG_Play_LR_Mixer_Right    0x21
+#define ADAU1391_REG_Play_LR_Mixer_Mono     0x22
+#define ADAU1391_REG_Play_HP_Left_Vol       0x23
+#define ADAU1391_REG_Play_HP_Right_Vol      0x24
+#define ADAU1391_REG_Line_Output_Left_Vol   0x25
+#define ADAU1391_REG_Line_Output_Right_Vol  0x26
+#define ADAU1391_REG_Play_Mono_Output       0x27
+#define ADAU1391_REG_Pop_Click_Suppress     0x28
+#define ADAU1391_REG_Play_Power_Mgmt        0x29
+#define ADAU1391_REG_DAC_Ctl0               0x2A
+#define ADAU1391_REG_DAC_Ctl1               0x2B
+#define ADAU1391_REG_DAC_Ctl2               0x2C
+#define ADAU1391_REG_Serial_Port_Pad        0x2D
+#define ADAU1391_REG_Ctl_Port_Pad0          0x2F
+#define ADAU1391_REG_Ctl_Port_Pad1          0x30
+#define ADAU1391_REG_Jack_Detect_Pin        0x31
+#define ADAU1391_REG_Dejitter_Ctl           0x36
+
+/****************************************************************************/
+
+struct adau1391_dev_s
 {
-  struct audio_lowerhalf_s dev; // ADAU1361 audio lower half (this device)
+  struct audio_lowerhalf_s dev; // ADAU1391 audio lower half (this device)
 
   // Our specific driver data goes here
-  FAR const struct adau1361_lower_s *lower;     // Low-level board specific functions
+  FAR const struct adau1391_lower_s *lower;     // Low-level board specific functions
   FAR struct i2c_master_s *i2c; // I2C driver to use
   FAR struct i2s_dev_s *i2s;    // I2S driver to use
   struct dq_queue_s pendq;      // Queue of pending buffers to be sent
@@ -112,99 +112,99 @@ struct adau1361_dev_s
 
 /****************************************************************************/
 
-static uint8_t adau1361_readreg(FAR struct adau1361_dev_s *priv, uint8_t addr)
+static uint8_t adau1391_readreg(FAR struct adau1391_dev_s *priv, uint8_t addr)
 {
   return 0;
 }
 
 /****************************************************************************/
 
-struct adau1361_regdump_s
+struct adau1391_regdump_s
 {
   const char *name;
   uint8_t addr;
 };
 
-static const struct adau1361_regdump_s g_adau1361_debug[] = {
-  {"Clock_Ctl", ADAU1361_REG_Clock_Ctl},
-  {"PLL_Ctl", ADAU1361_REG_PLL_Ctl},
-  {"Mic_Jack_Detect", ADAU1361_REG_Mic_Jack_Detect},
-  {"Rec_Power_Mgmt", ADAU1361_REG_Rec_Power_Mgmt},
-  {"Rec_Mixer_Left0", ADAU1361_REG_Rec_Mixer_Left0},
-  {"Rec_Mixer_Left1", ADAU1361_REG_Rec_Mixer_Left1},
-  {"Rec_Mixer_Right0", ADAU1361_REG_Rec_Mixer_Right0},
-  {"Rec_Mixer_Right1", ADAU1361_REG_Rec_Mixer_Right1},
-  {"Left_Diff_Input_Vol", ADAU1361_REG_Left_Diff_Input_Vol},
-  {"Right_Diff_Input_Vol", ADAU1361_REG_Right_Diff_Input_Vol},
-  {"Record_Mic_Bias", ADAU1361_REG_Record_Mic_Bias},
-  {"ALC0", ADAU1361_REG_ALC0},
-  {"ALC1", ADAU1361_REG_ALC1},
-  {"ALC2", ADAU1361_REG_ALC2},
-  {"ALC3", ADAU1361_REG_ALC3},
-  {"Serial_Port0", ADAU1361_REG_Serial_Port0},
-  {"Serial_Port1", ADAU1361_REG_Serial_Port1},
-  {"Converter0", ADAU1361_REG_Converter0},
-  {"Converter1", ADAU1361_REG_Converter1},
-  {"ADC_Ctl", ADAU1361_REG_ADC_Ctl},
-  {"Left_Digital_Vol", ADAU1361_REG_Left_Digital_Vol},
-  {"Right_Digital_Vol", ADAU1361_REG_Right_Digital_Vol},
-  {"Play_Mixer_Left0", ADAU1361_REG_Play_Mixer_Left0},
-  {"Play_Mixer_Left1", ADAU1361_REG_Play_Mixer_Left1},
-  {"Play_Mixer_Right0", ADAU1361_REG_Play_Mixer_Right0},
-  {"Play_Mixer_Right1", ADAU1361_REG_Play_Mixer_Right1},
-  {"Play_LR_Mixer_Left", ADAU1361_REG_Play_LR_Mixer_Left},
-  {"Play_LR_Mixer_Right", ADAU1361_REG_Play_LR_Mixer_Right},
-  {"Play_LR_Mixer_Mono", ADAU1361_REG_Play_LR_Mixer_Mono},
-  {"Play_HP_Left_Vol", ADAU1361_REG_Play_HP_Left_Vol},
-  {"Play_HP_Right_Vol", ADAU1361_REG_Play_HP_Right_Vol},
-  {"Line_Output_Left_Vol", ADAU1361_REG_Line_Output_Left_Vol},
-  {"Line_Output_Right_Vol", ADAU1361_REG_Line_Output_Right_Vol},
-  {"Play_Mono_Output", ADAU1361_REG_Play_Mono_Output},
-  {"Pop_Click_Suppress", ADAU1361_REG_Pop_Click_Suppress},
-  {"Play_Power_Mgmt", ADAU1361_REG_Play_Power_Mgmt},
-  {"DAC_Ctl0", ADAU1361_REG_DAC_Ctl0},
-  {"DAC_Ctl1", ADAU1361_REG_DAC_Ctl1},
-  {"DAC_Ctl2", ADAU1361_REG_DAC_Ctl2},
-  {"Serial_Port_Pad", ADAU1361_REG_Serial_Port_Pad},
-  {"Ctl_Port_Pad0", ADAU1361_REG_Ctl_Port_Pad0},
-  {"Ctl_Port_Pad1", ADAU1361_REG_Ctl_Port_Pad1},
-  {"Jack_Detect_Pin", ADAU1361_REG_Jack_Detect_Pin},
-  {"Dejitter_Ctl", ADAU1361_REG_Dejitter_Ctl},
+static const struct adau1391_regdump_s g_adau1391_debug[] = {
+  {"Clock_Ctl", ADAU1391_REG_Clock_Ctl},
+  {"PLL_Ctl", ADAU1391_REG_PLL_Ctl},
+  {"Mic_Jack_Detect", ADAU1391_REG_Mic_Jack_Detect},
+  {"Rec_Power_Mgmt", ADAU1391_REG_Rec_Power_Mgmt},
+  {"Rec_Mixer_Left0", ADAU1391_REG_Rec_Mixer_Left0},
+  {"Rec_Mixer_Left1", ADAU1391_REG_Rec_Mixer_Left1},
+  {"Rec_Mixer_Right0", ADAU1391_REG_Rec_Mixer_Right0},
+  {"Rec_Mixer_Right1", ADAU1391_REG_Rec_Mixer_Right1},
+  {"Left_Diff_Input_Vol", ADAU1391_REG_Left_Diff_Input_Vol},
+  {"Right_Diff_Input_Vol", ADAU1391_REG_Right_Diff_Input_Vol},
+  {"Record_Mic_Bias", ADAU1391_REG_Record_Mic_Bias},
+  {"ALC0", ADAU1391_REG_ALC0},
+  {"ALC1", ADAU1391_REG_ALC1},
+  {"ALC2", ADAU1391_REG_ALC2},
+  {"ALC3", ADAU1391_REG_ALC3},
+  {"Serial_Port0", ADAU1391_REG_Serial_Port0},
+  {"Serial_Port1", ADAU1391_REG_Serial_Port1},
+  {"Converter0", ADAU1391_REG_Converter0},
+  {"Converter1", ADAU1391_REG_Converter1},
+  {"ADC_Ctl", ADAU1391_REG_ADC_Ctl},
+  {"Left_Digital_Vol", ADAU1391_REG_Left_Digital_Vol},
+  {"Right_Digital_Vol", ADAU1391_REG_Right_Digital_Vol},
+  {"Play_Mixer_Left0", ADAU1391_REG_Play_Mixer_Left0},
+  {"Play_Mixer_Left1", ADAU1391_REG_Play_Mixer_Left1},
+  {"Play_Mixer_Right0", ADAU1391_REG_Play_Mixer_Right0},
+  {"Play_Mixer_Right1", ADAU1391_REG_Play_Mixer_Right1},
+  {"Play_LR_Mixer_Left", ADAU1391_REG_Play_LR_Mixer_Left},
+  {"Play_LR_Mixer_Right", ADAU1391_REG_Play_LR_Mixer_Right},
+  {"Play_LR_Mixer_Mono", ADAU1391_REG_Play_LR_Mixer_Mono},
+  {"Play_HP_Left_Vol", ADAU1391_REG_Play_HP_Left_Vol},
+  {"Play_HP_Right_Vol", ADAU1391_REG_Play_HP_Right_Vol},
+  {"Line_Output_Left_Vol", ADAU1391_REG_Line_Output_Left_Vol},
+  {"Line_Output_Right_Vol", ADAU1391_REG_Line_Output_Right_Vol},
+  {"Play_Mono_Output", ADAU1391_REG_Play_Mono_Output},
+  {"Pop_Click_Suppress", ADAU1391_REG_Pop_Click_Suppress},
+  {"Play_Power_Mgmt", ADAU1391_REG_Play_Power_Mgmt},
+  {"DAC_Ctl0", ADAU1391_REG_DAC_Ctl0},
+  {"DAC_Ctl1", ADAU1391_REG_DAC_Ctl1},
+  {"DAC_Ctl2", ADAU1391_REG_DAC_Ctl2},
+  {"Serial_Port_Pad", ADAU1391_REG_Serial_Port_Pad},
+  {"Ctl_Port_Pad0", ADAU1391_REG_Ctl_Port_Pad0},
+  {"Ctl_Port_Pad1", ADAU1391_REG_Ctl_Port_Pad1},
+  {"Jack_Detect_Pin", ADAU1391_REG_Jack_Detect_Pin},
+  {"Dejitter_Ctl", ADAU1391_REG_Dejitter_Ctl},
 };
 
-#define ADAU1361_NREGISTERS (sizeof(g_adau1361_debug)/sizeof(struct adau1361_regdump_s))
+#define ADAU1391_NREGISTERS (sizeof(g_adau1391_debug)/sizeof(struct adau1391_regdump_s))
 
-void adau1361_dump_registers(FAR struct audio_lowerhalf_s *dev,
+void adau1391_dump_registers(FAR struct audio_lowerhalf_s *dev,
                              FAR const char *msg)
 {
-  syslog(LOG_INFO, "ADAU1361 Registers: %s\n", msg);
-  for (int i = 0; i < ADAU1361_NREGISTERS; i++)
+  syslog(LOG_INFO, "ADAU1391 Registers: %s\n", msg);
+  for (int i = 0; i < ADAU1391_NREGISTERS; i++)
     {
-      const char *name = g_adau1361_debug[i].name;
-      uint8_t addr = g_adau1361_debug[i].addr;
-      uint8_t val = adau1361_readreg((struct adau1361_dev_s *)dev, addr);
+      const char *name = g_adau1391_debug[i].name;
+      uint8_t addr = g_adau1391_debug[i].addr;
+      uint8_t val = adau1391_readreg((struct adau1391_dev_s *)dev, addr);
       syslog(LOG_INFO, "%16s[%04x]: %02x\n", name, addr, val);
     }
 }
 
 /****************************************************************************/
 
-// Reset the ADAU1361 chip
-static void adau1361_hw_reset(FAR const struct adau1361_lower_s *lower)
+// Reset the ADAU1391 chip
+static void adau1391_hw_reset(FAR const struct adau1391_lower_s *lower)
 {
   DEBUGASSERT(lower && lower->reset);
   lower->reset(lower);
 }
 
-// Reset and re-initialize the ADAU1361
-static void adau1361_reset(FAR struct adau1361_dev_s *priv)
+// Reset and re-initialize the ADAU1391
+static void adau1391_reset(FAR struct adau1391_dev_s *priv)
 {
 }
 
 /****************************************************************************/
 
 // Get the lower-half device capabilities
-static int adau1361_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
+static int adau1391_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *pCaps)
 {
   audinfo("\n");
@@ -212,7 +212,7 @@ static int adau1361_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 }
 
 // Shutdown the driver (called after close)
-static int adau1361_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_shutdown(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
@@ -220,7 +220,7 @@ static int adau1361_shutdown(FAR struct audio_lowerhalf_s *dev)
 
 #if 0
 // Allocate an audio pipeline buffer
-static int adau1361_allocbuffer(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_allocbuffer(FAR struct audio_lowerhalf_s *dev,
                                 FAR struct audio_buf_desc_s *apb)
 {
   audinfo("\n");
@@ -230,7 +230,7 @@ static int adau1361_allocbuffer(FAR struct audio_lowerhalf_s *dev,
 
 #if 0
 // Free an audio pipeline buffer
-static int adau1361_freebuffer(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_freebuffer(FAR struct audio_lowerhalf_s *dev,
                                FAR struct audio_buf_desc_s *apb)
 {
   audinfo("\n");
@@ -239,7 +239,7 @@ static int adau1361_freebuffer(FAR struct audio_lowerhalf_s *dev,
 #endif
 
 // Enqueue a buffer for processing
-static int adau1361_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                                   FAR struct ap_buffer_s *apb)
 {
   audinfo("\n");
@@ -247,7 +247,7 @@ static int adau1361_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 }
 
 // Cancel a previously enqueued buffer
-static int adau1361_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
                                  FAR struct ap_buffer_s *apb)
 {
   audinfo("\n");
@@ -255,7 +255,7 @@ static int adau1361_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 }
 
 // Driver specific ioctl commands
-static int adau1361_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
+static int adau1391_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                           unsigned long arg)
 {
   audinfo("\n");
@@ -264,7 +264,7 @@ static int adau1361_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 
 #if 0
 // Driver specific read commands
-static int adau1361_read(FAR struct audio_lowerhalf_s *dev, FAR char *buffer,
+static int adau1391_read(FAR struct audio_lowerhalf_s *dev, FAR char *buffer,
                          size_t buflen)
 {
   audinfo("\n");
@@ -274,7 +274,7 @@ static int adau1361_read(FAR struct audio_lowerhalf_s *dev, FAR char *buffer,
 
 #if 0
 // Driver specific write commands
-static int adau1361_write(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_write(FAR struct audio_lowerhalf_s *dev,
                           FAR const char *buffer, size_t buflen)
 {
   audinfo("\n");
@@ -285,7 +285,7 @@ static int adau1361_write(FAR struct audio_lowerhalf_s *dev,
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 
 // Release a session
-static int adau1361_release(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_release(FAR struct audio_lowerhalf_s *dev,
                             FAR void *session)
 {
   audinfo("\n");
@@ -293,7 +293,7 @@ static int adau1361_release(FAR struct audio_lowerhalf_s *dev,
 }
 
 // Reserve a session
-static int adau1361_reserve(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_reserve(FAR struct audio_lowerhalf_s *dev,
                             FAR void **psession)
 {
   audinfo("\n");
@@ -301,35 +301,35 @@ static int adau1361_reserve(FAR struct audio_lowerhalf_s *dev,
 }
 
 // Resumes audio streaming after a pause
-static int adau1361_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int adau1391_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 {
   audinfo("\n");
   return 0;
 }
 
 // Pause the audio stream
-static int adau1361_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int adau1391_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 {
   audinfo("\n");
   return 0;
 }
 
 // Start audio streaming
-static int adau1361_start(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int adau1391_start(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 {
   audinfo("\n");
   return 0;
 }
 
 // Stop audio streaming
-static int adau1361_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int adau1391_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 {
   audinfo("\n");
   return 0;
 }
 
 // Configure the driver
-static int adau1361_configure(FAR struct audio_lowerhalf_s *dev, void *session,
+static int adau1391_configure(FAR struct audio_lowerhalf_s *dev, void *session,
                               FAR const struct audio_caps_s *pCaps)
 {
   audinfo("\n");
@@ -339,49 +339,49 @@ static int adau1361_configure(FAR struct audio_lowerhalf_s *dev, void *session,
 #else
 
 // Release a session
-static int adau1361_release(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_release(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Reserve a session
-static int adau1361_reserve(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_reserve(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Resumes audio streaming after a pause
-static int adau1361_resume(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_resume(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Pause the audio stream
-static int adau1361_pause(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_pause(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Start audio streaming
-static int adau1361_start(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_start(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Stop audio streaming
-static int adau1361_stop(FAR struct audio_lowerhalf_s *dev)
+static int adau1391_stop(FAR struct audio_lowerhalf_s *dev)
 {
   audinfo("\n");
   return 0;
 }
 
 // Configure the driver
-static int adau1361_configure(FAR struct audio_lowerhalf_s *dev,
+static int adau1391_configure(FAR struct audio_lowerhalf_s *dev,
                               FAR const struct audio_caps_s *pCaps)
 {
   audinfo("\n");
@@ -393,40 +393,40 @@ static int adau1361_configure(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************/
 
 static const struct audio_ops_s g_audioops = {
-  .getcaps = adau1361_getcaps,
-  .configure = adau1361_configure,
-  .shutdown = adau1361_shutdown,
-  .start = adau1361_start,
-  .stop = adau1361_stop,
-  .pause = adau1361_pause,
-  .resume = adau1361_resume,
-  .allocbuffer = NULL /* adau1361_allocbuffer */ ,
-  .freebuffer = NULL /* adau1361_freebuffer */ ,
-  .enqueuebuffer = adau1361_enqueuebuffer,
-  .cancelbuffer = adau1361_cancelbuffer,
-  .ioctl = adau1361_ioctl,
-  .read = NULL /* adau1361_read */ ,
-  .write = NULL /* adau1361_write */ ,
-  .reserve = adau1361_reserve,
-  .release = adau1361_release,
+  .getcaps = adau1391_getcaps,
+  .configure = adau1391_configure,
+  .shutdown = adau1391_shutdown,
+  .start = adau1391_start,
+  .stop = adau1391_stop,
+  .pause = adau1391_pause,
+  .resume = adau1391_resume,
+  .allocbuffer = NULL /* adau1391_allocbuffer */ ,
+  .freebuffer = NULL /* adau1391_freebuffer */ ,
+  .enqueuebuffer = adau1391_enqueuebuffer,
+  .cancelbuffer = adau1391_cancelbuffer,
+  .ioctl = adau1391_ioctl,
+  .read = NULL /* adau1391_read */ ,
+  .write = NULL /* adau1391_write */ ,
+  .reserve = adau1391_reserve,
+  .release = adau1391_release,
 };
 
 /****************************************************************************/
 
-FAR struct audio_lowerhalf_s *adau1361_initialize(FAR struct i2c_master_s *i2c,
+FAR struct audio_lowerhalf_s *adau1391_initialize(FAR struct i2c_master_s *i2c,
                                                   FAR struct i2s_dev_s *i2s,
                                                   FAR const struct
-                                                  adau1361_lower_s *lower)
+                                                  adau1391_lower_s *lower)
 {
   // Sanity check
   DEBUGASSERT(i2c && i2s && lower);
 
-  // Allocate a ADAU1361 device structure
-  struct adau1361_dev_s *priv =
-    (struct adau1361_dev_s *)kmm_zalloc(sizeof(struct adau1361_dev_s));
+  // Allocate a ADAU1391 device structure
+  struct adau1391_dev_s *priv =
+    (struct adau1391_dev_s *)kmm_zalloc(sizeof(struct adau1391_dev_s));
   if (priv)
     {
-      // Initialize the ADAU1361 device structure.
+      // Initialize the ADAU1391 device structure.
 
       priv->dev.ops = &g_audioops;
       priv->lower = lower;
@@ -440,19 +440,19 @@ FAR struct audio_lowerhalf_s *adau1361_initialize(FAR struct i2c_master_s *i2c,
       // Initialize I2C
       audinfo("address=%02x frequency=%d\n", lower->address, lower->frequency);
 
-      // Reset the ADAU1361
-      adau1361_hw_reset(priv->lower);
-      adau1361_dump_registers(&priv->dev, "After reset");
+      // Reset the ADAU1391
+      adau1391_hw_reset(priv->lower);
+      adau1391_dump_registers(&priv->dev, "After reset");
 
-      // Verify the ADAU1361 is present and available on this I2C
-      uint8_t val = adau1361_readreg(priv, ADAU1361_REG_Serial_Port_Pad);
+      // Verify the ADAU1391 is present and available on this I2C
+      uint8_t val = adau1391_readreg(priv, ADAU1391_REG_Serial_Port_Pad);
       if (val != 0xaa)
         {
-          auderr("adau1361 not found\n");
+          auderr("adau1391 not found\n");
           goto errout_with_dev;
         }
-      // Reset and reconfigure the ADAU1361 hardware
-      adau1361_reset(priv);
+      // Reset and reconfigure the ADAU1391 hardware
+      adau1391_reset(priv);
       return &priv->dev;
     }
 

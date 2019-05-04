@@ -1,0 +1,111 @@
+--- ./nuttx/arch/arm/src/stm32/stm32.h	2019-05-04 07:53:39.931551242 -0700
++++ ./nuttx/arch/arm/src/stm32/stm32.h	2019-05-04 07:54:11.491475667 -0700
+@@ -72,6 +72,7 @@
+ #include "stm32_pwr.h"
+ #include "stm32_rcc.h"
+ #include "stm32_rtc.h"
++#include "stm32_sai.h"
+ #include "stm32_sdio.h"
+ #include "stm32_spi.h"
+ #include "stm32_tim.h"
+--- ./nuttx/arch/arm/src/stm32/Kconfig	2019-04-23 10:11:11.000000000 -0700
++++ ./nuttx/arch/arm/src/stm32/Kconfig	2019-05-04 11:26:03.113577558 -0700
+@@ -1787,6 +1787,7 @@
+ 	select STM32_HAVE_CAN2
+ 	select STM32_HAVE_DAC1
+ 	select STM32_HAVE_RNG
++	select STM32_HAVE_SAI1
+ 	select STM32_HAVE_ETHMAC
+ 	select STM32_HAVE_SPI2
+ 	select STM32_HAVE_SPI3
+@@ -1944,6 +1945,14 @@
+ 	bool
+ 	default n
+ 
++config STM32_HAVE_SAI1
++	bool
++	default n
++
++config STM32_HAVE_SAI2
++	bool
++	default n
++
+ config STM32_HAVE_FSMC
+ 	bool
+ 	default n
+@@ -2596,6 +2605,52 @@
+ 	depends on STM32_HAVE_RNG
+ 	select ARCH_HAVE_RNG
+ 
++config STM32_SAI1
++	bool "SAI1"
++	default n
++	depends on STM32_HAVE_SAI1
++
++config STM32_SAI1_A
++	bool "SAI1 Block A"
++	default n
++	select AUDIO
++	select I2S
++	select SCHED_WORKQUEUE
++	select STM32_SAI
++	depends on STM32_SAI1
++
++config STM32_SAI1_B
++	bool "SAI1 Block B"
++	default n
++	select AUDIO
++	select I2S
++	select SCHED_WORKQUEUE
++	select STM32_SAI
++	depends on STM32_SAI1
++
++config STM32_SAI2
++	bool "SAI2"
++	default n
++	depends on STM32_HAVE_SAI2
++
++config STM32_SAI2_A
++	bool "SAI2 Block A"
++	default n
++	select AUDIO
++	select I2S
++	select SCHED_WORKQUEUE
++	select STM32_SAI
++	depends on STM32_SAI2
++
++config STM32_SAI2_B
++	bool "SAI2 Block B"
++	default n
++	select AUDIO
++	select I2S
++	select SCHED_WORKQUEUE
++	select STM32_SAI
++	depends on STM32_SAI2
++
+ # REVISIT:  There are some lower-end STM32F401 parts without SDIO too. Others?
+ 
+ config STM32_SDIO
+@@ -2849,6 +2904,9 @@
+ config STM32_I2C
+ 	bool
+ 
++config STM32_SAI
++	bool
++
+ config STM32_CAN
+ 	bool
+ 
+--- ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:32:59.016131939 -0700
++++ ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:33:42.406086306 -0700
+@@ -228,6 +228,10 @@
+ CHIP_CSRCS += stm32_rng.c
+ endif
+ 
++ifeq ($(CONFIG_STM32_SAI),y)
++CHIP_CSRCS += stm32_sai.c
++endif
++
+ ifeq ($(CONFIG_STM32_LTDC),y)
+ CHIP_CSRCS += stm32_ltdc.c
+ endif

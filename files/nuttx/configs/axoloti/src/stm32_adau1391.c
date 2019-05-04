@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/axoloti/src/stm32_adau1361.c
+ * configs/axoloti/src/stm32_adau1391.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -44,7 +44,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/i2s.h>
-#include <nuttx/audio/adau1361.h>
+#include <nuttx/audio/adau1391.h>
 
 #include <arch/board/board.h>
 
@@ -53,17 +53,63 @@
 
 /************************************************************************************/
 
-static void adau1361_hw_reset(FAR const struct adau1361_lower_s *lower)
+static int adau1391_attach(FAR const struct adau1391_lower_s *lower,
+                           adau1391_handler_t isr, FAR void *arg)
 {
-  // TODO...
+  audinfo("TODO\n");
+  return 0;
+}
+
+static bool adau1391_enable(FAR const struct adau1391_lower_s *lower,
+                            bool enable)
+{
+  audinfo("TODO\n");
+  return 0;
+}
+
+static void adau1391_hw_reset(FAR const struct adau1391_lower_s *lower)
+{
+  audinfo("TODO\n");
 }
 
 /****************************************************************************
- * Name: stm32_adau1361_initialize
+ * Private Data
+ ****************************************************************************/
+
+struct stm32_mwinfo_s
+{
+  /* Standard ADAU1391 interface */
+  struct adau1391_lower_s lower;
+};
+
+/* A reference to a structure of this type must be passed to the ADAU1391
+ * driver.  This structure provides information about the configuration
+ * of the ADAU1391 and provides some board-specific hooks.
+ *
+ * Memory for this structure is provided by the caller.  It is not copied
+ * by the driver and is presumed to persist while the driver is active.
+ */
+
+#define CONFIG_STM32_ADAU1391_I2CFREQUENCY 100000
+#define BOARD_MAINCK_FREQUENCY 8000000
+
+static struct stm32_mwinfo_s g_adau1391info = {
+  .lower = {
+            .address = ADAU1391_I2C_ADDRESS,
+            .frequency = CONFIG_STM32_ADAU1391_I2CFREQUENCY,
+            .mclk = BOARD_MAINCK_FREQUENCY,
+            .attach = adau1391_attach,
+            .enable = adau1391_enable,
+            .reset = adau1391_hw_reset,
+            },
+};
+
+/****************************************************************************
+ * Name: stm32_adau1391_initialize
  *
  * Description:
  *   This function is called by platform-specific, setup logic to configure
- *   and register the ADAU1361 device.  This function will register the driver
+ *   and register the ADAU1391 device.  This function will register the driver
  *   as /dev/audio/pcm[x] where x is determined by the minor device number.
  *
  * Input Parameters:
@@ -75,10 +121,9 @@ static void adau1361_hw_reset(FAR const struct adau1361_lower_s *lower)
  *
  ****************************************************************************/
 
-int stm32_adau1361_initialize(int minor)
+int stm32_adau1391_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *adau1361;
-  FAR struct audio_lowerhalf_s *pcm;
+  FAR struct audio_lowerhalf_s *adau1391;
   FAR struct i2c_master_s *i2c;
   FAR struct i2s_dev_s *i2s;
   static bool initialized = false;
@@ -93,46 +138,33 @@ int stm32_adau1361_initialize(int minor)
    * touchscreen example is used as a built-in application in NSH and can be
    * called numerous time.  It will attempt to initialize each time.
    */
-
   if (!initialized)
     {
-      /* Get an instance of the I2C interface for the ADAU1361 device */
-      i2c = stm32_i2cbus_initialize(ADAU1361_I2C_BUS);
+      /* Get an instance of the I2C interface for the ADAU1391 device */
+      i2c = stm32_i2cbus_initialize(ADAU1391_I2C_BUS);
       if (!i2c)
         {
-          auderr("ERROR: Failed to initialize TWI%d\n", ADAU1361_I2C_BUS);
-          ret = -ENODEV;
-          goto errout;
-        }
-
-      /* Get an instance of the I2S interface for the ADAU1361 data channel */
-      i2s = stm32_i2sdev_initialize(ADAU1361_I2S_BUS);
-      if (!i2s)
-        {
-          auderr("ERROR: Failed to initialize I2S%d\n", ADAU1361_I2S_BUS);
-          ret = -ENODEV;
-          goto errout_with_i2c;
-        }
-
-      /* Now we can use these I2C and I2S interfaces to initialize the
-       * ADAU1361 which will return an audio interface.
-       */
-      adau1361 = adau1361_initialize(i2c, i2s, &g_adau1361info.lower);
-      if (!cs43l22)
-        {
-          auderr("ERROR: Failed to initialize the ADAU1361\n");
+          auderr("failed to initialize i2c%d\n", ADAU1391_I2C_BUS);
           ret = -ENODEV;
           goto error;
         }
 
-      /* Now we embed the ADAU1361/I2C/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the ADAU1361
-       * driver.
-       */
-      pcm = pcm_decode_initialize(adau1361);
-      if (!pcm)
+      /* Get an instance of the I2S interface for the ADAU1391 data channel */
+      i2s = stm32_sai_initialize(ADAU1391_SAI_BUS);
+      if (!i2s)
         {
-          auderr("ERROR: Failed create the PCM decoder\n");
+          auderr("failed to initialize sai%d\n", ADAU1391_SAI_BUS);
+          ret = -ENODEV;
+          goto error;
+        }
+
+      /* Now we can use these I2C and I2S interfaces to initialize the
+       * ADAU1391 which will return an audio interface.
+       */
+      adau1391 = adau1391_initialize(i2c, i2s, &g_adau1391info.lower);
+      if (!adau1391)
+        {
+          auderr("failed to initialize the ADAU1391\n");
           ret = -ENODEV;
           goto error;
         }
@@ -140,13 +172,12 @@ int stm32_adau1361_initialize(int minor)
       /* Create a device name */
       snprintf(devname, 12, "pcm%d", minor);
 
-      /* Finally, we can register the PCM/ADAU1361/I2C/I2S audio device. */
-      ret = audio_register(devname, pcm);
+      /* Finally, we can register the ADAU1391/I2C/I2S audio device. */
+      ret = audio_register(devname, adau1391);
       if (ret < 0)
         {
-          auderr("ERROR: Failed to register /dev/%s device: %d\n", devname,
-                 ret);
-          goto errout_with_pcm;
+          auderr("failed to register /dev/%s device: %d\n", devname, ret);
+          goto error;
         }
 
       /* Now we are initialized */
@@ -155,10 +186,9 @@ int stm32_adau1361_initialize(int minor)
 
   return OK;
 
-  /* Error exits.  Unfortunately there is no mechanism in place now to
+  /* Error exits. Unfortunately there is no mechanism in place now to
    * recover resources from most errors on initialization failures.
    */
-
 error:
   return ret;
 }
