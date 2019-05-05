@@ -41,19 +41,20 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <assert.h>
-#include <queue.h>
+//#include <sys/types.h>
+//#include <stdint.h>
+//#include <stdbool.h>
+//#include <semaphore.h>
+//#include <errno.h>
+//#include <assert.h>
+//#include <queue.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 
+//#include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wdog.h>
-#include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
@@ -61,6 +62,7 @@
 #include "stm32_dma.h"
 #include "stm32_gpio.h"
 #include "stm32_sai.h"
+#include "up_arch.h"
 
 #ifdef CONFIG_STM32_SAI
 
@@ -177,33 +179,28 @@ struct stm32_sai_s
 #ifdef CONFIG_DEBUG_I2S_INFO
 static void sai_dump_regs(struct stm32_sai_s *priv, const char *msg);
 #else
-#define       sai_dump_regs(s,m)
+#define sai_dump_regs(s,m)
 #endif
 
 /* Semaphore helpers */
-
 static void sai_exclsem_take(struct stm32_sai_s *priv);
-#define         sai_exclsem_give(priv) nxsem_post(&priv->exclsem)
-
+#define sai_exclsem_give(priv) nxsem_post(&priv->exclsem)
 static void sai_bufsem_take(struct stm32_sai_s *priv);
-#define         sai_bufsem_give(priv) nxsem_post(&priv->bufsem)
+#define sai_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
-
 static struct sai_buffer_s *sai_buf_allocate(struct stm32_sai_s *priv);
 static void sai_buf_free(struct stm32_sai_s *priv,
                          struct sai_buffer_s *bfcontainer);
 static void sai_buf_initialize(struct stm32_sai_s *priv);
 
 /* DMA support */
-
 #ifdef CONFIG_STM32_SAI_DMA
 static void sai_schedule(struct stm32_sai_s *priv, int result);
 static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
 
 /* I2S methods */
-
 static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits);
 static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
@@ -218,14 +215,13 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 /* I2S device operations */
 
 static const struct i2s_ops_s g_i2sops = {
-  /* Receiver methods */
 
+  /* Receiver methods */
   .i2s_rxsamplerate = sai_samplerate,
   .i2s_rxdatawidth = sai_datawidth,
   .i2s_receive = sai_receive,
 
   /* Transmitter methods */
-
   .i2s_txsamplerate = sai_samplerate,
   .i2s_txdatawidth = sai_datawidth,
   .i2s_send = sai_send,
@@ -239,7 +235,7 @@ static struct stm32_sai_s g_sai1a_priv = {
   .base = STM32_SAI1_A_BASE,
   .frequency = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32_SAI1_A_SYNC_WITH_B
-  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
@@ -257,7 +253,7 @@ static struct stm32_sai_s g_sai1b_priv = {
   .base = STM32_SAI1_B_BASE,
   .frequency = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32_SAI1_B_SYNC_WITH_A
-  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
@@ -277,7 +273,7 @@ static struct stm32_sai_s g_sai2a_priv = {
   .base = STM32_SAI2_A_BASE,
   .frequency = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32_SAI2_A_SYNC_WITH_B
-  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
@@ -295,7 +291,7 @@ static struct stm32_sai_s g_sai2b_priv = {
   .base = STM32_SAI2_B_BASE,
   .frequency = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32_SAI2_B_SYNC_WITH_A
-  .syncen = SAI_CR1_SYNCEN_SYNC_INT,
+  .syncen = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen = SAI_CR1_SYNCEN_ASYNC,
 #endif
@@ -518,21 +514,19 @@ static void sai_mckdivider(struct stm32_sai_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SAI_DMA
 static void sai_timeout(int argc, uint32_t arg)
 {
   struct stm32_sai_s *priv = (struct stm32_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
 
-#ifdef CONFIG_STM32_SAI_DMA
   /* Cancel the DMA */
-
   stm32_dmastop(priv->dma);
-#endif
 
   /* Then schedule completion of the transfer to occur on the worker thread. */
-
   sai_schedule(priv, -ETIMEDOUT);
 }
+#endif
 
 /****************************************************************************
  * Name: sai_dma_setup
@@ -694,6 +688,7 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SAI_DMA
 static void sai_worker(void *arg)
 {
   struct stm32_sai_s *priv = (struct stm32_sai_s *)arg;
@@ -759,6 +754,7 @@ static void sai_worker(void *arg)
       sai_buf_free(priv, bfcontainer);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: sai_schedule
@@ -780,6 +776,7 @@ static void sai_worker(void *arg)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_SAI_DMA
 static void sai_schedule(struct stm32_sai_s *priv, int result)
 {
   struct sai_buffer_s *bfcontainer;
@@ -818,6 +815,7 @@ static void sai_schedule(struct stm32_sai_s *priv, int result)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: sai_dma_callback

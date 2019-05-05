@@ -178,7 +178,15 @@
 /************************************************************************************
  * SAI Bus
  * Used with the ADAU1391 CODEC
+ * PE6_SAI1_SD_A
+ * PE3_SAI1_SD_B
+ * PE5_SAI1_SCK_A
+ * PE4_SAI1_FS_A
+ * PA8_MCO1
  */
+
+#define GPIO_SAI1_SD_A GPIO_SAI1_SD_A_2 /* AF6, PE6 */
+#define STM32_SAI1_FREQUENCY (48000 * 2 * 256)  /* TODO ?? */
 
 /************************************************************************************
  * SDIO

@@ -115,44 +115,46 @@
 
 /* SAI Global Configuration Register */
 
-#define SAI_GCR_SYNCIN_SHIFT       (0)  /* Bits 0-1: Synchronization inputs */
-#define SAI_GCR_SYNCIN_MASK        (3 << SAI_GCR_SYNCIN_SHIFT)
-#define SAI_GCR_SYNCIN(n)        ((uint32_t)(n) << SAI_GCR_SYNCIN_SHIFT)
+#define SAI_GCR_SYNCIN_SHIFT (0)        /* Bits 0-1: Synchronization inputs */
+#define SAI_GCR_SYNCIN_MASK (3 << SAI_GCR_SYNCIN_SHIFT)
+#define SAI_GCR_SYNCIN(n) ((uint32_t)(n) << SAI_GCR_SYNCIN_SHIFT)
                                              /* Bits 2-3: Reserved */
-#define SAI_GCR_SYNCOUT_SHIFT      (4)  /* Bits 4-5: Synchronization outputs */
-#define SAI_GCR_SYNCOUT_MASK       (3 << SAI_GCR_SYNCOUT_SHIFT)
-#define SAI_GCR_SYNCOUT          ((uint32_t)(n) << SAI_GCR_SYNCOUT_SHIFT)
+#define SAI_GCR_SYNCOUT_SHIFT (4)       /* Bits 4-5: Synchronization outputs */
+#define SAI_GCR_SYNCOUT_MASK (3 << SAI_GCR_SYNCOUT_SHIFT)
+#define SAI_GCR_SYNCOUT ((uint32_t)(n) << SAI_GCR_SYNCOUT_SHIFT)
                                              /* Bits 6-31: Reserved */
 
 /* SAI Configuration Register 1 */
 
 #define SAI_CR1_MODE_SHIFT         (0)  /* Bits 0-1: SAI audio block mode */
 #define SAI_CR1_MODE_MASK          (3 << SAI_CR1_MODE_SHIFT)
-#define SAI_CR1_MODE_MASTER_TX   (0 << SAI_CR1_MODE_SHIFT)      /* Master transmitter */
-#define SAI_CR1_MODE_MASTER_RX   (1 << SAI_CR1_MODE_SHIFT)      /* Master receiver */
-#define SAI_CR1_MODE_SLAVE_TX    (2 << SAI_CR1_MODE_SHIFT)      /* Slave transmitter */
-#define SAI_CR1_MODE_SLAVE_RX    (3 << SAI_CR1_MODE_SHIFT)      /* Slave receiver */
+#define SAI_CR1_MODE_MASTER_TX     (0 << SAI_CR1_MODE_SHIFT)    /* Master transmitter */
+#define SAI_CR1_MODE_MASTER_RX     (1 << SAI_CR1_MODE_SHIFT)    /* Master receiver */
+#define SAI_CR1_MODE_SLAVE_TX      (2 << SAI_CR1_MODE_SHIFT)    /* Slave transmitter */
+#define SAI_CR1_MODE_SLAVE_RX      (3 << SAI_CR1_MODE_SHIFT)    /* Slave receiver */
 #define SAI_CR1_PRTCFG_SHIFT       (2)  /* Bits 2-3: Protocol configuration */
 #define SAI_CR1_PRTCFG_MASK        (3 << SAI_CR1_PRTCFG_SHIFT)
-#define SAI_CR1_PRTCFG_FREE      (0 << SAI_CR1_PRTCFG_SHIFT)    /* Free protocol */
-#define SAI_CR1_PRTCFG_SPDIF     (1 << SAI_CR1_PRTCFG_SHIFT)    /* SPDIF protocol */
-#define SAI_CR1_PRTCFG_AC97      (2 << SAI_CR1_PRTCFG_SHIFT)    /* AC97 protocol */
+#define SAI_CR1_PRTCFG_FREE        (0 << SAI_CR1_PRTCFG_SHIFT)  /* Free protocol */
+#define SAI_CR1_PRTCFG_SPDIF       (1 << SAI_CR1_PRTCFG_SHIFT)  /* SPDIF protocol */
+#define SAI_CR1_PRTCFG_AC97        (2 << SAI_CR1_PRTCFG_SHIFT)  /* AC97 protocol */
                                              /* Bit 4: Reserved */
 #define SAI_CR1_DS_SHIFT           (5)  /* Bits 5-7: Data size */
 #define SAI_CR1_DS_MASK            (7 << SAI_CR1_DS_SHIFT)
-#define SAI_CR1_DS_8BITS          (2 << SAI_CR1_DS_SHIFT)       /* 8 bits */
-#define SAI_CR1_DS_10BITS         (3 << SAI_CR1_DS_SHIFT)       /* 10 bits */
-#define SAI_CR1_DS_16BITS         (4 << SAI_CR1_DS_SHIFT)       /* 16 bits */
-#define SAI_CR1_DS_20BITS         (5 << SAI_CR1_DS_SHIFT)       /* 20 bits */
-#define SAI_CR1_DS_24BITS         (6 << SAI_CR1_DS_SHIFT)       /* 24 bits */
-#define SAI_CR1_DS_32BITS         (7 << SAI_CR1_DS_SHIFT)       /* 32 bits */
+#define SAI_CR1_DS_8BITS           (2 << SAI_CR1_DS_SHIFT)      /* 8 bits */
+#define SAI_CR1_DS_10BITS          (3 << SAI_CR1_DS_SHIFT)      /* 10 bits */
+#define SAI_CR1_DS_16BITS          (4 << SAI_CR1_DS_SHIFT)      /* 16 bits */
+#define SAI_CR1_DS_20BITS          (5 << SAI_CR1_DS_SHIFT)      /* 20 bits */
+#define SAI_CR1_DS_24BITS          (6 << SAI_CR1_DS_SHIFT)      /* 24 bits */
+#define SAI_CR1_DS_32BITS          (7 << SAI_CR1_DS_SHIFT)      /* 32 bits */
 #define SAI_CR1_LSBFIRST           (1 << 8)     /* Bit 8:  Least significant bit first */
 #define SAI_CR1_CKSTR              (1 << 9)     /* Bit 9:  Clock strobing edge */
+
 #define SAI_CR1_SYNCEN_SHIFT       (10) /* Bits 10-11: Synchronization enable */
 #define SAI_CR1_SYNCEN_MASK        (3 << SAI_CR1_SYNCEN_SHIFT)
-#define SAI_CR1_SYNCEN_ASYNCH    (0 << SAI_CR1_SYNCEN_SHIFT)    /* Asynchronous mode */
-#define SAI_CR1_SYNCEN_INTERNAL  (1 << SAI_CR1_SYNCEN_SHIFT)    /* Synchronous with other internal sub-block */
-#define SAI_CR1_SYNCEN_EXTERNAL  (2 << SAI_CR1_SYNCEN_SHIFT)    /* Aynchronous with external SAI peripheral */
+#define SAI_CR1_SYNCEN_ASYNC       (0 << SAI_CR1_SYNCEN_SHIFT)  /* Asynchronous mode */
+#define SAI_CR1_SYNCEN_INTERNAL    (1 << SAI_CR1_SYNCEN_SHIFT)  /* Synchronous with other internal sub-block */
+#define SAI_CR1_SYNCEN_EXTERNAL    (2 << SAI_CR1_SYNCEN_SHIFT)  /* Aynchronous with external SAI peripheral */
+
 #define SAI_CR1_MONO               (1 << 12)    /* Bit 12: Mono mode */
 #define SAI_CR1_OUTDRIV            (1 << 13)    /* Bit 13: Output drive */
                                              /* Bits 14-15: Reserved */
@@ -162,7 +164,7 @@
 #define SAI_CR1_NODIV              (1 << 19)    /* Bit 19: No divider */
 #define SAI_CR1_MCKDIV_SHIFT       (20) /* Bits 20-23: Master clock divider */
 #define SAI_CR1_MCKDIV_MASK        (15 << SAI_CR1_MCKDIV_SHIFT)
-#define SAI_CR1_MCKDIV(n)        ((uint32_t)(n) << SAI_CR1_MCKDIV_SHIFT)
+#define SAI_CR1_MCKDIV(n)          ((uint32_t)(n) << SAI_CR1_MCKDIV_SHIFT)
                                              /* Bits 24-31: Reserved */
 
 /* SAI Configuration Register 2 */
