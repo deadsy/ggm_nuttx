@@ -3,8 +3,8 @@ README
 
 This README discusses issues unique to NuttX configurations for the
 Axoloti open source synthesizer board featuring the STM32F427IGH6
-MCU. The STM32F427IGH6 has a 180MHz Cortex-M4 core with 1Mbit Flash
-memory and 128KiB of SRAM. The board features:
+MCU. The STM32F427IGH6 has a 180MHz Cortex-M4 core with 1MiB Flash
+memory and 256KiB of SRAM. The board features:
 
   - ADAU1391 24-bit 96 kHz stereo CODEC,
   - 1/4" in/out jacks for analog audio signals,
