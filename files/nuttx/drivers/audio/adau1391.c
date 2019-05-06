@@ -110,11 +110,50 @@ struct adau1391_dev_s
 
 };
 
-/****************************************************************************/
+/****************************************************************************
+ * i2c read/write routines
+ */
 
-static uint8_t adau1391_readreg(FAR struct adau1391_dev_s *priv, uint8_t addr)
+/* read n bytes at a device offset */
+static int adau1391_rdbuf(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                          uint8_t * buf, size_t n)
 {
-  return 0;
+  return OK;
+}
+
+/* write n bytes at a device offset */
+static int adau1391_wrbuf(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                          const uint8_t * buf, size_t n)
+{
+  return OK;
+}
+
+/* read 1 byte at a device offset */
+static int adau1391_rd8(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                        uint8_t * val)
+{
+  return adau1391_rdbuf(priv, ofs, val, 1);
+}
+
+/* read 6 bytes at a device offset */
+static int adau1391_rd48(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                         uint8_t * val)
+{
+  return adau1391_rdbuf(priv, ofs, val, 6);
+}
+
+/* write 1 byte at a device offset */
+static int adau1391_wr8(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                        uint8_t val)
+{
+  return adau1391_wrbuf(priv, ofs, &val, 1);
+}
+
+/* write 6 bytes at a device offset */
+static int adau1391_wr48(FAR struct adau1391_dev_s *priv, uint8_t ofs,
+                         const uint8_t * val)
+{
+  return adau1391_wrbuf(priv, ofs, val, 6);
 }
 
 /****************************************************************************/
@@ -182,7 +221,7 @@ void adau1391_dump_registers(FAR struct audio_lowerhalf_s *dev,
     {
       const char *name = g_adau1391_debug[i].name;
       uint8_t addr = g_adau1391_debug[i].addr;
-      uint8_t val = adau1391_readreg((struct adau1391_dev_s *)dev, addr);
+      uint8_t val = adau1391_rd8((struct adau1391_dev_s *)dev, addr);
       syslog(LOG_INFO, "%16s[%04x]: %02x\n", name, addr, val);
     }
 }
