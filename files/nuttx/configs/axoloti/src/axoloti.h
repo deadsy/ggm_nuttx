@@ -88,6 +88,9 @@
 #define SDIO_MINOR CONFIG_NSH_MMCSDMINOR
 #define SDIO_SLOTNO CONFIG_NSH_MMCSDSLOTNO
 
+/* SD Slot Card detect */
+#define GPIO_SDIO_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN13)
+
 /****************************************************************************
  * PROC File System Configuration
  */
@@ -101,26 +104,28 @@
 #endif
 
 /****************************************************************************
- * GPIOs
+ * LEDs
  */
 
-/* LEDs */
 #define GPIO_LED1 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
                    GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN6)
 
 #define GPIO_LED2 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
                    GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN6)
 
-/* Button */
+/****************************************************************************
+ * Buttons
+ */
+
 #define MIN_IRQBUTTON BUTTON_USER
 #define MAX_IRQBUTTON BUTTON_USER
 #define NUM_IRQBUTTONS  1
 #define GPIO_BTN_USER (GPIO_INPUT|GPIO_PULLDOWN|GPIO_EXTI|GPIO_PORTA|GPIO_PIN10)
 
-/* SD Slot Card detect */
-#define GPIO_SDIO_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN13)
+/****************************************************************************
+ * USB Host (OTG High Speed)
+ */
 
-/* USB (OTG High Speed) */
 #define GPIO_OTGHS_PWRON (GPIO_OUTPUT|GPIO_OUTPUT_SET|GPIO_FLOAT| \
                           GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN7)
 
@@ -196,6 +201,18 @@ void weak_function stm32_usbinitialize(void);
 
 #if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adau1391_initialize
+ *
+ * Description:
+ *   Called from stm32_bringup to initialize the audio driver.
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_ADAU1391)
+int stm32_adau1391_initialize(int minor);
 #endif
 
 /****************************************************************************
