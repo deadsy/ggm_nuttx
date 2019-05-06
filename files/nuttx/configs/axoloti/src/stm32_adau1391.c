@@ -133,14 +133,14 @@ int stm32_adau1391_initialize(int minor)
   audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
-   */
+  /* Initialise the CODEC if we have not already done so */
   if (!initialized)
     {
-      /* Get an instance of the I2C interface for the ADAU1391 device */
+      /* Configure MC01 to drive the master clock of the CODEC */
+      stm32_configgpio(GPIO_MCO1);
+      stm32_mco1config(0, 0 /*TODO*/);
+
+      /* Get an instance of the I2C interface for the CODEC */
       i2c = stm32_i2cbus_initialize(ADAU1391_I2C_BUS);
       if (!i2c)
         {
@@ -149,7 +149,7 @@ int stm32_adau1391_initialize(int minor)
           goto error;
         }
 
-      /* Get an instance of the I2S interface for the ADAU1391 data channel */
+      /* Get an instance of the I2S interface for the CODEC data streams */
       i2s = stm32_sai_initialize(ADAU1391_SAI_BUS);
       if (!i2s)
         {
@@ -159,7 +159,7 @@ int stm32_adau1391_initialize(int minor)
         }
 
       /* Now we can use these I2C and I2S interfaces to initialize the
-       * ADAU1391 which will return an audio interface.
+       * CODEC which will return an audio interface.
        */
       adau1391 = adau1391_initialize(i2c, i2s, &g_adau1391info.lower);
       if (!adau1391)
