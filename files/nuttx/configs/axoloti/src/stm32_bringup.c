@@ -83,7 +83,7 @@ int stm32_bringup(void)
   int ret = OK;
 
 #ifdef HAVE_SDIO
-  // Initialize the SDIO block driver
+  /* Initialize the SDIO block driver */
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
@@ -93,8 +93,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBHOST
-  // Initialize USB host operation.  stm32_usbhost_initialize() starts a
-  // thread will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
+   */
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
@@ -104,7 +105,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBMONITOR
-  // Start the USB Monitor
+  /* Start the USB Monitor */
   ret = usbmonitor_start();
   if (ret != OK)
     {
@@ -114,7 +115,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_BUTTONS
-  // Register the BUTTON driver
+  /* Register the BUTTON driver */
   ret = btn_lower_initialize("/dev/buttons");
   if (ret < 0)
     {
@@ -123,7 +124,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_INPUT_REI2C
-  // register the rei2c driver
+  /* register the rei2c driver */
   ret = rei2c_initialize("/dev/re0");
   if (ret < 0)
     {
@@ -132,7 +133,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_USERLED
-  // Register the LED driver
+  /* Register the LED driver */
   ret = userled_lower_initialize("/dev/userleds");
   if (ret < 0)
     {
@@ -140,8 +141,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_ADAU1391
+  /* Configure ADAU1391 audio */
+  ret = stm32_adau1391_initialize(1);
+  if (ret != OK)
+    {
+      serr("Failed to initialize CS43L22 audio: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
-  // Mount the procfs file system
+  /* Mount the procfs file system */
   ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {

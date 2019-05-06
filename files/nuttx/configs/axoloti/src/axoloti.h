@@ -47,6 +47,7 @@
  * configuration
  */
 
+/* Assume that we have everything */
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_SDIO       1
@@ -65,6 +66,11 @@
 /* Can't support MMC/SD features if mountpoints or SDIO support are disabled */
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
 #undef HAVE_SDIO
+#endif
+
+/* The ADAU1391 depends on the ADAU1391 driver, I2C3, and SAI1 support */
+#if !defined(CONFIG_AUDIO_ADAU1391) || !defined(CONFIG_STM32_I2C3) || !defined(CONFIG_STM32_SAI1)
+#undef HAVE_ADAU1391
 #endif
 
 /****************************************************************************
@@ -124,39 +130,69 @@
 /* #define GPIO_OTGHS_VBUS no vbus monitoring.... */
 
 /****************************************************************************
- * Initialize SDIO-based MMC/SD card support
- */
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDIO)
 int stm32_sdio_initialize(void);
 #endif
 
 /****************************************************************************
- * Perform architecture-specific initialization
+ * Name: stm32_usbinitialize
  *
- * CONFIG_BOARD_LATE_INITIALIZE=y :
- *   Called from board_late_initialize().
+ * Description:
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the STM32F4Discovery board.
  *
- * CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
- *   Called from the NSH library
- */
-
-int stm32_bringup(void);
-
-/****************************************************************************
- * Called from stm32_usbinitialize very early in initialization to setup
- * USB-related GPIO pins for the axoloti board.
- */
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32_OTGHS
-void stm32_usbinitialize(void);
+void weak_function stm32_usbinitialize(void);
 #endif
 
 /****************************************************************************
- * Called at application startup time to initialize the USB host
- * functionality. This function will start a thread that will monitor for
- * device connection/disconnection events.
- */
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host
+ *   functionality. This function will start a thread that will monitor for
+ *   device connection/disconnection events.
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_OTGHS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
@@ -169,8 +205,5 @@ int stm32_usbhost_initialize(void);
 /*i2c controlled rotary encoder*/
 int rei2c_initialize(char *devname);
 
-/****************************************************************************/
-
+#endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_AXOLOTI_SRC_AXOLOTI_H */
-
-/****************************************************************************/

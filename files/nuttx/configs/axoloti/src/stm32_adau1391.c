@@ -136,9 +136,9 @@ int stm32_adau1391_initialize(int minor)
   /* Initialise the CODEC if we have not already done so */
   if (!initialized)
     {
-      /* Configure MC01 to drive the master clock of the CODEC */
+      /* Configure MC01 to drive the master clock of the CODEC at 8MHz */
       stm32_configgpio(GPIO_MCO1);
-      stm32_mco1config(0, 0 /*TODO*/);
+      stm32_mco1config(RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1PRE_NONE);
 
       /* Get an instance of the I2C interface for the CODEC */
       i2c = stm32_i2cbus_initialize(ADAU1391_I2C_BUS);
