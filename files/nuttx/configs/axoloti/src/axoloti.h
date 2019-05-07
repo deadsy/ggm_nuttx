@@ -77,9 +77,9 @@
  * Audio Configuration
  */
 
-#define ADAU1391_I2C_BUS 3
+#define ADAU1391_I2C_BUS 3 /* i2c3 */
 #define ADAU1391_I2C_ADDRESS 0x38
-#define ADAU1391_SAI_BUS 1
+#define ADAU1391_SAI_BUS 1 /* sai1 */
 
 /****************************************************************************
  * SDIO Configuration
@@ -207,7 +207,7 @@ int stm32_usbhost_initialize(void);
  * Name: stm32_adau1391_initialize
  *
  * Description:
- *   Called from stm32_bringup to initialize the audio driver.
+ *   Called from stm32_bringup to initialize the adau1391 audio driver.
  *
  ****************************************************************************/
 
@@ -216,10 +216,13 @@ int stm32_adau1391_initialize(int minor);
 #endif
 
 /****************************************************************************
- * Other (non-standard) peripherals
- */
+ * Name: rei2c_initialize
+ *
+ * Description:
+ *   I2C controlled rotary encoder.
+ *
+ ****************************************************************************/
 
-/*i2c controlled rotary encoder*/
 int rei2c_initialize(char *devname);
 
 #endif /* __ASSEMBLY__ */

@@ -4,8 +4,8 @@
  endif
  endif
  
-+ifeq ($(CONFIG_AUDIO_ADAU1391),y)
-+CSRCS += adau1391.c
++ifeq ($(CONFIG_AUDIO_ADAU1961),y)
++CSRCS += adau1961.c
 +endif
 +
  ifeq ($(CONFIG_AUDIO_WM8776),y)
@@ -17,12 +17,12 @@
  endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
  endif # AUDIO_VS1053
  
-+config AUDIO_ADAU1391
-+	bool "ADAU1391 stereo codec"
++config AUDIO_ADAU1961
++	bool "ADAU1961 stereo codec"
 +	default n
 +	depends on AUDIO
 +	---help---
-+		Select to enable support for the Analog Devices ADAU1391 Stereo CODEC.
++		Select to enable support for the Analog Devices ADAU1961 Stereo CODEC.
 +
  config AUDIO_CS43L22
  	bool "CS43L22 audio chip"

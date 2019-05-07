@@ -90,14 +90,11 @@ struct stm32_mwinfo_s
  * by the driver and is presumed to persist while the driver is active.
  */
 
-#define CONFIG_STM32_ADAU1391_I2CFREQUENCY 100000
-#define BOARD_MAINCK_FREQUENCY 8000000
-
 static struct stm32_mwinfo_s g_adau1391info = {
   .lower = {
             .address = ADAU1391_I2C_ADDRESS,
-            .frequency = CONFIG_STM32_ADAU1391_I2CFREQUENCY,
-            .mclk = BOARD_MAINCK_FREQUENCY,
+            .frequency = I2C_SPEED_FAST, /* 400 kHz */
+            .mclk = STM32_HSE_FREQUENCY, /* see MCO1 configuration */
             .attach = adau1391_attach,
             .enable = adau1391_enable,
             .reset = adau1391_hw_reset,
