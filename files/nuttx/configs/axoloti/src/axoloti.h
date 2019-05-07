@@ -79,7 +79,7 @@
 
 #define ADAU1961_I2C_BUS 3      /* i2c3 */
 #define ADAU1961_I2C_ADDRESS 0x38
-#define ADAU1961_SAI_BUS 1      /* sai1 */
+#define ADAU1961_SAI_BUS SAI1_BLOCK_A
 
 /****************************************************************************
  * SDIO Configuration

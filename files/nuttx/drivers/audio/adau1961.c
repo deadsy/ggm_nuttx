@@ -199,7 +199,7 @@ static const struct adau1961_regdump_s g_adau1961_debug[] = {
 
 #define ADAU1961_NREGISTERS (sizeof(g_adau1961_debug)/sizeof(struct adau1961_regdump_s))
 
-void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
+static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
 {
   syslog(LOG_INFO, "ADAU1961 Registers:\n");
   for (int i = 0; i < ADAU1961_NREGISTERS; i++)
@@ -211,15 +211,15 @@ void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
           /*6 byte register */
           uint8_t val[6] = { 0, 0, 0, 0, 0, 0 };
           adau1961_rdbuf((struct adau1961_dev_s *)dev, addr, val, 6);
-          syslog(LOG_INFO, "%16s[%04x]: %02x %02x %02x %02x %02x %02x\n", name,
-                 addr, val[0], val[1], val[2], val[3], val[4], val[5]);
+          syslog(LOG_INFO, "%21s[40%02x]: %02x %02x %02x %02x %02x %02x\n",
+                 name, addr, val[0], val[1], val[2], val[3], val[4], val[5]);
         }
       else
         {
           /*1 byte register */
           uint8_t val = 0;
           adau1961_rd((struct adau1961_dev_s *)dev, addr, &val);
-          syslog(LOG_INFO, "%16s[%04x]: %02x\n", name, addr, val);
+          syslog(LOG_INFO, "%21s[40%02x]: %02x\n", name, addr, val);
         }
     }
 }

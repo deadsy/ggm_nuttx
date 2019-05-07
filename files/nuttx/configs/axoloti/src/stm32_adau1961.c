@@ -141,7 +141,7 @@ int stm32_adau1961_initialize(int minor)
       i2c = stm32_i2cbus_initialize(ADAU1961_I2C_BUS);
       if (!i2c)
         {
-          auderr("failed to initialize i2c%d\n", ADAU1961_I2C_BUS);
+          auderr("stm32_i2cbus_initialize failed\n");
           ret = -ENODEV;
           goto error;
         }
@@ -150,7 +150,7 @@ int stm32_adau1961_initialize(int minor)
       i2s = stm32_sai_initialize(ADAU1961_SAI_BUS);
       if (!i2s)
         {
-          auderr("failed to initialize sai%d\n", ADAU1961_SAI_BUS);
+          auderr("stm32_sai_initialize failed\n");
           ret = -ENODEV;
           goto error;
         }
@@ -161,7 +161,7 @@ int stm32_adau1961_initialize(int minor)
       adau1961 = adau1961_initialize(i2c, i2s, &g_adau1961info.lower);
       if (!adau1961)
         {
-          auderr("failed to initialize the ADAU1961\n");
+          auderr("adau1961_initialize failed\n");
           ret = -ENODEV;
           goto error;
         }
