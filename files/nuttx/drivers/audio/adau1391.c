@@ -50,7 +50,7 @@
 #define ADAU1391_REG_BASE 0x4000
 
 #define ADAU1391_REG_Clock_Ctl              0x00
-#define ADAU1391_REG_PLL_Ctl                0x02
+#define ADAU1391_REG_PLL_Ctl                0x02        /* 6 bytes */
 #define ADAU1391_REG_Mic_Jack_Detect        0x08
 #define ADAU1391_REG_Rec_Power_Mgmt         0x09
 #define ADAU1391_REG_Rec_Mixer_Left0        0x0A
@@ -98,15 +98,15 @@
 
 struct adau1391_dev_s
 {
-  struct audio_lowerhalf_s dev; // ADAU1391 audio lower half (this device)
+  struct audio_lowerhalf_s dev; /* ADAU1391 audio lower half (this device) */
 
-  // Our specific driver data goes here
-  FAR const struct adau1391_lower_s *lower;     // Low-level board specific functions
-  FAR struct i2c_master_s *i2c; // I2C driver to use
-  FAR struct i2s_dev_s *i2s;    // I2S driver to use
-  struct dq_queue_s pendq;      // Queue of pending buffers to be sent
-  struct dq_queue_s doneq;      // Queue of sent buffers to be returned
-  sem_t pendsem;                // Protect pendq
+  /* Our specific driver data goes here */
+  FAR const struct adau1391_lower_s *lower;     /* Low-level board specific functions */
+  FAR struct i2c_master_s *i2c; /* I2C driver to use */
+  FAR struct i2s_dev_s *i2s;    /* I2S driver to use */
+  struct dq_queue_s pendq;      /* Queue of pending buffers to be sent */
+  struct dq_queue_s doneq;      /* Queue of sent buffers to be returned */
+  sem_t pendsem;                /* Protect pendq */
 
 };
 
@@ -114,46 +114,32 @@ struct adau1391_dev_s
  * i2c read/write routines
  */
 
-/* read n bytes at a device offset */
-static int adau1391_rdbuf(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                          uint8_t * buf, size_t n)
+/* read n bytes at a device address */
+static int adau1391_rdbuf(FAR struct adau1391_dev_s *priv, uint8_t addr,
+                          FAR uint8_t * buf, size_t n)
 {
   return OK;
 }
 
-/* write n bytes at a device offset */
-static int adau1391_wrbuf(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                          const uint8_t * buf, size_t n)
+/* write n bytes at a device address */
+static int adau1391_wrbuf(FAR struct adau1391_dev_s *priv, uint8_t addr,
+                          FAR const uint8_t * buf, size_t n)
 {
   return OK;
 }
 
-/* read 1 byte at a device offset */
-static int adau1391_rd8(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                        uint8_t * val)
+/* read 1 byte at a device address */
+static int adau1391_rd(FAR struct adau1391_dev_s *priv, uint8_t addr,
+                       FAR uint8_t * val)
 {
-  return adau1391_rdbuf(priv, ofs, val, 1);
+  return adau1391_rdbuf(priv, addr, val, 1);
 }
 
-/* read 6 bytes at a device offset */
-static int adau1391_rd48(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                         uint8_t * val)
+/* write 1 byte at a device address */
+static int adau1391_wr(FAR struct adau1391_dev_s *priv, uint8_t addr,
+                       uint8_t val)
 {
-  return adau1391_rdbuf(priv, ofs, val, 6);
-}
-
-/* write 1 byte at a device offset */
-static int adau1391_wr8(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                        uint8_t val)
-{
-  return adau1391_wrbuf(priv, ofs, &val, 1);
-}
-
-/* write 6 bytes at a device offset */
-static int adau1391_wr48(FAR struct adau1391_dev_s *priv, uint8_t ofs,
-                         const uint8_t * val)
-{
-  return adau1391_wrbuf(priv, ofs, val, 6);
+  return adau1391_wrbuf(priv, addr, &val, 1);
 }
 
 /****************************************************************************/
@@ -213,31 +199,38 @@ static const struct adau1391_regdump_s g_adau1391_debug[] = {
 
 #define ADAU1391_NREGISTERS (sizeof(g_adau1391_debug)/sizeof(struct adau1391_regdump_s))
 
-void adau1391_dump_registers(FAR struct audio_lowerhalf_s *dev,
-                             FAR const char *msg)
+void adau1391_dump_registers(FAR struct audio_lowerhalf_s *dev)
 {
-  syslog(LOG_INFO, "ADAU1391 Registers: %s\n", msg);
+  syslog(LOG_INFO, "ADAU1391 Registers:\n");
   for (int i = 0; i < ADAU1391_NREGISTERS; i++)
     {
       const char *name = g_adau1391_debug[i].name;
       uint8_t addr = g_adau1391_debug[i].addr;
-      uint8_t val = adau1391_rd8((struct adau1391_dev_s *)dev, addr);
-      syslog(LOG_INFO, "%16s[%04x]: %02x\n", name, addr, val);
+      if (addr == ADAU1391_REG_PLL_Ctl)
+        {
+          /*6 byte register */
+          uint8_t val[6] = { 0, 0, 0, 0, 0, 0 };
+          adau1391_rdbuf((struct adau1391_dev_s *)dev, addr, val, 6);
+          syslog(LOG_INFO, "%16s[%04x]: %02x %02x %02x %02x %02x %02x\n", name,
+                 addr, val[0], val[1], val[2], val[3], val[4], val[5]);
+        }
+      else
+        {
+          /*1 byte register */
+          uint8_t val = 0;
+          adau1391_rd((struct adau1391_dev_s *)dev, addr, &val);
+          syslog(LOG_INFO, "%16s[%04x]: %02x\n", name, addr, val);
+        }
     }
 }
 
 /****************************************************************************/
 
-// Reset the ADAU1391 chip
-static void adau1391_hw_reset(FAR const struct adau1391_lower_s *lower)
+/* Reset and re-initialize the ADAU1391 */
+static int adau1391_reset(FAR struct adau1391_dev_s *priv)
 {
-  DEBUGASSERT(lower && lower->reset);
-  lower->reset(lower);
-}
-
-// Reset and re-initialize the ADAU1391
-static void adau1391_reset(FAR struct adau1391_dev_s *priv)
-{
+  audinfo("\n");
+  return OK;
 }
 
 /****************************************************************************/
@@ -457,16 +450,16 @@ FAR struct audio_lowerhalf_s *adau1391_initialize(FAR struct i2c_master_s *i2c,
                                                   FAR const struct
                                                   adau1391_lower_s *lower)
 {
-  // Sanity check
   DEBUGASSERT(i2c && i2s && lower);
 
-  // Allocate a ADAU1391 device structure
+  /* Allocate a ADAU1391 device structure */
   struct adau1391_dev_s *priv =
     (struct adau1391_dev_s *)kmm_zalloc(sizeof(struct adau1391_dev_s));
   if (priv)
     {
-      // Initialize the ADAU1391 device structure.
+      int rc;
 
+      /* Initialize the ADAU1391 device structure */
       priv->dev.ops = &g_audioops;
       priv->lower = lower;
       priv->i2c = i2c;
@@ -476,28 +469,19 @@ FAR struct audio_lowerhalf_s *adau1391_initialize(FAR struct i2c_master_s *i2c,
       dq_init(&priv->pendq);
       dq_init(&priv->doneq);
 
-      // Initialize I2C
-      audinfo("address=%02x frequency=%d\n", lower->address, lower->frequency);
-
-      // Reset the ADAU1391
-      adau1391_hw_reset(priv->lower);
-      adau1391_dump_registers(&priv->dev, "After reset");
-
-      // Verify the ADAU1391 is present and available on this I2C
-      uint8_t val = adau1391_readreg(priv, ADAU1391_REG_Serial_Port_Pad);
-      if (val != 0xaa)
+      /* Reset and reconfigure the CODEC */
+      rc = adau1391_reset(priv);
+      if (rc != 0)
         {
-          auderr("adau1391 not found\n");
-          goto errout_with_dev;
+          goto error;
         }
-      // Reset and reconfigure the ADAU1391 hardware
-      adau1391_reset(priv);
+      adau1391_dump_registers(&priv->dev);
       return &priv->dev;
     }
 
   return NULL;
 
-errout_with_dev:
+error:
   nxsem_destroy(&priv->pendsem);
   kmm_free(priv);
   return NULL;
