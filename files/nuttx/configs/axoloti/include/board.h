@@ -171,13 +171,13 @@
 #define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_PULLUP)     /* AF4, PB8 */
 #define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_PULLUP)     /* AF4, PB9 */
 
-/* I2C3 - for the ADAU1391 codec */
+/* I2C3 - for the ADAU1961 codec */
 #define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2|GPIO_PULLUP)     /* AF4, PH7 */
 #define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2|GPIO_PULLUP)     /* AF4, PH8 */
 
 /************************************************************************************
  * SAI Bus
- * Used with the ADAU1391 CODEC
+ * Used with the ADAU1961 CODEC
  * PE6_SAI1_SD_A
  * PE3_SAI1_SD_B
  * PE5_SAI1_SCK_A

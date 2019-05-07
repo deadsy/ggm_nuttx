@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/axoloti/src/stm32_adau1391.c
+ * configs/axoloti/src/stm32_adau1961.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -44,7 +44,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/i2s.h>
-#include <nuttx/audio/adau1391.h>
+#include <nuttx/audio/adau1961.h>
 
 #include <arch/board/board.h>
 
@@ -53,21 +53,21 @@
 
 /************************************************************************************/
 
-static int adau1391_attach(FAR const struct adau1391_lower_s *lower,
-                           adau1391_handler_t isr, FAR void *arg)
+static int adau1961_attach(FAR const struct adau1961_lower_s *lower,
+                           adau1961_handler_t isr, FAR void *arg)
 {
   audinfo("TODO\n");
   return 0;
 }
 
-static bool adau1391_enable(FAR const struct adau1391_lower_s *lower,
+static bool adau1961_enable(FAR const struct adau1961_lower_s *lower,
                             bool enable)
 {
   audinfo("TODO\n");
   return 0;
 }
 
-static void adau1391_hw_reset(FAR const struct adau1391_lower_s *lower)
+static void adau1961_hw_reset(FAR const struct adau1961_lower_s *lower)
 {
   audinfo("TODO\n");
 }
@@ -78,35 +78,35 @@ static void adau1391_hw_reset(FAR const struct adau1391_lower_s *lower)
 
 struct stm32_mwinfo_s
 {
-  /* Standard ADAU1391 interface */
-  struct adau1391_lower_s lower;
+  /* Standard ADAU1961 interface */
+  struct adau1961_lower_s lower;
 };
 
-/* A reference to a structure of this type must be passed to the ADAU1391
+/* A reference to a structure of this type must be passed to the ADAU1961
  * driver.  This structure provides information about the configuration
- * of the ADAU1391 and provides some board-specific hooks.
+ * of the ADAU1961 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active.
  */
 
-static struct stm32_mwinfo_s g_adau1391info = {
+static struct stm32_mwinfo_s g_adau1961info = {
   .lower = {
-            .address = ADAU1391_I2C_ADDRESS,
-            .frequency = I2C_SPEED_FAST, /* 400 kHz */
-            .mclk = STM32_HSE_FREQUENCY, /* see MCO1 configuration */
-            .attach = adau1391_attach,
-            .enable = adau1391_enable,
-            .reset = adau1391_hw_reset,
+            .address = ADAU1961_I2C_ADDRESS,
+            .frequency = I2C_SPEED_FAST,        /* 400 kHz */
+            .mclk = STM32_HSE_FREQUENCY,        /* see MCO1 configuration */
+            .attach = adau1961_attach,
+            .enable = adau1961_enable,
+            .reset = adau1961_hw_reset,
             },
 };
 
 /****************************************************************************
- * Name: stm32_adau1391_initialize
+ * Name: stm32_adau1961_initialize
  *
  * Description:
  *   This function is called by platform-specific, setup logic to configure
- *   and register the ADAU1391 device.  This function will register the driver
+ *   and register the ADAU1961 device.  This function will register the driver
  *   as /dev/audio/pcm[x] where x is determined by the minor device number.
  *
  * Input Parameters:
@@ -118,9 +118,9 @@ static struct stm32_mwinfo_s g_adau1391info = {
  *
  ****************************************************************************/
 
-int stm32_adau1391_initialize(int minor)
+int stm32_adau1961_initialize(int minor)
 {
-  FAR struct audio_lowerhalf_s *adau1391;
+  FAR struct audio_lowerhalf_s *adau1961;
   FAR struct i2c_master_s *i2c;
   FAR struct i2s_dev_s *i2s;
   static bool initialized = false;
@@ -138,19 +138,19 @@ int stm32_adau1391_initialize(int minor)
       stm32_mco1config(RCC_CFGR_MCO1_HSE, RCC_CFGR_MCO1PRE_NONE);
 
       /* Get an instance of the I2C interface for the CODEC */
-      i2c = stm32_i2cbus_initialize(ADAU1391_I2C_BUS);
+      i2c = stm32_i2cbus_initialize(ADAU1961_I2C_BUS);
       if (!i2c)
         {
-          auderr("failed to initialize i2c%d\n", ADAU1391_I2C_BUS);
+          auderr("failed to initialize i2c%d\n", ADAU1961_I2C_BUS);
           ret = -ENODEV;
           goto error;
         }
 
       /* Get an instance of the I2S interface for the CODEC data streams */
-      i2s = stm32_sai_initialize(ADAU1391_SAI_BUS);
+      i2s = stm32_sai_initialize(ADAU1961_SAI_BUS);
       if (!i2s)
         {
-          auderr("failed to initialize sai%d\n", ADAU1391_SAI_BUS);
+          auderr("failed to initialize sai%d\n", ADAU1961_SAI_BUS);
           ret = -ENODEV;
           goto error;
         }
@@ -158,10 +158,10 @@ int stm32_adau1391_initialize(int minor)
       /* Now we can use these I2C and I2S interfaces to initialize the
        * CODEC which will return an audio interface.
        */
-      adau1391 = adau1391_initialize(i2c, i2s, &g_adau1391info.lower);
-      if (!adau1391)
+      adau1961 = adau1961_initialize(i2c, i2s, &g_adau1961info.lower);
+      if (!adau1961)
         {
-          auderr("failed to initialize the ADAU1391\n");
+          auderr("failed to initialize the ADAU1961\n");
           ret = -ENODEV;
           goto error;
         }
@@ -169,8 +169,8 @@ int stm32_adau1391_initialize(int minor)
       /* Create a device name */
       snprintf(devname, 12, "pcm%d", minor);
 
-      /* Finally, we can register the ADAU1391/I2C/I2S audio device. */
-      ret = audio_register(devname, adau1391);
+      /* Finally, we can register the ADAU1961/I2C/I2S audio device. */
+      ret = audio_register(devname, adau1961);
       if (ret < 0)
         {
           auderr("failed to register /dev/%s device: %d\n", devname, ret);

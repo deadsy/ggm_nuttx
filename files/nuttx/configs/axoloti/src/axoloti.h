@@ -51,7 +51,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBHOST    1
 #define HAVE_SDIO       1
-#define HAVE_ADAU1391   1
+#define HAVE_ADAU1961   1
 
 /* Can't support USB host if USB OTG HS is not enabled */
 #if !defined(CONFIG_STM32_OTGHS) || !defined(CONFIG_USBHOST)
@@ -68,18 +68,18 @@
 #undef HAVE_SDIO
 #endif
 
-/* The ADAU1391 depends on the ADAU1391 driver, I2C3, and SAI1 support */
-#if !defined(CONFIG_AUDIO_ADAU1391) || !defined(CONFIG_STM32_I2C3) || !defined(CONFIG_STM32_SAI1)
-#undef HAVE_ADAU1391
+/* The ADAU1961 depends on the ADAU1961 driver, I2C3, and SAI1 support */
+#if !defined(CONFIG_AUDIO_ADAU1961) || !defined(CONFIG_STM32_I2C3) || !defined(CONFIG_STM32_SAI1)
+#undef HAVE_ADAU1961
 #endif
 
 /****************************************************************************
  * Audio Configuration
  */
 
-#define ADAU1391_I2C_BUS 3 /* i2c3 */
-#define ADAU1391_I2C_ADDRESS 0x38
-#define ADAU1391_SAI_BUS 1 /* sai1 */
+#define ADAU1961_I2C_BUS 3      /* i2c3 */
+#define ADAU1961_I2C_ADDRESS 0x38
+#define ADAU1961_SAI_BUS 1      /* sai1 */
 
 /****************************************************************************
  * SDIO Configuration
@@ -204,15 +204,15 @@ int stm32_usbhost_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_adau1391_initialize
+ * Name: stm32_adau1961_initialize
  *
  * Description:
- *   Called from stm32_bringup to initialize the adau1391 audio driver.
+ *   Called from stm32_bringup to initialize the adau1961 audio driver.
  *
  ****************************************************************************/
 
-#if defined(HAVE_ADAU1391)
-int stm32_adau1391_initialize(int minor);
+#if defined(HAVE_ADAU1961)
+int stm32_adau1961_initialize(int minor);
 #endif
 
 /****************************************************************************

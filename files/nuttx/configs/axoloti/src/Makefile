@@ -44,8 +44,8 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_AUDIO_ADAU1391),y)
-CSRCS += stm32_adau1391.c
+ifeq ($(CONFIG_AUDIO_ADAU1961),y)
+CSRCS += stm32_adau1961.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

@@ -1,6 +1,6 @@
 /****************************************************************************
- * include/nuttx/audio/adau1391.h
- * Audio device driver for Analog Devices ADAU1391 Stereo CODEC.
+ * include/nuttx/audio/adau1961.h
+ * Audio device driver for Analog Devices ADAU1961 Stereo CODEC.
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Jason T. Harris <sirmanlypowers@gmail.com>
@@ -34,58 +34,58 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_AUDIO_ADAU1391_H
-#define __INCLUDE_NUTTX_AUDIO_ADAU1391_H
+#ifndef __INCLUDE_NUTTX_AUDIO_ADAU1961_H
+#define __INCLUDE_NUTTX_AUDIO_ADAU1961_H
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This is the type of the ADAU1391 interrupt handler.  The lower level code
+/* This is the type of the ADAU1961 interrupt handler.  The lower level code
  * will intercept the interrupt and provide the upper level with the private
  * data that was provided when the interrupt was attached.
  */
 
-struct adau1391_lower_s;        /* Forward reference. Defined below */
+struct adau1961_lower_s;        /* Forward reference. Defined below */
 
-typedef CODE int (*adau1391_handler_t) (FAR const struct adau1391_lower_s *
+typedef CODE int (*adau1961_handler_t) (FAR const struct adau1961_lower_s *
                                         lower, FAR void *arg);
 
-/* A reference to a structure of this type must be passed to the ADAU1391
+/* A reference to a structure of this type must be passed to the ADAU1961
  * driver.  This structure provides information about the configuration
- * of the ADAU1391 and provides some board-specific hooks.
+ * of the ADAU1961 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active.
  */
 
-struct adau1391_lower_s
+struct adau1961_lower_s
 {
   /* I2C characterization */
   uint32_t frequency;           /* Initial I2C frequency */
   uint8_t address;              /* 7-bit I2C address (only bits 0-6 used) */
 
-  /* Clocking is provided via MCLK.  The ADAU1391 driver will need to know
+  /* Clocking is provided via MCLK.  The ADAU1961 driver will need to know
    * the frequency of MCLK in order to generate the correct bitrates.
    */
-  uint32_t mclk;                /* ADAU1391 Master clock frequency */
+  uint32_t mclk;                /* ADAU1961 Master clock frequency */
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
-   * callbacks to isolate the ADAU1391 driver from differences in GPIO
+   * callbacks to isolate the ADAU1961 driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.  If possible,
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach or detach the ADAU1391 interrupt handler to the GPIO
+   * attach  - Attach or detach the ADAU1961 interrupt handler to the GPIO
    *           interrupt
    * enable  - Enable or disable the GPIO interrupt.  Returns the
    *           previous interrupt state.
-   * reset   - HW reset of the ADAU1391 chip
+   * reset   - HW reset of the ADAU1961 chip
    */
 
-  CODE int (*attach) (FAR const struct adau1391_lower_s * lower,
-                      adau1391_handler_t isr, FAR void *arg);
-  CODE bool(*enable) (FAR const struct adau1391_lower_s * lower, bool enable);
-  CODE void (*reset) (FAR const struct adau1391_lower_s * lower);
+  CODE int (*attach) (FAR const struct adau1961_lower_s * lower,
+                      adau1961_handler_t isr, FAR void *arg);
+  CODE bool(*enable) (FAR const struct adau1961_lower_s * lower, bool enable);
+  CODE void (*reset) (FAR const struct adau1961_lower_s * lower);
 };
 
 /****************************************************************************
@@ -105,10 +105,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: adau1391_initialize
+ * Name: adau1961_initialize
  *
  * Description:
- *   Initialize the ADAU1391 device.
+ *   Initialize the ADAU1961 device.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance
@@ -116,7 +116,7 @@ extern "C"
  *   lower   - Persistent board configuration data
  *
  * Returned Value:
- *   A new lower half audio interface for the ADAU1391 device is returned on
+ *   A new lower half audio interface for the ADAU1961 device is returned on
  *   success; NULL is returned on failure.
  *
  ****************************************************************************/
@@ -125,13 +125,13 @@ struct i2c_master_s;            /* Forward reference. Defined in include/nuttx/i
 struct i2s_dev_s;               /* Forward reference. Defined in include/nuttx/audio/i2s.h */
 struct audio_lowerhalf_s;       /* Forward reference. Defined in nuttx/audio/audio.h */
 
-FAR struct audio_lowerhalf_s *adau1391_initialize(FAR struct i2c_master_s *i2c,
+FAR struct audio_lowerhalf_s *adau1961_initialize(FAR struct i2c_master_s *i2c,
                                                   FAR struct i2s_dev_s *i2s,
                                                   FAR const struct
-                                                  adau1391_lower_s *lower);
+                                                  adau1961_lower_s *lower);
 
 /****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_AUDIO_ADAU1391_H */
+#endif /* __INCLUDE_NUTTX_AUDIO_ADAU1961_H */
 
 /****************************************************************************/

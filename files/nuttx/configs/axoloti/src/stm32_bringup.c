@@ -87,7 +87,7 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {
-      ferr("stm32_sdio_initialize failed %d\n", ret);
+      syslog(LOG_ERR, "stm32_sdio_initialize failed %d\n", ret);
       return ret;
     }
 #endif
@@ -99,7 +99,7 @@ int stm32_bringup(void)
   ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
-      uerr("stm32_usbhost_initialize failed %d\n", ret);
+      syslog(LOG_ERR, "stm32_usbhost_initialize failed %d\n", ret);
       return ret;
     }
 #endif
@@ -109,7 +109,7 @@ int stm32_bringup(void)
   ret = usbmonitor_start();
   if (ret != OK)
     {
-      uerr("usbmonitor_start failed %d\n", ret);
+      syslog(LOG_ERR, "usbmonitor_start failed %d\n", ret);
       return ret;
     }
 #endif
@@ -141,12 +141,12 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef HAVE_ADAU1391
-  /* Configure ADAU1391 audio */
-  ret = stm32_adau1391_initialize(1);
+#ifdef HAVE_ADAU1961
+  /* Configure ADAU1961 audio */
+  ret = stm32_adau1961_initialize(1);
   if (ret != OK)
     {
-      serr("Failed to initialize CS43L22 audio: %d\n", ret);
+      syslog(LOG_ERR, "stm32_adau1961_initialize failed %d\n", ret);
     }
 #endif
 
@@ -155,7 +155,8 @@ int stm32_bringup(void)
   ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      serr("failed to mount procfs at %s: %d\n", STM32_PROCFS_MOUNTPOINT, ret);
+      syslog(LOG_ERR, "failed to mount procfs at %s %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 
