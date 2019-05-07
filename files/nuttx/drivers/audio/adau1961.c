@@ -40,14 +40,17 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/adau1961.h>
 
 #include "adau1961.h"
 
 /****************************************************************************/
-
-#define ADAU1961_REG_BASE 0x4000
+/* ADAU1961 Register Addresses
+ * Note: The addresses are all 0x40xx.
+ * The leading 0x40 is handled in the code.
+ */
 
 #define ADAU1961_REG_Clock_Ctl              0x00
 #define ADAU1961_REG_PLL_Ctl                0x02        /* 6 bytes */
@@ -118,14 +121,102 @@ struct adau1961_dev_s
 static int adau1961_rdbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
                           FAR uint8_t * buf, size_t n)
 {
-  return OK;
+  uint8_t regaddr[2] = { 0x40, addr };
+  struct i2c_msg_s msg[2];
+  int retries;
+
+  /* Write the device register */
+  msg[0].frequency = priv->lower->frequency;
+  msg[0].addr = priv->lower->address;
+  msg[0].flags = 0;
+  msg[0].buffer = regaddr;
+  msg[0].length = sizeof(regaddr);
+
+  /* Read the data buffer */
+  msg[1].frequency = priv->lower->frequency;
+  msg[1].addr = priv->lower->address;
+  msg[1].flags = I2C_M_READ;
+  msg[1].buffer = buf;
+  msg[1].length = n;
+
+  /* Try up to three times to read the register */
+  for (retries = 1; retries <= 3; retries++)
+    {
+      int ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try resetting the bus. */
+          audwarn("I2C_TRANSFER failed %d (resetting)\n", ret);
+          ret = I2C_RESET(priv->i2c);
+          if (ret < 0)
+            {
+              auderr("I2C_RESET failed %d\n", ret);
+              return -1;
+            }
+#else
+          auderr("I2C_TRANSFER failed %d (retrying)\n", ret);
+#endif
+        }
+      else
+        {
+          /* done */
+          return 0;
+        }
+    }
+
+  return -1;
 }
 
 /* write n bytes at a device address */
 static int adau1961_wrbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
                           FAR const uint8_t * buf, size_t n)
 {
-  return OK;
+  uint8_t regaddr[2] = { 0x40, addr };
+  struct i2c_msg_s msg[2];
+  int retries;
+
+  /* Write the device register */
+  msg[0].frequency = priv->lower->frequency;
+  msg[0].addr = priv->lower->address;
+  msg[0].flags = 0;
+  msg[0].buffer = regaddr;
+  msg[0].length = sizeof(regaddr);
+
+  /* Write the data buffer */
+  msg[1].frequency = priv->lower->frequency;
+  msg[1].addr = priv->lower->address;
+  msg[1].flags = I2C_M_NOSTART;
+  msg[1].buffer = (FAR uint8_t *) buf;
+  msg[1].length = n;
+
+  /* Try up to three times to read the register */
+  for (retries = 1; retries <= 3; retries++)
+    {
+      int ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try resetting the bus. */
+          audwarn("I2C_TRANSFER failed %d (resetting)\n", ret);
+          ret = I2C_RESET(priv->i2c);
+          if (ret < 0)
+            {
+              auderr("I2C_RESET failed %d\n", ret);
+              return -1;
+            }
+#else
+          auderr("I2C_TRANSFER failed %d (retrying)\n", ret);
+#endif
+        }
+      else
+        {
+          /* done */
+          return 0;
+        }
+    }
+
+  return -1;
 }
 
 /* read 1 byte at a device address */
