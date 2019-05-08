@@ -1,0 +1,11 @@
+--- ./nuttx/libs/libc/misc/Make.defs	2019-05-08 12:00:52.964857622 -0700
++++ ./nuttx/libs/libc/misc/Make.defs	2019-05-08 12:01:17.572854541 -0700
+@@ -67,7 +67,7 @@
+ # Add the miscellaneous C files to the build
+ 
+ CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
+-CSRCS += lib_dumpbuffer.c lib_match.c
++CSRCS += lib_dumpbuffer.c lib_match.c lib_gcd.c
+ 
+ ifeq ($(CONFIG_DEBUG_FEATURES),y)
+ CSRCS += lib_debug.c

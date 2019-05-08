@@ -38,9 +38,9 @@
 
 #include <stdint.h>
 #include <syslog.h>
+#include <gcd.h>
 
 #include <nuttx/kmalloc.h>
-//#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/adau1961.h>
@@ -273,43 +273,6 @@ static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
  *   Generate the pll register values.
  */
 
-unsigned long gcd(unsigned long a, unsigned long b)
-{
-  unsigned long r = a | b;
-
-  if (!a || !b)
-    return r;
-
-  /* Isolate lsbit of r */
-  r &= -r;
-
-  while (!(b & r))
-    b >>= 1;
-  if (b == r)
-    return r;
-
-  for (;;)
-    {
-      while (!(a & r))
-        a >>= 1;
-      if (a == r)
-        return r;
-      if (a == b)
-        return a;
-      if (a < b)
-        {
-          unsigned long tmp = a;
-          a = b;
-          b = tmp;
-        }
-      a -= b;
-      a >>= 1;
-      if (a & r)
-        a += b;
-      a >>= 1;
-    }
-}
-
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 
 int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
@@ -357,9 +320,9 @@ int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
   pll[4] = (r << 3) | (div << 1);
   if (m != 0)
     {
-      pll[4] |= 1;              /* Fractional mode */
+      pll[4] |= 1;              /* fractional mode */
     }
-  pll[5] = 0;
+  pll[5] = 1 << 0 /* core enable */ ;
 
   return 0;
 }
