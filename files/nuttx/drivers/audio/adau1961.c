@@ -128,6 +128,7 @@ static int adau1961_rdbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
 {
   uint8_t regaddr[2] = { 0x40, addr };
   struct i2c_msg_s msg[2];
+  int rc;
 
   /* Write the device register */
   msg[0].frequency = priv->lower->frequency;
@@ -143,7 +144,13 @@ static int adau1961_rdbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
   msg[1].buffer = buf;
   msg[1].length = n;
 
-  return I2C_TRANSFER(priv->i2c, msg, 2);
+  rc = I2C_TRANSFER(priv->i2c, msg, 2);
+  if (rc < 0)
+    {
+      auderr("adau1961_rdbuf failed %d\n", rc);
+      return -1;
+    }
+  return 0;
 }
 
 /* write n bytes at a device address */
@@ -152,6 +159,7 @@ static int adau1961_wrbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
 {
   uint8_t regaddr[2] = { 0x40, addr };
   struct i2c_msg_s msg[2];
+  int rc;
 
   /* Write the device register */
   msg[0].frequency = priv->lower->frequency;
@@ -167,7 +175,13 @@ static int adau1961_wrbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
   msg[1].buffer = (FAR uint8_t *) buf;
   msg[1].length = n;
 
-  return I2C_TRANSFER(priv->i2c, msg, 2);
+  rc = I2C_TRANSFER(priv->i2c, msg, 2);
+  if (rc < 0)
+    {
+      auderr("adau1961_wrbuf failed %d\n", rc);
+      return -1;
+    }
+  return 0;
 }
 
 /* read 1 byte at a device address */
@@ -313,6 +327,7 @@ int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
         }
     }
 
+  /* set the pll bytes */
   pll[0] = m >> 8;
   pll[1] = m & 0xff;
   pll[2] = n >> 8;
@@ -322,7 +337,7 @@ int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
     {
       pll[4] |= 1;              /* fractional mode */
     }
-  pll[5] = 1 << 0 /* core enable */ ;
+  pll[5] = 1;                   /* pll enabled */
 
   return 0;
 }
@@ -348,7 +363,6 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
   rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl, 0);
   if (rc < 0)
     {
-      auderr("adau1961_wr failed %d\n", rc);
       return -1;
     }
 
@@ -375,21 +389,19 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
   rc = adau1961_wrbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
   if (rc < 0)
     {
-      auderr("adau1961_wrbuf failed %d\n", rc);
       return -1;
     }
 
-  /*wait for the pll to lock */
+  /* wait for the pll to lock */
   i = 100;
   while (i > 0)
     {
       rc = adau1961_rdbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
       if (rc < 0)
         {
-          auderr("adau1961_rdbuf failed %d\n", rc);
           return -1;
         }
-      if (pll[5] & (1 << 1 /*Lock */ ))
+      if (pll[5] & (1 << 1 /* Locked? */ ))
         {
           break;
         }
@@ -409,7 +421,6 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
                    (1 << 3 /*pll */ ) | (1 << 0 /*coren */ ));
   if (rc < 0)
     {
-      auderr("adau1961_wr failed %d\n", rc);
       return -1;
     }
 
