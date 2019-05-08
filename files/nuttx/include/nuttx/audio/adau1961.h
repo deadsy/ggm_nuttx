@@ -130,8 +130,8 @@ FAR struct audio_lowerhalf_s *adau1961_initialize(FAR struct i2c_master_s *i2c,
                                                   FAR const struct
                                                   adau1961_lower_s *lower);
 
-/****************************************************************************/
-
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 #endif /* __INCLUDE_NUTTX_AUDIO_ADAU1961_H */
-
-/****************************************************************************/

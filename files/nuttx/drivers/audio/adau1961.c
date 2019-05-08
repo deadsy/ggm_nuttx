@@ -112,6 +112,10 @@ struct adau1961_dev_s
   struct dq_queue_s doneq;      /* Queue of sent buffers to be returned */
   sem_t pendsem;                /* Protect pendq */
 
+  uint32_t sample_rate;         /* Configured samprate (samples/sec) */
+  uint8_t n_channels;           /* Number of channels (1 or 2) */
+  uint8_t bits_per_sample;      /* Bits per sample (8 or 16) */
+
 };
 
 /****************************************************************************
@@ -263,27 +267,197 @@ static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
 }
 
 /****************************************************************************
- * Name: adau1961_genpll
+ * Name: adau1961_gen_pll
  *
  * Description:
- *   Use the master clock and sample rate to generate PLL values.
+ *   Generate the pll register values.
  */
 
-static void adau1961_genpll(FAR struct adau1961_dev_s *priv, FAR uint8_t * pll)
+unsigned long gcd(unsigned long a, unsigned long b)
 {
+  unsigned long r = a | b;
+
+  if (!a || !b)
+    return r;
+
+  /* Isolate lsbit of r */
+  r &= -r;
+
+  while (!(b & r))
+    b >>= 1;
+  if (b == r)
+    return r;
+
+  for (;;)
+    {
+      while (!(a & r))
+        a >>= 1;
+      if (a == r)
+        return r;
+      if (a == b)
+        return a;
+      if (a < b)
+        {
+          unsigned long tmp = a;
+          a = b;
+          b = tmp;
+        }
+      a -= b;
+      a >>= 1;
+      if (a & r)
+        a += b;
+      a >>= 1;
+    }
+}
+
+#define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+
+int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
+{
+  uint32_t r, n, m, i, j;
+  uint32_t div;
+
+  if (!freq_out)
+    {
+      r = 0;
+      n = 0;
+      m = 0;
+      div = 0;
+    }
+  else
+    {
+      if (freq_out % freq_in != 0)
+        {
+          div = DIV_ROUND_UP(freq_in, 13500000);
+          freq_in /= div;
+          r = freq_out / freq_in;
+          i = freq_out % freq_in;
+          j = gcd(i, freq_in);
+          n = i / j;
+          m = freq_in / j;
+          div--;
+        }
+      else
+        {
+          r = freq_out / freq_in;
+          n = 0;
+          m = 0;
+          div = 0;
+        }
+      if (n > 0xffff || m > 0xffff || div > 3 || r > 8 || r < 2)
+        {
+          return -1;
+        }
+    }
+
+  pll[0] = m >> 8;
+  pll[1] = m & 0xff;
+  pll[2] = n >> 8;
+  pll[3] = n & 0xff;
+  pll[4] = (r << 3) | (div << 1);
+  if (m != 0)
+    {
+      pll[4] |= 1;              /* Fractional mode */
+    }
+  pll[5] = 0;
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: adau1961_setpll
+ *
+ * Description:
+ *   Setup the CODEC PLL and enable the core. The PLL settings are a
+ *   function of the master clock and the desired sample rate.
+ */
+
+static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
+{
+  uint32_t mclk = priv->lower->mclk;
+  uint32_t sample_rate = priv->sample_rate;
+  uint8_t pll[6];
+  int rc, i;
+
+  audinfo("mclk %u sample_rate %u\n", mclk, sample_rate);
+
+  /* disable the core */
+  rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl, 0);
+  if (rc < 0)
+    {
+      auderr("adau1961_wr failed %d\n", rc);
+      return -1;
+    }
+
+  /* setup the pll */
+  rc = adau1961_gen_pll(priv->lower->mclk, 1024 * priv->sample_rate, pll);
+  if (rc < 0)
+    {
+      auderr("adau1961_gen_pll failed %d\n", rc);
+      return -1;
+    }
+
+  audinfo("pll %02x %02x %02x %02x %02x %02x\n", pll[0], pll[1], pll[2], pll[3],
+          pll[4], pll[5]);
+
+//#if 0
   pll[0] = 0x1F;
   pll[1] = 0x40;
   pll[2] = 0x04;
   pll[3] = 0x81;
   pll[4] = 0x31;
   pll[5] = 0x01;
+//#endif
+
+  rc = adau1961_wrbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
+  if (rc < 0)
+    {
+      auderr("adau1961_wrbuf failed %d\n", rc);
+      return -1;
+    }
+
+  /*wait for the pll to lock */
+  i = 100;
+  while (i > 0)
+    {
+      rc = adau1961_rdbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
+      if (rc < 0)
+        {
+          auderr("adau1961_rdbuf failed %d\n", rc);
+          return -1;
+        }
+      if (pll[5] & (1 << 1 /*Lock */ ))
+        {
+          break;
+        }
+      nxsig_usleep(1000);
+      i--;
+    }
+  if (i == 0)
+    {
+      auderr("codec pll did not lock\n");
+      return -1;
+    }
+
+  audinfo("lock %d\n", i);
+
+  /* enable the core and clocking via pll */
+  rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl,
+                   (1 << 3 /*pll */ ) | (1 << 0 /*coren */ ));
+  if (rc < 0)
+    {
+      auderr("adau1961_wr failed %d\n", rc);
+      return -1;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
- * Name: adau1961_reset
+ * Name: adau1961_init
  *
  * Description:
- *   Reset and re-initialize the ADAU1961.
+ *   Set initial values for the CODEC registers.
  */
 
 struct adau1961_regval_s
@@ -293,8 +467,6 @@ struct adau1961_regval_s
 };
 
 static const struct adau1961_regval_s adau1961_regvals[] = {
-  /* enable the core and clocking via pll */
-  {ADAU1961_REG_Clock_Ctl, (1 << 3 /*pll */ ) | (1 << 0 /*coren */ )},
   {ADAU1961_REG_Mic_Jack_Detect, 0},
   {ADAU1961_REG_Rec_Power_Mgmt, 0},
   {ADAU1961_REG_Rec_Mixer_Left0, 0},
@@ -340,53 +512,52 @@ static const struct adau1961_regval_s adau1961_regvals[] = {
   {0xff, 0}                     /* eol */
 };
 
-static int adau1961_reset(FAR struct adau1961_dev_s *priv)
+static int adau1961_init_registers(FAR struct adau1961_dev_s *priv)
 {
   const struct adau1961_regval_s *reg = adau1961_regvals;
-  uint8_t pll[6];
-  int rc, i;
+  int i = 0;
 
-  audinfo("\n");
-
-  /* disable the core */
-  rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl, 0);
-  if (rc < 0)
-    {
-      auderr("adau1961_wr failed %d\n", rc);
-      return -1;
-    }
-
-  /* If the first write was ok we'll assume the CODEC is operational on the
-   * I2C bus and won't bother to check the error return from the read/write
-   * operations.
-   */
-
-  /* setup the pll */
-  adau1961_genpll(priv, pll);
-  adau1961_wrbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
-
-  /*wait for the pll to lock */
-  for (i = 0; i < 100; i++)
-    {
-      adau1961_rdbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
-      if (pll[5] & (1 << 1 /*Lock */ ))
-        {
-          break;
-        }
-      nxsig_usleep(1000);
-    }
-  if (i == 0)
-    {
-      auderr("codec pll did not lock\n");
-      return -1;
-    }
-
-  /*apply initial register configuration */
-  i = 0;
   while (reg[i].addr != 0xff)
     {
-      adau1961_wr(priv, reg[i].addr, reg[i].val);
+      int rc = adau1961_wr(priv, reg[i].addr, reg[i].val);
+      if (rc < 0)
+        {
+          return -1;
+        }
       i++;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: adau1961_reset
+ *
+ * Description:
+ *   Reset and re-initialize the ADAU1961.
+ */
+
+static int adau1961_reset(FAR struct adau1961_dev_s *priv)
+{
+  int rc;
+
+  /*set some default values */
+  priv->sample_rate = 48000;
+  priv->n_channels = 2;
+  priv->bits_per_sample = 16;
+
+  rc = adau1961_set_pll(priv);
+  if (rc < 0)
+    {
+      auderr("adau1961_set_pll failed %d\n", rc);
+      return -1;
+    }
+
+  rc = adau1961_init_registers(priv);
+  if (rc < 0)
+    {
+      auderr("adau1961_init_registers failed %d\n", rc);
+      return -1;
     }
 
   return 0;
