@@ -40,6 +40,7 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
+//#include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/adau1961.h>
@@ -123,7 +124,6 @@ static int adau1961_rdbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
 {
   uint8_t regaddr[2] = { 0x40, addr };
   struct i2c_msg_s msg[2];
-  int retries;
 
   /* Write the device register */
   msg[0].frequency = priv->lower->frequency;
@@ -139,33 +139,7 @@ static int adau1961_rdbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
   msg[1].buffer = buf;
   msg[1].length = n;
 
-  /* Try up to three times to read the register */
-  for (retries = 1; retries <= 3; retries++)
-    {
-      int ret = I2C_TRANSFER(priv->i2c, msg, 2);
-      if (ret < 0)
-        {
-#ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try resetting the bus. */
-          audwarn("I2C_TRANSFER failed %d (resetting)\n", ret);
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
-            {
-              auderr("I2C_RESET failed %d\n", ret);
-              return -1;
-            }
-#else
-          auderr("I2C_TRANSFER failed %d (retrying)\n", ret);
-#endif
-        }
-      else
-        {
-          /* done */
-          return 0;
-        }
-    }
-
-  return -1;
+  return I2C_TRANSFER(priv->i2c, msg, 2);
 }
 
 /* write n bytes at a device address */
@@ -174,7 +148,6 @@ static int adau1961_wrbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
 {
   uint8_t regaddr[2] = { 0x40, addr };
   struct i2c_msg_s msg[2];
-  int retries;
 
   /* Write the device register */
   msg[0].frequency = priv->lower->frequency;
@@ -190,33 +163,7 @@ static int adau1961_wrbuf(FAR struct adau1961_dev_s *priv, uint8_t addr,
   msg[1].buffer = (FAR uint8_t *) buf;
   msg[1].length = n;
 
-  /* Try up to three times to read the register */
-  for (retries = 1; retries <= 3; retries++)
-    {
-      int ret = I2C_TRANSFER(priv->i2c, msg, 2);
-      if (ret < 0)
-        {
-#ifdef CONFIG_I2C_RESET
-          /* Perhaps the I2C bus is locked up?  Try resetting the bus. */
-          audwarn("I2C_TRANSFER failed %d (resetting)\n", ret);
-          ret = I2C_RESET(priv->i2c);
-          if (ret < 0)
-            {
-              auderr("I2C_RESET failed %d\n", ret);
-              return -1;
-            }
-#else
-          auderr("I2C_TRANSFER failed %d (retrying)\n", ret);
-#endif
-        }
-      else
-        {
-          /* done */
-          return 0;
-        }
-    }
-
-  return -1;
+  return I2C_TRANSFER(priv->i2c, msg, 2);
 }
 
 /* read 1 byte at a device address */
@@ -315,13 +262,134 @@ static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
     }
 }
 
-/****************************************************************************/
+/****************************************************************************
+ * Name: adau1961_genpll
+ *
+ * Description:
+ *   Use the master clock and sample rate to generate PLL values.
+ */
 
-/* Reset and re-initialize the ADAU1961 */
+static void adau1961_genpll(FAR struct adau1961_dev_s *priv, FAR uint8_t * pll)
+{
+  pll[0] = 0x1F;
+  pll[1] = 0x40;
+  pll[2] = 0x04;
+  pll[3] = 0x81;
+  pll[4] = 0x31;
+  pll[5] = 0x01;
+}
+
+/****************************************************************************
+ * Name: adau1961_reset
+ *
+ * Description:
+ *   Reset and re-initialize the ADAU1961.
+ */
+
+struct adau1961_regval_s
+{
+  uint8_t addr;
+  uint8_t val;
+};
+
+static const struct adau1961_regval_s adau1961_regvals[] = {
+  /* enable the core and clocking via pll */
+  {ADAU1961_REG_Clock_Ctl, (1 << 3 /*pll */ ) | (1 << 0 /*coren */ )},
+  {ADAU1961_REG_Mic_Jack_Detect, 0},
+  {ADAU1961_REG_Rec_Power_Mgmt, 0},
+  {ADAU1961_REG_Rec_Mixer_Left0, 0},
+  {ADAU1961_REG_Rec_Mixer_Left1, 0},
+  {ADAU1961_REG_Rec_Mixer_Right0, 0},
+  {ADAU1961_REG_Rec_Mixer_Right1, 0},
+  {ADAU1961_REG_Left_Diff_Input_Vol, 0},
+  {ADAU1961_REG_Right_Diff_Input_Vol, 0},
+  {ADAU1961_REG_Record_Mic_Bias, 0},
+  {ADAU1961_REG_ALC0, 0},
+  {ADAU1961_REG_ALC1, 0},
+  {ADAU1961_REG_ALC2, 0},
+  {ADAU1961_REG_ALC3, 0},
+  {ADAU1961_REG_Serial_Port0, (1 << 0 /*master */ )},
+  {ADAU1961_REG_Serial_Port1, 0},
+  {ADAU1961_REG_Converter0, 0},
+  {ADAU1961_REG_Converter1, 0},
+  {ADAU1961_REG_ADC_Ctl, 0},
+  {ADAU1961_REG_Left_Digital_Vol, 0},
+  {ADAU1961_REG_Right_Digital_Vol, 0},
+  {ADAU1961_REG_Play_Mixer_Left0, 0},
+  {ADAU1961_REG_Play_Mixer_Left1, 0},
+  {ADAU1961_REG_Play_Mixer_Right0, 0},
+  {ADAU1961_REG_Play_Mixer_Right1, 0},
+  {ADAU1961_REG_Play_LR_Mixer_Left, 0},
+  {ADAU1961_REG_Play_LR_Mixer_Right, 0},
+  {ADAU1961_REG_Play_LR_Mixer_Mono, 0},
+  {ADAU1961_REG_Play_HP_Left_Vol, 0},
+  {ADAU1961_REG_Play_HP_Right_Vol, 0},
+  {ADAU1961_REG_Line_Output_Left_Vol, 0},
+  {ADAU1961_REG_Line_Output_Right_Vol, 0},
+  {ADAU1961_REG_Play_Mono_Output, 0},
+  {ADAU1961_REG_Pop_Click_Suppress, 0},
+  {ADAU1961_REG_Play_Power_Mgmt, 0},
+  {ADAU1961_REG_DAC_Ctl0, 0},
+  {ADAU1961_REG_DAC_Ctl1, 0},
+  {ADAU1961_REG_DAC_Ctl2, 0},
+  {ADAU1961_REG_Serial_Port_Pad, 0},
+  {ADAU1961_REG_Ctl_Port_Pad0, 0},
+  {ADAU1961_REG_Ctl_Port_Pad1, 0},
+  {ADAU1961_REG_Jack_Detect_Pin, 0},
+  {ADAU1961_REG_Dejitter_Ctl, 0},
+  {0xff, 0}                     /* eol */
+};
+
 static int adau1961_reset(FAR struct adau1961_dev_s *priv)
 {
+  const struct adau1961_regval_s *reg = adau1961_regvals;
+  uint8_t pll[6];
+  int rc, i;
+
   audinfo("\n");
-  return OK;
+
+  /* disable the core */
+  rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl, 0);
+  if (rc < 0)
+    {
+      auderr("adau1961_wr failed %d\n", rc);
+      return -1;
+    }
+
+  /* If the first write was ok we'll assume the CODEC is operational on the
+   * I2C bus and won't bother to check the error return from the read/write
+   * operations.
+   */
+
+  /* setup the pll */
+  adau1961_genpll(priv, pll);
+  adau1961_wrbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
+
+  /*wait for the pll to lock */
+  for (i = 0; i < 100; i++)
+    {
+      adau1961_rdbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
+      if (pll[5] & (1 << 1 /*Lock */ ))
+        {
+          break;
+        }
+      nxsig_usleep(1000);
+    }
+  if (i == 0)
+    {
+      auderr("codec pll did not lock\n");
+      return -1;
+    }
+
+  /*apply initial register configuration */
+  i = 0;
+  while (reg[i].addr != 0xff)
+    {
+      adau1961_wr(priv, reg[i].addr, reg[i].val);
+      i++;
+    }
+
+  return 0;
 }
 
 /****************************************************************************/
