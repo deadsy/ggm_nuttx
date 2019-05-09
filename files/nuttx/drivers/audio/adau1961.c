@@ -53,50 +53,50 @@
  * The leading 0x40 is handled in the code.
  */
 
-#define ADAU1961_REG_Clock_Ctl              0x00
-#define ADAU1961_REG_PLL_Ctl                0x02        /* 6 bytes */
-#define ADAU1961_REG_Mic_Jack_Detect        0x08
-#define ADAU1961_REG_Rec_Power_Mgmt         0x09
-#define ADAU1961_REG_Rec_Mixer_Left0        0x0A
-#define ADAU1961_REG_Rec_Mixer_Left1        0x0B
-#define ADAU1961_REG_Rec_Mixer_Right0       0x0C
-#define ADAU1961_REG_Rec_Mixer_Right1       0x0D
-#define ADAU1961_REG_Left_Diff_Input_Vol    0x0E
-#define ADAU1961_REG_Right_Diff_Input_Vol   0x0F
-#define ADAU1961_REG_Record_Mic_Bias        0x10
-#define ADAU1961_REG_ALC0                   0x11
-#define ADAU1961_REG_ALC1                   0x12
-#define ADAU1961_REG_ALC2                   0x13
-#define ADAU1961_REG_ALC3                   0x14
-#define ADAU1961_REG_Serial_Port0           0x15
-#define ADAU1961_REG_Serial_Port1           0x16
-#define ADAU1961_REG_Converter0             0x17
-#define ADAU1961_REG_Converter1             0x18
-#define ADAU1961_REG_ADC_Ctl                0x19
-#define ADAU1961_REG_Left_Digital_Vol       0x1A
-#define ADAU1961_REG_Right_Digital_Vol      0x1B
-#define ADAU1961_REG_Play_Mixer_Left0       0x1C
-#define ADAU1961_REG_Play_Mixer_Left1       0x1D
-#define ADAU1961_REG_Play_Mixer_Right0      0x1E
-#define ADAU1961_REG_Play_Mixer_Right1      0x1F
-#define ADAU1961_REG_Play_LR_Mixer_Left     0x20
-#define ADAU1961_REG_Play_LR_Mixer_Right    0x21
-#define ADAU1961_REG_Play_LR_Mixer_Mono     0x22
-#define ADAU1961_REG_Play_HP_Left_Vol       0x23
-#define ADAU1961_REG_Play_HP_Right_Vol      0x24
-#define ADAU1961_REG_Line_Output_Left_Vol   0x25
-#define ADAU1961_REG_Line_Output_Right_Vol  0x26
-#define ADAU1961_REG_Play_Mono_Output       0x27
-#define ADAU1961_REG_Pop_Click_Suppress     0x28
-#define ADAU1961_REG_Play_Power_Mgmt        0x29
-#define ADAU1961_REG_DAC_Ctl0               0x2A
-#define ADAU1961_REG_DAC_Ctl1               0x2B
-#define ADAU1961_REG_DAC_Ctl2               0x2C
-#define ADAU1961_REG_Serial_Port_Pad        0x2D
-#define ADAU1961_REG_Ctl_Port_Pad0          0x2F
-#define ADAU1961_REG_Ctl_Port_Pad1          0x30
-#define ADAU1961_REG_Jack_Detect_Pin        0x31
-#define ADAU1961_REG_Dejitter_Ctl           0x36
+#define ADAU1961_R0_Clock_Ctl              0x00
+#define ADAU1961_R1_PLL_Ctl                0x02 /* 6 bytes */
+#define ADAU1961_R2_Mic_Jack_Detect        0x08
+#define ADAU1961_R3_Rec_Power_Mgmt         0x09
+#define ADAU1961_R4_Rec_Mixer_Left0        0x0A
+#define ADAU1961_R5_Rec_Mixer_Left1        0x0B
+#define ADAU1961_R6_Rec_Mixer_Right0       0x0C
+#define ADAU1961_R7_Rec_Mixer_Right1       0x0D
+#define ADAU1961_R8_Left_Diff_Input_Vol    0x0E
+#define ADAU1961_R9_Right_Diff_Input_Vol   0x0F
+#define ADAU1961_R10_Record_Mic_Bias        0x10
+#define ADAU1961_R11_ALC0                   0x11
+#define ADAU1961_R12_ALC1                   0x12
+#define ADAU1961_R13_ALC2                   0x13
+#define ADAU1961_R14_ALC3                   0x14
+#define ADAU1961_R15_Serial_Port0           0x15
+#define ADAU1961_R16_Serial_Port1           0x16
+#define ADAU1961_R17_Converter0             0x17
+#define ADAU1961_R18_Converter1             0x18
+#define ADAU1961_R19_ADC_Ctl                0x19
+#define ADAU1961_R20_Left_Digital_Vol       0x1A
+#define ADAU1961_R21_Right_Digital_Vol      0x1B
+#define ADAU1961_R22_Play_Mixer_Left0       0x1C
+#define ADAU1961_R23_Play_Mixer_Left1       0x1D
+#define ADAU1961_R24_Play_Mixer_Right0      0x1E
+#define ADAU1961_R25_Play_Mixer_Right1      0x1F
+#define ADAU1961_R26_Play_LR_Mixer_Left     0x20
+#define ADAU1961_R27_Play_LR_Mixer_Right    0x21
+#define ADAU1961_R28_Play_LR_Mixer_Mono     0x22
+#define ADAU1961_R29_Play_HP_Left_Vol       0x23
+#define ADAU1961_R30_Play_HP_Right_Vol      0x24
+#define ADAU1961_R31_Line_Output_Left_Vol   0x25
+#define ADAU1961_R32_Line_Output_Right_Vol  0x26
+#define ADAU1961_R33_Play_Mono_Output       0x27
+#define ADAU1961_R34_Pop_Click_Suppress     0x28
+#define ADAU1961_R35_Play_Power_Mgmt        0x29
+#define ADAU1961_R36_DAC_Ctl0               0x2A
+#define ADAU1961_R37_DAC_Ctl1               0x2B
+#define ADAU1961_R38_DAC_Ctl2               0x2C
+#define ADAU1961_R39_Serial_Port_Pad        0x2D
+#define ADAU1961_R40_Ctl_Port_Pad0          0x2F
+#define ADAU1961_R41_Ctl_Port_Pad1          0x30
+#define ADAU1961_R42_Jack_Detect_Pin        0x31
+#define ADAU1961_R67_Dejitter_Ctl           0x36
 
 /****************************************************************************/
 
@@ -339,6 +339,9 @@ int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
     }
   pll[5] = 1;                   /* pll enabled */
 
+  audinfo("pll %02x %02x %02x %02x %02x %02x\n", pll[0], pll[1], pll[2], pll[3],
+          pll[4], pll[5]);
+
   return 0;
 }
 
@@ -373,19 +376,6 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
       auderr("adau1961_gen_pll failed %d\n", rc);
       return -1;
     }
-
-  audinfo("pll %02x %02x %02x %02x %02x %02x\n", pll[0], pll[1], pll[2], pll[3],
-          pll[4], pll[5]);
-
-//#if 0
-  pll[0] = 0x1F;
-  pll[1] = 0x40;
-  pll[2] = 0x04;
-  pll[3] = 0x81;
-  pll[4] = 0x31;
-  pll[5] = 0x01;
-//#endif
-
   rc = adau1961_wrbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
   if (rc < 0)
     {
@@ -393,7 +383,7 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
     }
 
   /* wait for the pll to lock */
-  i = 100;
+  i = 10;
   while (i > 0)
     {
       rc = adau1961_rdbuf(priv, ADAU1961_REG_PLL_Ctl, pll, sizeof(pll));
@@ -414,8 +404,6 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
       return -1;
     }
 
-  audinfo("lock %d\n", i);
-
   /* enable the core and clocking via pll */
   rc = adau1961_wr(priv, ADAU1961_REG_Clock_Ctl,
                    (1 << 3 /*pll */ ) | (1 << 0 /*coren */ ));
@@ -424,6 +412,7 @@ static int adau1961_set_pll(FAR struct adau1961_dev_s *priv)
       return -1;
     }
 
+  audinfo("pll enabled\n");
   return 0;
 }
 
@@ -458,7 +447,7 @@ static const struct adau1961_regval_s adau1961_regvals[] = {
   {ADAU1961_REG_Serial_Port1, 0},
   {ADAU1961_REG_Converter0, 0},
   {ADAU1961_REG_Converter1, 0},
-  {ADAU1961_REG_ADC_Ctl, 0},
+  {ADAU1961_REG_ADC_Ctl, (1 << 4 /*dmpol */ ) | (3 << 0 /*ADCs on */ )},
   {ADAU1961_REG_Left_Digital_Vol, 0},
   {ADAU1961_REG_Right_Digital_Vol, 0},
   {ADAU1961_REG_Play_Mixer_Left0, 0},
@@ -468,21 +457,21 @@ static const struct adau1961_regval_s adau1961_regvals[] = {
   {ADAU1961_REG_Play_LR_Mixer_Left, 0},
   {ADAU1961_REG_Play_LR_Mixer_Right, 0},
   {ADAU1961_REG_Play_LR_Mixer_Mono, 0},
-  {ADAU1961_REG_Play_HP_Left_Vol, 0},
-  {ADAU1961_REG_Play_HP_Right_Vol, 0},
-  {ADAU1961_REG_Line_Output_Left_Vol, 0},
-  {ADAU1961_REG_Line_Output_Right_Vol, 0},
-  {ADAU1961_REG_Play_Mono_Output, 0},
+  {ADAU1961_REG_Play_HP_Left_Vol, (1 << 1 /*unmute */ )},
+  {ADAU1961_REG_Play_HP_Right_Vol, (1 << 1 /*unmute */ )},
+  {ADAU1961_REG_Line_Output_Left_Vol, (1 << 1 /*unmute */ )},
+  {ADAU1961_REG_Line_Output_Right_Vol, (1 << 1 /*unmute */ )},
+  {ADAU1961_REG_Play_Mono_Output, (1 << 1 /*unmute */ )},
   {ADAU1961_REG_Pop_Click_Suppress, 0},
   {ADAU1961_REG_Play_Power_Mgmt, 0},
-  {ADAU1961_REG_DAC_Ctl0, 0},
+  {ADAU1961_REG_DAC_Ctl0, (3 << 0 /*DACs on */ )},
   {ADAU1961_REG_DAC_Ctl1, 0},
   {ADAU1961_REG_DAC_Ctl2, 0},
   {ADAU1961_REG_Serial_Port_Pad, 0},
-  {ADAU1961_REG_Ctl_Port_Pad0, 0},
+  {ADAU1961_REG_Ctl_Port_Pad0, 0xaa},
   {ADAU1961_REG_Ctl_Port_Pad1, 0},
-  {ADAU1961_REG_Jack_Detect_Pin, 0},
-  {ADAU1961_REG_Dejitter_Ctl, 0},
+  {ADAU1961_REG_Jack_Detect_Pin, (2 << 2 /*none */ )},
+  {ADAU1961_REG_Dejitter_Ctl, (3 << 0 /*dejit */ )},
   {0xff, 0}                     /* eol */
 };
 
