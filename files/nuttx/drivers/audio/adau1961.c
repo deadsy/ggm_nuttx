@@ -120,9 +120,9 @@ struct adau1961_dev_s
   struct dq_queue_s doneq;      /* Queue of sent buffers to be returned */
   sem_t pendsem;                /* Protect pendq */
 
-  uint32_t sample_rate;         /* Configured samprate (samples/sec) */
-  uint8_t n_channels;           /* Number of channels (1 or 2) */
-  uint8_t bits_per_sample;      /* Bits per sample (8 or 16) */
+  //uint32_t sample_rate;         /* Configured samprate (samples/sec) */
+  //uint8_t n_channels;           /* Number of channels (1 or 2) */
+  //uint8_t bits_per_sample;      /* Bits per sample (8 or 16) */
 
 };
 
@@ -214,68 +214,68 @@ struct adau1961_regdump_s
   uint8_t addr;
 };
 
-static const struct adau1961_regdump_s g_adau1961_debug[] = {
-  {"Clock_Ctl", ADAU1961_R0_Clock_Ctl},
-  {"PLL_Ctl", ADAU1961_R1_PLL_Ctl},
-  {"Mic_Jack_Detect", ADAU1961_R2_Mic_Jack_Detect},
-  {"Rec_Power_Mgmt", ADAU1961_R3_Rec_Power_Mgmt},
-  {"Rec_Mixer_Left0", ADAU1961_R4_Rec_Mixer_Left0},
-  {"Rec_Mixer_Left1", ADAU1961_R5_Rec_Mixer_Left1},
-  {"Rec_Mixer_Right0", ADAU1961_R6_Rec_Mixer_Right0},
-  {"Rec_Mixer_Right1", ADAU1961_R7_Rec_Mixer_Right1},
-  {"Left_Diff_Input_Vol", ADAU1961_R8_Left_Diff_Input_Vol},
-  {"Right_Diff_Input_Vol", ADAU1961_R9_Right_Diff_Input_Vol},
-  {"Record_Mic_Bias", ADAU1961_R10_Record_Mic_Bias},
-  {"ALC0", ADAU1961_R11_ALC0},
-  {"ALC1", ADAU1961_R12_ALC1},
-  {"ALC2", ADAU1961_R13_ALC2},
-  {"ALC3", ADAU1961_R14_ALC3},
-  {"Serial_Port0", ADAU1961_R15_Serial_Port0},
-  {"Serial_Port1", ADAU1961_R16_Serial_Port1},
-  {"Converter0", ADAU1961_R17_Converter0},
-  {"Converter1", ADAU1961_R18_Converter1},
-  {"ADC_Ctl", ADAU1961_R19_ADC_Ctl},
-  {"Left_Digital_Vol", ADAU1961_R20_Left_Digital_Vol},
-  {"Right_Digital_Vol", ADAU1961_R21_Right_Digital_Vol},
-  {"Play_Mixer_Left0", ADAU1961_R22_Play_Mixer_Left0},
-  {"Play_Mixer_Left1", ADAU1961_R23_Play_Mixer_Left1},
-  {"Play_Mixer_Right0", ADAU1961_R24_Play_Mixer_Right0},
-  {"Play_Mixer_Right1", ADAU1961_R25_Play_Mixer_Right1},
-  {"Play_LR_Mixer_Left", ADAU1961_R26_Play_LR_Mixer_Left},
-  {"Play_LR_Mixer_Right", ADAU1961_R27_Play_LR_Mixer_Right},
-  {"Play_LR_Mixer_Mono", ADAU1961_R28_Play_LR_Mixer_Mono},
-  {"Play_HP_Left_Vol", ADAU1961_R29_Play_HP_Left_Vol},
-  {"Play_HP_Right_Vol", ADAU1961_R30_Play_HP_Right_Vol},
-  {"Line_Output_Left_Vol", ADAU1961_R31_Line_Output_Left_Vol},
-  {"Line_Output_Right_Vol", ADAU1961_R32_Line_Output_Right_Vol},
-  {"Play_Mono_Output", ADAU1961_R33_Play_Mono_Output},
-  {"Pop_Click_Suppress", ADAU1961_R34_Pop_Click_Suppress},
-  {"Play_Power_Mgmt", ADAU1961_R35_Play_Power_Mgmt},
-  {"DAC_Ctl0", ADAU1961_R36_DAC_Ctl0},
-  {"DAC_Ctl1", ADAU1961_R37_DAC_Ctl1},
-  {"DAC_Ctl2", ADAU1961_R38_DAC_Ctl2},
-  {"Serial_Port_Pad", ADAU1961_R39_Serial_Port_Pad},
-  {"Ctl_Port_Pad0", ADAU1961_R40_Ctl_Port_Pad0},
-  {"Ctl_Port_Pad1", ADAU1961_R41_Ctl_Port_Pad1},
-  {"Jack_Detect_Pin", ADAU1961_R42_Jack_Detect_Pin},
-  {"Dejitter_Ctl", ADAU1961_R67_Dejitter_Ctl},
+static const struct adau1961_regdump_s g_adau1961_regdump[] = {
+  {"R0_Clock_Ctl", ADAU1961_R0_Clock_Ctl},
+  {"R1_PLL_Ctl", ADAU1961_R1_PLL_Ctl},
+  {"R2_Mic_Jack_Detect", ADAU1961_R2_Mic_Jack_Detect},
+  {"R3_Rec_Power_Mgmt", ADAU1961_R3_Rec_Power_Mgmt},
+  {"R4_Rec_Mixer_Left0", ADAU1961_R4_Rec_Mixer_Left0},
+  {"R5_Rec_Mixer_Left1", ADAU1961_R5_Rec_Mixer_Left1},
+  {"R6_Rec_Mixer_Right0", ADAU1961_R6_Rec_Mixer_Right0},
+  {"R7_Rec_Mixer_Right1", ADAU1961_R7_Rec_Mixer_Right1},
+  {"R8_Left_Diff_Input_Vol", ADAU1961_R8_Left_Diff_Input_Vol},
+  {"R9_Right_Diff_Input_Vol", ADAU1961_R9_Right_Diff_Input_Vol},
+  {"R10_Record_Mic_Bias", ADAU1961_R10_Record_Mic_Bias},
+  {"R11_ALC0", ADAU1961_R11_ALC0},
+  {"R12_ALC1", ADAU1961_R12_ALC1},
+  {"R13_ALC2", ADAU1961_R13_ALC2},
+  {"R14_ALC3", ADAU1961_R14_ALC3},
+  {"R15_Serial_Port0", ADAU1961_R15_Serial_Port0},
+  {"R16_Serial_Port1", ADAU1961_R16_Serial_Port1},
+  {"R17_Converter0", ADAU1961_R17_Converter0},
+  {"R18_Converter1", ADAU1961_R18_Converter1},
+  {"R19_ADC_Ctl", ADAU1961_R19_ADC_Ctl},
+  {"R20_Left_Digital_Vol", ADAU1961_R20_Left_Digital_Vol},
+  {"R21_Right_Digital_Vol", ADAU1961_R21_Right_Digital_Vol},
+  {"R22_Play_Mixer_Left0", ADAU1961_R22_Play_Mixer_Left0},
+  {"R23_Play_Mixer_Left1", ADAU1961_R23_Play_Mixer_Left1},
+  {"R24_Play_Mixer_Right0", ADAU1961_R24_Play_Mixer_Right0},
+  {"R25_Play_Mixer_Right1", ADAU1961_R25_Play_Mixer_Right1},
+  {"R26_Play_LR_Mixer_Left", ADAU1961_R26_Play_LR_Mixer_Left},
+  {"R27_Play_LR_Mixer_Right", ADAU1961_R27_Play_LR_Mixer_Right},
+  {"R28_Play_LR_Mixer_Mono", ADAU1961_R28_Play_LR_Mixer_Mono},
+  {"R29_Play_HP_Left_Vol", ADAU1961_R29_Play_HP_Left_Vol},
+  {"R30_Play_HP_Right_Vol", ADAU1961_R30_Play_HP_Right_Vol},
+  {"R31_Line_Output_Left_Vol", ADAU1961_R31_Line_Output_Left_Vol},
+  {"R32_Line_Output_Right_Vol", ADAU1961_R32_Line_Output_Right_Vol},
+  {"R33_Play_Mono_Output", ADAU1961_R33_Play_Mono_Output},
+  {"R34_Pop_Click_Suppress", ADAU1961_R34_Pop_Click_Suppress},
+  {"R35_Play_Power_Mgmt", ADAU1961_R35_Play_Power_Mgmt},
+  {"R36_DAC_Ctl0", ADAU1961_R36_DAC_Ctl0},
+  {"R37_DAC_Ctl1", ADAU1961_R37_DAC_Ctl1},
+  {"R38_DAC_Ctl2", ADAU1961_R38_DAC_Ctl2},
+  {"R39_Serial_Port_Pad", ADAU1961_R39_Serial_Port_Pad},
+  {"R40_Ctl_Port_Pad0", ADAU1961_R40_Ctl_Port_Pad0},
+  {"R41_Ctl_Port_Pad1", ADAU1961_R41_Ctl_Port_Pad1},
+  {"R42_Jack_Detect_Pin", ADAU1961_R42_Jack_Detect_Pin},
+  {"R67_Dejitter_Ctl", ADAU1961_R67_Dejitter_Ctl},
 };
 
-#define ADAU1961_NREGISTERS (sizeof(g_adau1961_debug)/sizeof(struct adau1961_regdump_s))
+#define ADAU1961_NDUMPS (sizeof(g_adau1961_regdump)/sizeof(struct adau1961_regdump_s))
 
 static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
 {
   syslog(LOG_INFO, "ADAU1961 Registers:\n");
-  for (int i = 0; i < ADAU1961_NREGISTERS; i++)
+  for (int i = 0; i < ADAU1961_NDUMPS; i++)
     {
-      const char *name = g_adau1961_debug[i].name;
-      uint8_t addr = g_adau1961_debug[i].addr;
+      const char *name = g_adau1961_regdump[i].name;
+      uint8_t addr = g_adau1961_regdump[i].addr;
       if (addr == ADAU1961_R1_PLL_Ctl)
         {
           /*6 byte register */
           uint8_t val[6] = { 0, 0, 0, 0, 0, 0 };
           adau1961_rdbuf((struct adau1961_dev_s *)dev, addr, val, 6);
-          syslog(LOG_INFO, "%21s[40%02x]: %02x %02x %02x %02x %02x %02x\n",
+          syslog(LOG_INFO, "%25s[40%02x]: %02x %02x %02x %02x %02x %02x\n",
                  name, addr, val[0], val[1], val[2], val[3], val[4], val[5]);
         }
       else
@@ -283,7 +283,7 @@ static void adau1961_dump_registers(FAR struct audio_lowerhalf_s *dev)
           /*1 byte register */
           uint8_t val = 0;
           adau1961_rd((struct adau1961_dev_s *)dev, addr, &val);
-          syslog(LOG_INFO, "%21s[40%02x]: %02x\n", name, addr, val);
+          syslog(LOG_INFO, "%25s[40%02x]: %02x\n", name, addr, val);
         }
     }
 }
@@ -347,8 +347,8 @@ int adau1961_gen_pll(uint32_t freq_in, uint32_t freq_out, uint8_t pll[6])
     }
   pll[5] = 1;                   /* pll enabled */
 
-  audinfo("pll %02x %02x %02x %02x %02x %02x\n", pll[0], pll[1], pll[2], pll[3],
-          pll[4], pll[5]);
+  audinfo("pll[] = {%02x %02x %02x %02x %02x %02x}\n",
+          pll[0], pll[1], pll[2], pll[3], pll[4], pll[5]);
 
   return 0;
 }
@@ -452,35 +452,36 @@ static const struct adau1961_rates_s g_adau1961_rates[] = {
   {22050, 44100, CONVSR_DIV2},
   {29400, 44100, CONVSR_DIV1_5},
   {88200, 44100, CONVSR_DIV0_5},
-  {0, 0, 0},                    /*eol */
 };
+
+#define ADAU1961_NRATES (sizeof(g_adau1961_rates)/sizeof(struct adau1961_rates_s))
 
 int adau1961_set_fs(FAR struct adau1961_dev_s *priv, uint32_t fs)
 {
-  const struct adau1961_rates_s *rate = g_adau1961_rates;
-  int i = 0;
-  int rc;
+  int i;
 
-  /*find the sample rate */
-  while (rate[i].fs != 0)
+  audinfo("sample rate %u\n", fs);
+
+  /* find the sample rate */
+  for (i = 0; i < ADAU1961_NRATES; i++)
     {
-      if (rate[i].fs == fs)
+      const struct adau1961_rates_s *rate = &g_adau1961_rates[i];
+      if (rate->fs == fs)
         {
           /*setup the pll with the base sample rate */
-          rc = adau1961_set_pll(priv, rate[i].base_fs);
+          int rc = adau1961_set_pll(priv, rate->base_fs);
           if (rc < 0)
             {
               return -1;
             }
           /*set the sample rate divider */
-          rc = adau1961_wr(priv, ADAU1961_R17_Converter0, rate[i].convsr);
+          rc = adau1961_wr(priv, ADAU1961_R17_Converter0, rate->convsr);
           if (rc < 0)
             {
               return -1;
             }
           return 0;
         }
-      i += 1;
     }
   auderr("sample rate %lu not found\n", fs);
   return -1;
@@ -499,67 +500,65 @@ struct adau1961_regval_s
   uint8_t val;
 };
 
-static const struct adau1961_regval_s adau1961_regvals[] = {
-  {ADAU1961_R2_Mic_Jack_Detect, 0},
-  {ADAU1961_R3_Rec_Power_Mgmt, 0},
-  {ADAU1961_R4_Rec_Mixer_Left0, 0},
-  {ADAU1961_R5_Rec_Mixer_Left1, 0},
-  {ADAU1961_R6_Rec_Mixer_Right0, 0},
-  {ADAU1961_R7_Rec_Mixer_Right1, 0},
-  {ADAU1961_R8_Left_Diff_Input_Vol, 0},
-  {ADAU1961_R9_Right_Diff_Input_Vol, 0},
-  {ADAU1961_R10_Record_Mic_Bias, 0},
-  {ADAU1961_R11_ALC0, 0},
-  {ADAU1961_R12_ALC1, 0},
-  {ADAU1961_R13_ALC2, 0},
-  {ADAU1961_R14_ALC3, 0},
-  {ADAU1961_R15_Serial_Port0, 0},
-  {ADAU1961_R16_Serial_Port1, 0},
-  {ADAU1961_R17_Converter0, 0},
-  {ADAU1961_R18_Converter1, 0},
-  {ADAU1961_R19_ADC_Ctl, 0},
-  {ADAU1961_R20_Left_Digital_Vol, 0},
-  {ADAU1961_R21_Right_Digital_Vol, 0},
-  {ADAU1961_R22_Play_Mixer_Left0, 0},
-  {ADAU1961_R23_Play_Mixer_Left1, 0},
-  {ADAU1961_R24_Play_Mixer_Right0, 0},
-  {ADAU1961_R25_Play_Mixer_Right1, 0},
-  {ADAU1961_R26_Play_LR_Mixer_Left, 0},
-  {ADAU1961_R27_Play_LR_Mixer_Right, 0},
-  {ADAU1961_R28_Play_LR_Mixer_Mono, 0},
-  {ADAU1961_R29_Play_HP_Left_Vol, 0},
-  {ADAU1961_R30_Play_HP_Right_Vol, 0},
-  {ADAU1961_R31_Line_Output_Left_Vol, 0},
-  {ADAU1961_R32_Line_Output_Right_Vol, 0},
-  {ADAU1961_R33_Play_Mono_Output, 0},
-  {ADAU1961_R34_Pop_Click_Suppress, 0},
-  {ADAU1961_R35_Play_Power_Mgmt, 0},
-  {ADAU1961_R36_DAC_Ctl0, 0},
-  {ADAU1961_R37_DAC_Ctl1, 0},
-  {ADAU1961_R38_DAC_Ctl2, 0},
-  {ADAU1961_R39_Serial_Port_Pad, 0},
-  {ADAU1961_R40_Ctl_Port_Pad0, 0},
-  {ADAU1961_R41_Ctl_Port_Pad1, 0},
-  {ADAU1961_R42_Jack_Detect_Pin, 0},
-  {ADAU1961_R67_Dejitter_Ctl, 0},
-  {0xff, 0}                     /* eol */
+static const struct adau1961_regval_s g_adau1961_regval[] = {
+  {ADAU1961_R2_Mic_Jack_Detect, 0},     /*default */
+  {ADAU1961_R3_Rec_Power_Mgmt, 0},      /*default */
+  {ADAU1961_R4_Rec_Mixer_Left0, 0},     /*default */
+  {ADAU1961_R5_Rec_Mixer_Left1, 0},     /*default */
+  {ADAU1961_R6_Rec_Mixer_Right0, 0},    /*default */
+  {ADAU1961_R7_Rec_Mixer_Right1, 0},    /*default */
+  {ADAU1961_R8_Left_Diff_Input_Vol, 0}, /*default */
+  {ADAU1961_R9_Right_Diff_Input_Vol, 0},        /*default */
+  {ADAU1961_R10_Record_Mic_Bias, 0},    /*default */
+  {ADAU1961_R11_ALC0, 0},       /*default */
+  {ADAU1961_R12_ALC1, 0},       /*default */
+  {ADAU1961_R13_ALC2, 0},       /*default */
+  {ADAU1961_R14_ALC3, 0},       /*default */
+  {ADAU1961_R15_Serial_Port0, 1 << 0 /*master mode */ },
+  {ADAU1961_R16_Serial_Port1, 0},       /*default */
+  /* {ADAU1961_R17_Converter0, 0}, */
+  {ADAU1961_R18_Converter1, 0}, /*default */
+  {ADAU1961_R19_ADC_Ctl, 0},    /*default */
+  {ADAU1961_R20_Left_Digital_Vol, 0},   /*default */
+  {ADAU1961_R21_Right_Digital_Vol, 0},  /*default */
+  {ADAU1961_R22_Play_Mixer_Left0, 0},   /*default */
+  {ADAU1961_R23_Play_Mixer_Left1, 0},   /*default */
+  {ADAU1961_R24_Play_Mixer_Right0, 0},  /*default */
+  {ADAU1961_R25_Play_Mixer_Right1, 0},  /*default */
+  {ADAU1961_R26_Play_LR_Mixer_Left, 0}, /*default */
+  {ADAU1961_R27_Play_LR_Mixer_Right, 0},        /*default */
+  {ADAU1961_R28_Play_LR_Mixer_Mono, 0}, /*default */
+  {ADAU1961_R29_Play_HP_Left_Vol, 0},   /*default */
+  {ADAU1961_R30_Play_HP_Right_Vol, 0},  /*default */
+  {ADAU1961_R31_Line_Output_Left_Vol, 0},       /*default */
+  {ADAU1961_R32_Line_Output_Right_Vol, 0},      /*default */
+  {ADAU1961_R33_Play_Mono_Output, 0},   /*default */
+  {ADAU1961_R34_Pop_Click_Suppress, 0}, /*default */
+  {ADAU1961_R35_Play_Power_Mgmt, 0},    /*default */
+  {ADAU1961_R36_DAC_Ctl0, 0},   /*default */
+  {ADAU1961_R37_DAC_Ctl1, 0},   /*default */
+  {ADAU1961_R38_DAC_Ctl2, 0},   /*default */
+  {ADAU1961_R39_Serial_Port_Pad, 0xaa}, /*default */
+  {ADAU1961_R40_Ctl_Port_Pad0, 0xaa},   /*default */
+  {ADAU1961_R41_Ctl_Port_Pad1, 0},      /*default */
+  {ADAU1961_R42_Jack_Detect_Pin, 0x0a}, /*default */
+  {ADAU1961_R67_Dejitter_Ctl, 0x03},    /*default */
 };
+
+#define ADAU1961_NINITS (sizeof(g_adau1961_regval)/sizeof(struct adau1961_regval_s))
 
 static int adau1961_init_registers(FAR struct adau1961_dev_s *priv)
 {
-  const struct adau1961_regval_s *reg = adau1961_regvals;
-  int i = 0;
-
-  while (reg[i].addr != 0xff)
+  int i;
+  for (i = 0; i < ADAU1961_NINITS; i++)
     {
-      int rc = adau1961_wr(priv, reg[i].addr, reg[i].val);
+      const struct adau1961_regval_s *reg = &g_adau1961_regval[i];
+      int rc = adau1961_wr(priv, reg->addr, reg->val);
       if (rc < 0)
         {
           return -1;
         }
-      i++;
     }
-
   return 0;
 }
 
@@ -574,12 +573,7 @@ static int adau1961_reset(FAR struct adau1961_dev_s *priv)
 {
   int rc;
 
-  /*set some default values */
-  //priv->sample_rate = 48000;
-  //priv->n_channels = 2;
-  //priv->bits_per_sample = 16;
-
-  rc = adau1961_set_fs(priv, 48000);
+  rc = adau1961_set_fs(priv, 96000);
   if (rc < 0)
     {
       auderr("adau1961_set_fs failed %d\n", rc);
