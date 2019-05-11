@@ -38,6 +38,56 @@
 #define __INCLUDE_NUTTX_AUDIO_ADAU1961_H
 
 /****************************************************************************
+ * Pre-processor Definitions
+ */
+
+#ifndef CONFIG_AUDIO
+#error "CONFIG_AUDIO is required for audio subsystem support"
+#endif
+
+#ifndef CONFIG_I2S
+#error "CONFIG_I2S (or SAI) is required by the ADAU1961 driver"
+#endif
+
+#ifndef CONFIG_I2C
+#error "CONFIG_I2C is required by the ADAU1961 driver"
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#error "CONFIG_SCHED_WORKQUEUE is required by the ADAU1961 driver"
+#endif
+
+/* Default configuration values */
+
+#ifndef CONFIG_ADAU1961_INITVOLUME
+#define CONFIG_ADAU1961_INITVOLUME 400
+#endif
+
+#ifndef CONFIG_ADAU1961_INFLIGHT
+#define CONFIG_ADAU1961_INFLIGHT 2
+#endif
+
+#if CONFIG_ADAU1961_INFLIGHT > 255
+#error "CONFIG_ADAU1961_INFLIGHT must fit in a uint8_t"
+#endif
+
+#ifndef CONFIG_ADAU1961_MSG_PRIO
+#define CONFIG_ADAU1961_MSG_PRIO 1
+#endif
+
+#ifndef CONFIG_ADAU1961_BUFFER_SIZE
+#define CONFIG_ADAU1961_BUFFER_SIZE 8192
+#endif
+
+#ifndef CONFIG_ADAU1961_NUM_BUFFERS
+#define CONFIG_ADAU1961_NUM_BUFFERS 4
+#endif
+
+#ifndef CONFIG_ADAU1961_WORKER_STACKSIZE
+#define CONFIG_ADAU1961_WORKER_STACKSIZE 768
+#endif
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 /* This is the type of the ADAU1961 interrupt handler.  The lower level code
