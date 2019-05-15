@@ -807,9 +807,6 @@ static void adau1961_senddone(FAR struct i2s_dev_s *i2s,
 
 static void adau1961_returnbuffers(FAR struct adau1961_dev_s *priv)
 {
-
-#if 0
-
   FAR struct ap_buffer_s *apb;
   irqstate_t flags;
 
@@ -822,49 +819,37 @@ static void adau1961_returnbuffers(FAR struct adau1961_dev_s *priv)
   while (dq_peek(&priv->doneq) != NULL)
     {
       /* Take the next buffer from the queue of completed transfers */
-
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
       leave_critical_section(flags);
 
-      audinfo("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+      audinfo("apb %p curbyte %d nbytes %d flags %04x\n",
               apb, apb->curbyte, apb->nbytes, apb->flags);
 
       /* Are we returning the final buffer in the stream? */
-
       if ((apb->flags & AUDIO_APB_FINAL) != 0)
         {
           /* Both the pending and the done queues should be empty and there
            * should be no buffers in-flight.
            */
-
           DEBUGASSERT(dq_empty(&priv->doneq) && dq_empty(&priv->pendq) &&
                       priv->inflight == 0);
 
           /* Set the terminating flag.  This will, eventually, cause the
            * worker thread to exit (if it is not already terminating).
            */
-
-          audinfo("Terminating\n");
+          audinfo("terminating\n");
           priv->terminating = true;
         }
 
       /* Release our reference to the audio buffer */
-
       apb_free(apb);
 
       /* Send the buffer back up to the previous level. */
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
-#else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-#endif
       flags = enter_critical_section();
     }
 
   leave_critical_section(flags);
-
-#endif
 }
 
 /****************************************************************************
