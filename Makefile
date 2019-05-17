@@ -1,8 +1,8 @@
 TOP = .
 include $(TOP)/mk/common.mk
 
-#BOARD_CONFIG = axoloti/ggm
-BOARD_CONFIG = axoloti/nsh
+BOARD_CONFIG = axoloti/ggm
+#BOARD_CONFIG = axoloti/nsh
 #BOARD_CONFIG = stm32f4discovery/ggm
 #BOARD_CONFIG = stm32f4discovery/audio
 

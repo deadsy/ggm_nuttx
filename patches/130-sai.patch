@@ -8,17 +8,52 @@
  #include "stm32_sdio.h"
  #include "stm32_spi.h"
  #include "stm32_tim.h"
---- ./nuttx/arch/arm/src/stm32/Kconfig	2019-04-23 10:11:11.000000000 -0700
-+++ ./nuttx/arch/arm/src/stm32/Kconfig	2019-05-04 11:26:03.113577558 -0700
-@@ -1787,6 +1787,7 @@
- 	select STM32_HAVE_CAN2
- 	select STM32_HAVE_DAC1
- 	select STM32_HAVE_RNG
+--- ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:32:59.016131939 -0700
++++ ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:33:42.406086306 -0700
+@@ -228,6 +228,10 @@
+ CHIP_CSRCS += stm32_rng.c
+ endif
+ 
++ifeq ($(CONFIG_STM32_SAI),y)
++CHIP_CSRCS += stm32_sai.c
++endif
++
+ ifeq ($(CONFIG_STM32_LTDC),y)
+ CHIP_CSRCS += stm32_ltdc.c
+ endif
+--- ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:25:40.184599461 -0700
++++ ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:34:52.164900219 -0700
+@@ -1170,6 +1170,19 @@
+ #  define GPIO_SAI2_SD_B_3    (GPIO_ALT|GPIO_AF10|GPIO_PORTF|GPIO_PIN11)
+ #endif
+ 
++#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) 
++#  define GPIO_SAI1_SD_A_1    (GPIO_ALT|GPIO_AF6|GPIO_PORTD|GPIO_PIN6)
++#  define GPIO_SAI1_SD_A_2    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN6)
++#  define GPIO_SAI1_SD_B_1    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN3)
++#  define GPIO_SAI1_SD_B_2    (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN6)
++#  define GPIO_SAI1_MCLK_A    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN2)
++#  define GPIO_SAI1_MCLK_B    (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN7)
++#  define GPIO_SAI1_FS_A      (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN4)
++#  define GPIO_SAI1_FS_B      (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN9)
++#  define GPIO_SAI1_SCK_A     (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN5)
++#  define GPIO_SAI1_SCK_B     (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN8)
++#endif
++
+ /* HDMI-CEC Controller */
+ 
+ #if defined(CONFIG_STM32_STM32F446)
+--- ./nuttx/arch/arm/src/stm32/Kconfig	2019-05-16 19:53:46.590099083 -0700
++++ ./nuttx/arch/arm/src/stm32/Kconfig	2019-05-16 20:08:41.119556904 -0700
+@@ -1796,6 +1796,7 @@
+ 	select STM32_HAVE_I2C3
+ 	select STM32_HAVE_OTGFS
+ 	select STM32_HAVE_SPI6
 +	select STM32_HAVE_SAI1
- 	select STM32_HAVE_ETHMAC
- 	select STM32_HAVE_SPI2
- 	select STM32_HAVE_SPI3
-@@ -1944,6 +1945,14 @@
+ 
+ # This is really 429/439, but we treat the two the same.
+ 
+@@ -1984,6 +1985,14 @@
  	bool
  	default n
  
@@ -30,12 +65,12 @@
 +	bool
 +	default n
 +
- config STM32_HAVE_FSMC
+ config STM32_HAVE_TIM1
  	bool
  	default n
-@@ -2596,6 +2605,52 @@
- 	depends on STM32_HAVE_RNG
- 	select ARCH_HAVE_RNG
+@@ -2760,6 +2769,52 @@
+ 	depends on STM32_HAVE_TIM17
+ 	select STM32_TIM
  
 +config STM32_SAI1
 +	bool "SAI1"
@@ -83,9 +118,9 @@
 +	select STM32_SAI
 +	depends on STM32_SAI2
 +
- # REVISIT:  There are some lower-end STM32F401 parts without SDIO too. Others?
- 
- config STM32_SDIO
+ config STM32_TSC
+ 	bool "TSC"
+ 	default n
 @@ -2849,6 +2904,9 @@
  config STM32_I2C
  	bool
@@ -96,38 +131,71 @@
  config STM32_CAN
  	bool
  
---- ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:32:59.016131939 -0700
-+++ ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-04 11:33:42.406086306 -0700
-@@ -228,6 +228,10 @@
- CHIP_CSRCS += stm32_rng.c
- endif
+@@ -9950,3 +10008,67 @@
+ endchoice
  
-+ifeq ($(CONFIG_STM32_SAI),y)
-+CHIP_CSRCS += stm32_sai.c
-+endif
+ endmenu
 +
- ifeq ($(CONFIG_STM32_LTDC),y)
- CHIP_CSRCS += stm32_ltdc.c
- endif
---- ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:25:40.184599461 -0700
-+++ ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:34:52.164900219 -0700
-@@ -1170,6 +1170,19 @@
- #  define GPIO_SAI2_SD_B_3    (GPIO_ALT|GPIO_AF10|GPIO_PORTF|GPIO_PIN11)
- #endif
- 
-+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) 
-+#  define GPIO_SAI1_SD_A_1    (GPIO_ALT|GPIO_AF6|GPIO_PORTD|GPIO_PIN6)
-+#  define GPIO_SAI1_SD_A_2    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN6)
-+#  define GPIO_SAI1_SD_B_1    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN3)
-+#  define GPIO_SAI1_SD_B_2    (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN6)
-+#  define GPIO_SAI1_MCLK_A    (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN2)
-+#  define GPIO_SAI1_MCLK_B    (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN7)
-+#  define GPIO_SAI1_FS_A      (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN4)
-+#  define GPIO_SAI1_FS_B      (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN9)
-+#  define GPIO_SAI1_SCK_A     (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN5)
-+#  define GPIO_SAI1_SCK_B     (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN8)
-+#endif
++menu "SAI Configuration"
++	depends on STM32_SAI
 +
- /* HDMI-CEC Controller */
- 
- #if defined(CONFIG_STM32_STM32F446)
++choice
++	prompt "Operation mode"
++	default STM32_SAI_DMA
++	---help---
++		Select the operation mode the SAI driver should use.
++
++config STM32_SAI_POLLING
++	bool "Polling"
++	---help---
++		The SAI registers are polled for events.
++
++config STM32_SAI_INTERRUPTS
++	bool "Interrupt"
++	---help---
++		Select to enable interrupt driven SAI support.
++
++config STM32_SAI_DMA
++	bool "DMA"
++	---help---
++		Use DMA to improve SAI transfer performance.
++
++endchoice # Operation mode
++
++choice
++	prompt "SAI1 synchronization enable"
++	default STM32_SAI1_BOTH_ASYNC
++	depends on STM32_SAI1_A && STM32_SAI1_B
++	---help---
++		Select the synchronization mode of the SAI sub-blocks
++
++config STM32_SAI1_BOTH_ASYNC
++	bool "Both asynchronous"
++
++config STM32_SAI1_A_SYNC_WITH_B
++	bool "Block A is synchronous with Block B"
++
++config STM32_SAI1_B_SYNC_WITH_A
++	bool "Block B is synchronous with Block A"
++
++endchoice # SAI1 synchronization enable
++
++choice
++	prompt "SAI2 synchronization enable"
++	default STM32_SAI2_BOTH_ASYNC
++	depends on STM32_SAI2_A && STM32_SAI2_B
++	---help---
++		Select the synchronization mode of the SAI sub-blocks
++
++config STM32_SAI2_BOTH_ASYNC
++	bool "Both asynchronous"
++
++config STM32_SAI2_A_SYNC_WITH_B
++	bool "Block A is synchronous with Block B"
++
++config STM32_SAI2_B_SYNC_WITH_A
++	bool "Block B is synchronous with Block A"
++
++endchoice # SAI2 synchronization enable
++
++endmenu
