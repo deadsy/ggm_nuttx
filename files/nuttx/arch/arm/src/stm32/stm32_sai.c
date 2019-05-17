@@ -103,27 +103,27 @@
 #endif
 
 #ifdef CONFIG_STM32_SAI_DMA
+
 /* SAI DMA priority */
-
 #if defined(CONFIG_STM32_SAI_DMAPRIO)
-#define SAI_DMA_PRIO       CONFIG_STM32_SAI_DMAPRIO
+#define SAI_DMA_PRIO CONFIG_STM32_SAI_DMAPRIO
 #else
-#define SAI_DMA_PRIO       DMA_CCR_PRIMED
+#define SAI_DMA_PRIO DMA_SCR_PRIMED
 #endif
-
-#if (SAI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
+/* check the DMA priority value */
+#if (SAI_DMA_PRIO & ~DMA_SCR_PL_MASK) != 0
 #error "Illegal value for CONFIG_STM32_SAI_DMAPRIO"
 #endif
 
 /* DMA channel configuration */
+#define SAI_RXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#define SAI_RXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#define SAI_RXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_SCR_MSIZE_32BITS|DMA_SCR_PSIZE_32BITS|DMA_SCR_MINC|DMA_SCR_DIR_M2P)
+#define SAI_TXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS |DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#define SAI_TXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_SCR_MSIZE_16BITS|DMA_SCR_PSIZE_16BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
+#define SAI_TXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_SCR_MSIZE_32BITS|DMA_SCR_PSIZE_32BITS|DMA_SCR_MINC|DMA_SCR_DIR_P2M)
 
-#define SAI_RXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
-#define SAI_RXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
-#define SAI_RXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC            )
-#define SAI_TXDMA8_CONFIG    (SAI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC|DMA_CCR_DIR)
-#define SAI_TXDMA16_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-#define SAI_TXDMA32_CONFIG   (SAI_DMA_PRIO|DMA_CCR_MSIZE_32BITS|DMA_CCR_PSIZE_32BITS|DMA_CCR_MINC|DMA_CCR_DIR)
-#endif
+#endif /* CONFIG_STM32_SAI_DMA */
 
 /****************************************************************************
  * Private Types
@@ -153,7 +153,7 @@ struct stm32_sai_s
 #ifdef CONFIG_STM32_SAI_DMA
   uint16_t dma_ch;              /* DMA channel number */
   DMA_HANDLE dma;               /* DMA channel handle */
-  uint32_t dma_ccr;             /* DMA control register */
+  uint32_t dma_scr;             /* DMA stream control register */
 #endif
   uint8_t datalen;              /* Data width */
   uint32_t samplerate;          /* Data sample rate */
@@ -592,18 +592,18 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
       switch (priv->datalen)
         {
         case 8:
-          priv->dma_ccr = SAI_TXDMA8_CONFIG;
+          priv->dma_scr = SAI_TXDMA8_CONFIG;
           ntransfers = nbytes;
           break;
 
         case 16:
-          priv->dma_ccr = SAI_TXDMA16_CONFIG;
+          priv->dma_scr = SAI_TXDMA16_CONFIG;
           DEBUGASSERT((nbytes & 0x1) == 0);
           ntransfers = nbytes >> 1;
           break;
 
         case 32:
-          priv->dma_ccr = SAI_TXDMA32_CONFIG;
+          priv->dma_scr = SAI_TXDMA32_CONFIG;
           DEBUGASSERT((nbytes & 0x3) == 0);
           ntransfers = nbytes >> 2;
           break;
@@ -616,18 +616,18 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
       switch (priv->datalen)
         {
         case 8:
-          priv->dma_ccr = SAI_RXDMA8_CONFIG;
+          priv->dma_scr = SAI_RXDMA8_CONFIG;
           ntransfers = nbytes;
           break;
 
         case 16:
-          priv->dma_ccr = SAI_RXDMA16_CONFIG;
+          priv->dma_scr = SAI_RXDMA16_CONFIG;
           DEBUGASSERT((nbytes & 0x1) == 0);
           ntransfers = nbytes >> 1;
           break;
 
         case 32:
-          priv->dma_ccr = SAI_RXDMA32_CONFIG;
+          priv->dma_scr = SAI_RXDMA32_CONFIG;
           DEBUGASSERT((nbytes & 0x3) == 0);
           ntransfers = nbytes >> 2;
           break;
@@ -637,7 +637,7 @@ static int sai_dma_setup(struct stm32_sai_s *priv)
   DEBUGASSERT(ntransfers > 0);
 
   stm32_dmasetup(priv->dma, priv->base + STM32_SAI_DR_OFFSET,
-                 samp, ntransfers, priv->dma_ccr);
+                 samp, ntransfers, priv->dma_scr);
 
   /* Add the container to the list of active DMAs */
 
@@ -845,7 +845,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
-  sai_schedule(priv, (isr & DMA_CHAN_TEIF_BIT) ? -EIO : OK);
+  sai_schedule(priv, (isr & DMA_STREAM_TEIF_BIT) ? -EIO : OK);
 }
 #endif
 

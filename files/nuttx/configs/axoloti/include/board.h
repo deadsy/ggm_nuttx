@@ -178,15 +178,21 @@
 /************************************************************************************
  * SAI Bus
  * Used with the ADAU1961 CODEC
- * PE6_SAI1_SD_A
- * PE3_SAI1_SD_B
- * PE5_SAI1_SCK_A
- * PE4_SAI1_FS_A
+ * PE6_SAI1_SD_A (GPIO_SAI1_SD_A_2)
+ * PE3_SAI1_SD_B (GPIO_SAI1_SD_B_1)
+ * PE5_SAI1_SCK_A (GPIO_SAI1_SCK_A)
+ * PE4_SAI1_FS_A (GPIO_SAI1_FS_A)
  * PA8_MCO1
  */
 
 #define GPIO_SAI1_SD_A GPIO_SAI1_SD_A_2 /* AF6, PE6 */
+#define GPIO_SAI1_SD_B GPIO_SAI1_SD_B_1 /* AF6, PE3 */
+
 #define STM32_SAI1_FREQUENCY (48000 * 2 * 256)  /* TODO ?? */
+
+/* SAI DMA channels */
+#define DMACHAN_SAI1_A DMAMAP_SAI1_A_1
+#define DMACHAN_SAI1_B DMAMAP_SAI1_B_1
 
 /************************************************************************************
  * SDIO
