@@ -159,8 +159,11 @@
 #define GPIO_USART1_TX GPIO_USART1_TX_2 /* AF7, PB6 */
 
 /* USART6 - midi in/out */
-#define GPIO_USART6_RX GPIO_USART6_RX_2 /* AF8, PG9 */
-#define GPIO_USART6_TX GPIO_USART6_TX_2 /* AF8, PG14 */
+#define GPIO_USART6_RX (GPIO_ALT|GPIO_AF8|GPIO_PORTG|GPIO_PIN9| \
+                        GPIO_PULLUP|GPIO_SPEED_2MHz|GPIO_PUSHPULL)
+
+#define GPIO_USART6_TX (GPIO_ALT|GPIO_AF8|GPIO_PORTG|GPIO_PIN14| \
+                        GPIO_FLOAT|GPIO_SPEED_2MHz|GPIO_OPENDRAIN)
 
 /************************************************************************************
  * I2C Bus
@@ -168,31 +171,47 @@
  */
 
 /* I2C1 - for external devices */
-#define GPIO_I2C1_SCL (GPIO_I2C1_SCL_2|GPIO_PULLUP)     /* AF4, PB8 */
-#define GPIO_I2C1_SDA (GPIO_I2C1_SDA_2|GPIO_PULLUP)     /* AF4, PB9 */
+#define GPIO_I2C1_SCL (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN8| \
+                       GPIO_SPEED_2MHz|GPIO_OPENDRAIN|GPIO_PULLUP)
+
+#define GPIO_I2C1_SDA  (GPIO_ALT|GPIO_AF4|GPIO_PORTB|GPIO_PIN9| \
+                       GPIO_SPEED_2MHz|GPIO_OPENDRAIN|GPIO_PULLUP)
 
 /* I2C3 - for the ADAU1961 codec */
-#define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2|GPIO_PULLUP)     /* AF4, PH7 */
-#define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2|GPIO_PULLUP)     /* AF4, PH8 */
+#define GPIO_I2C3_SCL (GPIO_ALT|GPIO_AF4|GPIO_PORTH|GPIO_PIN7| \
+                       GPIO_SPEED_2MHz|GPIO_OPENDRAIN|GPIO_PULLUP)
+
+#define GPIO_I2C3_SDA (GPIO_ALT|GPIO_AF4|GPIO_PORTH|GPIO_PIN8| \
+                       GPIO_SPEED_2MHz|GPIO_OPENDRAIN|GPIO_PULLUP)
 
 /************************************************************************************
  * SAI Bus
  * Used with the ADAU1961 CODEC
- * PE6_SAI1_SD_A (GPIO_SAI1_SD_A_2)
  * PE3_SAI1_SD_B (GPIO_SAI1_SD_B_1)
- * PE5_SAI1_SCK_A (GPIO_SAI1_SCK_A)
  * PE4_SAI1_FS_A (GPIO_SAI1_FS_A)
+ * PE5_SAI1_SCK_A (GPIO_SAI1_SCK_A)
+ * PE6_SAI1_SD_A (GPIO_SAI1_SD_A_2)
  * PA8_MCO1
  */
 
-#define GPIO_SAI1_SD_A GPIO_SAI1_SD_A_2 /* AF6, PE6 */
 #define GPIO_SAI1_SD_B GPIO_SAI1_SD_B_1 /* AF6, PE3 */
+#define GPIO_SAI1_SD_A GPIO_SAI1_SD_A_2 /* AF6, PE6 */
 
 #define STM32_SAI1_FREQUENCY (48000 * 2 * 256)  /* TODO ?? */
 
-/* SAI DMA channels */
+/* DAC DMA to Codec
+ * dma 2, stream 1, channel 0
+ * memory to peripheral
+ * 32 bits
+ */
 #define DMACHAN_SAI1_A DMAMAP_SAI1_A_1
-#define DMACHAN_SAI1_B DMAMAP_SAI1_B_1
+
+/* ADC DMA from Codec
+ * dma 2, stream 4, channel 1,
+ * peripheral to memory
+ * 32 bits
+ */
+#define DMACHAN_SAI1_B DMAMAP_SAI1_B_2
 
 /************************************************************************************
  * SDIO
@@ -201,8 +220,8 @@
  * d1 (AF12, PC9)
  * d2 (AF12, PC10)
  * d3 (AF12, PC11)
- * cmd (AF12, PD2)
  * clk (AF12, PC12)
+ * cmd (AF12, PD2)
  * cd1 PD13
  */
 
@@ -214,16 +233,16 @@
  * SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(118+2)=400 KHz
  */
 
-#define SDIO_INIT_CLKDIV        (118 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_INIT_CLKDIV (118 << SDIO_CLKCR_CLKDIV_SHIFT)
 
 /* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
  * DMA OFF: SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(2+2)=12 MHz
  */
 
 #ifdef CONFIG_SDIO_DMA
-#define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_MMCXFR_CLKDIV (1 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
-#define SDIO_MMCXFR_CLKDIV    (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_MMCXFR_CLKDIV (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
 /* DMA ON:  SDIOCLK=48MHz, SDIO_CK=SDIOCLK/(1+2)=16 MHz
@@ -231,16 +250,64 @@
  */
 
 #ifdef CONFIG_SDIO_DMA
-#define SDIO_SDXFR_CLKDIV     (1 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_SDXFR_CLKDIV (1 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
-#define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
+#define SDIO_SDXFR_CLKDIV (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
+
+/* dma 2, stream 6, channel 4 */
+#define DMAMAP_SDIO DMAMAP_SDIO_2
 
 /************************************************************************************
- * DMA Channel/Stream Setup
+ * FMC
+ *
+ * PD14 af12   sdram_d0 (FMC_D0)
+ * PD15 af12   sdram_d1 (FMC_D1)
+ * PD0  af12   sdram_d2 (FMC_D2)
+ * PD1  af12   sdram_d3 (FMC_D3)
+ * PE7  af12   sdram_d4 (FMC_D4)
+ * PE8  af12   sdram_d5 (FMC_D5)
+ * PE9  af12   sdram_d6 (FMC_D6)
+ * PE10 af12   sdram_d7 (FMC_D7)
+ * PE11 af12   sdram_d8 (FMC_D8)
+ * PE12 af12   sdram_d9 (FMC_D9)
+ * PE13 af12   sdram_d10 (FMC_D10)
+ * PE14 af12   sdram_d11 (FMC_D11)
+ * PE15 af12   sdram_d12 (FMC_D12)
+ * PD8  af12   sdram_d13 (FMC_D13)
+ * PD9  af12   sdram_d14 (FMC_D14)
+ * PD10 af12   sdram_d15 (FMC_D15)
+ *
+ * PF0  af12   sdram_a0 (FMC_A0)
+ * PF1  af12   sdram_a1 (FMC_A1)
+ * PF2  af12   sdram_a2 (FMC_A2)
+ * PF3  af12   sdram_a3 (FMC_A3)
+ * PF4  af12   sdram_a4 (FMC_A4)
+ * PF5  af12   sdram_a5 (FMC_A5)
+ * PF12 af12   sdram_a6 (FMC_A6)
+ * PF13 af12   sdram_a7 (FMC_A7)
+ * PF14 af12   sdram_a8 (FMC_A8)
+ * PF15 af12   sdram_a9 (FMC_A9)
+ * PG0  af12   sdram_a10 (FMC_A10)
+ * PG1  af12   sdram_a11 (FMC_A11)
+ * PG2  af12   sdram_a12 (FMC_A12)
+ *
+ * PF11 af12   sdram_ras (FMC_SNDRAS)
+ * PG15 af12   sdram_cas (FMC_SDNCAS)
+ *
+ * PG4  af12   sdram_ba0 (FMC_A14/FMC_BA0)
+ * PG5  af12   sdram_ba1 (FMC_A15/FMC_BA1)
+ *
+ * PE0  af12   sdram_ldqm (FMC_NBL0)
+ * PE1  af12   sdram_udqm (FMC_NBL1)
+ * PG8  af12   sdram_clk (FMC_SDCLK)
+ * PH2  af12   sdram_cke (FMC_SDCKE0)
+ * PH3  af12   sdram_cs0 (FMC_SDNE0)
+ * PH5  af12   sdram_we (FMC_SDNWE)
+ *
+ * PH6  af12   ? (FMC_SDNE1)
+ * PB6  af12   tp47 (FMC_SDNE1)
  */
-
-#define DMAMAP_SDIO DMAMAP_SDIO_1
 
 /************************************************************************************/
 
