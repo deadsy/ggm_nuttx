@@ -82,6 +82,16 @@ int stm32_bringup(void)
 #endif
   int ret = OK;
 
+#ifdef HAVE_SDRAM
+  /* Initialize access to the SDRAM device */
+  ret = stm32_sdram_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "stm32_sdram_initialize failed %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
   ret = stm32_sdio_initialize();

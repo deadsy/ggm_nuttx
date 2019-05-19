@@ -60,27 +60,21 @@
 #warning "FMC is not enabled"
 #endif
 
-/************************************************************************************
- * Name: stm32_extmem_gpios
- *
- * Description:
- *   Initialize GPIOs for external memory usage
+/****************************************************************************
+ * Axoloti SDRAM GPIO configuration
  */
 
-/* Axoloti SDRAM GPIO configuration */
-static const uint32_t g_extmem_config[] = {
+static const uint32_t g_sdram_config[] = {
   /* data lines */
   GPIO_FMC_D0, GPIO_FMC_D1, GPIO_FMC_D2, GPIO_FMC_D3,
   GPIO_FMC_D4, GPIO_FMC_D5, GPIO_FMC_D6, GPIO_FMC_D7,
   GPIO_FMC_D8, GPIO_FMC_D9, GPIO_FMC_D10, GPIO_FMC_D11,
   GPIO_FMC_D12, GPIO_FMC_D13, GPIO_FMC_D14, GPIO_FMC_D15,
-
   /* address lines */
   GPIO_FMC_A0, GPIO_FMC_A1, GPIO_FMC_A2, GPIO_FMC_A3,
   GPIO_FMC_A4, GPIO_FMC_A5, GPIO_FMC_A6, GPIO_FMC_A7,
   GPIO_FMC_A8, GPIO_FMC_A9, GPIO_FMC_A10, GPIO_FMC_A11,
   GPIO_FMC_A12,
-
   /* control lines */
   GPIO_FMC_BA0,                 /* ba0 */
   GPIO_FMC_BA1,                 /* ba1 */
@@ -92,55 +86,36 @@ static const uint32_t g_extmem_config[] = {
   GPIO_FMC_SDNCAS,              /* cas */
   GPIO_FMC_SDNRAS,              /* ras */
   GPIO_FMC_SDNE0_1,             /* cs0 */
-  GPIO_FMC_SDNE1_1,             /* cs1 ?? */
-  GPIO_FMC_SDNE1_2,             /* cs1 ?? */
+  GPIO_FMC_SDNE1_2,             /* cs1 */
+  //GPIO_FMC_SDNE1_1,             /* cs1 ?? */
 };
 
-#define N_EXTMEM_GPIOS (sizeof(g_extmem_config) / sizeof(uint32_t))
+#define NUM_SDRAM_GPIOS (sizeof(g_sdram_config) / sizeof(uint32_t))
 
-void stm32_extmem_gpios(void)
+/****************************************************************************
+ * Name: stm32_sdram_initialize
+ *
+ * Description:
+ *   Called from stm32_bringup to initialize external SDRAM access.
+ */
+
+int stm32_sdram_initialize(void)
 {
+  uint32_t val;
   int i;
 
   /* Configure GPIOs */
-  for (i = 0; i < N_EXTMEM_GPIOS; i++)
+  for (i = 0; i < NUM_SDRAM_GPIOS; i++)
     {
-      stm32_configgpio(g_extmem_config[i]);
+      stm32_configgpio(g_sdram_config[i]);
     }
-}
 
-/************************************************************************************
- * Name: stm32_enable_fmc
- *
- * Description:
- *  enable clocking to the FMC module
- */
-
-void stm32_enable_fmc(void)
-{
   /* Enable AHB clocking to the FMC */
-  uint32_t regval = getreg32(STM32_RCC_AHB3ENR);
-  regval |= RCC_AHB3ENR_FMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}
-
-/************************************************************************************
- * Name: stm32_disable_fmc
- *
- * Description:
- * disable clocking to the FMC module
- */
-
-void stm32_disable_fmc(void)
-{
-  /* Disable AHB clocking to the FMC */
-  uint32_t regval = getreg32(STM32_RCC_AHB3ENR);
-  regval &= ~RCC_AHB3ENR_FMCEN;
-  putreg32(regval, STM32_RCC_AHB3ENR);
-}
+  val = getreg32(STM32_RCC_AHB3ENR);
+  val |= RCC_AHB3ENR_FMCEN;
+  putreg32(val, STM32_RCC_AHB3ENR);
 
 /*
-
 SDCR1 : a0000140[31:0] = 0x00003954   SDRAM Control Register 1
 SDCR2 : a0000144[31:0] = 0x000002d0   SDRAM Control Register 2
 SDTR1 : a0000148[31:0] = 0x01116361   SDRAM Timing register 1
@@ -148,5 +123,7 @@ SDTR2 : a000014c[31:0] = 0x0fffffff   SDRAM Timing register 2
 SDCMR : a0000150[31:0] = 0x00044200   SDRAM Command Mode register
 SDRTR : a0000154[31:0] = 0x00000556   SDRAM Refresh Timer register
 SDSR  : a0000158[31:0] = 0            SDRAM Status register
-
 */
+
+  return OK;
+}
