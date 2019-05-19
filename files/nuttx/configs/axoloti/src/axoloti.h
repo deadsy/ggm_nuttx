@@ -52,6 +52,7 @@
 #define HAVE_USBHOST    1
 #define HAVE_SDIO       1
 #define HAVE_ADAU1961   1
+#define HAVE_SDRAM      1
 
 /* Can't support USB host if USB OTG HS is not enabled */
 #if !defined(CONFIG_STM32_OTGHS) || !defined(CONFIG_USBHOST)
@@ -71,6 +72,11 @@
 /* The ADAU1961 depends on the ADAU1961 driver, I2C3, and SAI1 support */
 #if !defined(CONFIG_AUDIO_ADAU1961) || !defined(CONFIG_STM32_I2C3) || !defined(CONFIG_STM32_SAI1)
 #undef HAVE_ADAU1961
+#endif
+
+/* Can't support SDRAM if the memory controller is disabled */
+#if !defined(CONFIG_STM32_FMC)
+#undef HAVE_SDRAM
 #endif
 
 /****************************************************************************
@@ -213,6 +219,18 @@ int stm32_usbhost_initialize(void);
 
 #if defined(HAVE_ADAU1961)
 int stm32_adau1961_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdram_initialize
+ *
+ * Description:
+ *   Called from stm32_bringup to initialize external SDRAM access.
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_SDRAM)
+int stm32_sdram_initialize(void);
 #endif
 
 /****************************************************************************

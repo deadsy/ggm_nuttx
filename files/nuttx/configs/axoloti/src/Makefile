@@ -38,6 +38,10 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c
 
+ifeq ($(CONFIG_STM32_FMC),y)
+CSRCS += stm32_sdram.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else

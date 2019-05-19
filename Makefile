@@ -26,7 +26,7 @@ PATCHFILES := $(sort $(wildcard patches/*.patch))
 PATCH_CMD = \
   for f in $(PATCHFILES); do\
       echo $$f ":"; \
-      patch -d $(SRC) -p1 < $$f || exit 1; \
+      patch -d $(SRC) --backup -p1 < $$f || exit 1; \
   done
 
 COPY_CMD = tar cf - -C files . | tar xf - -C $(SRC)
