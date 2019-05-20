@@ -1,9 +1,8 @@
 /************************************************************************************
  * configs/axoloti/src/stm32_fmc.c
  *
- *   Copyright (C) 2012-2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Jason T. Harris <sirmanlypowers@gmail.com>
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -104,7 +103,7 @@ int stm32_sdram_initialize(void)
   uint32_t val;
   int i;
 
-  /* Configure GPIOs */
+  /* Configure SDRAM GPIOs */
   for (i = 0; i < NUM_SDRAM_GPIOS; i++)
     {
       stm32_configgpio(g_sdram_config[i]);
@@ -115,6 +114,96 @@ int stm32_sdram_initialize(void)
   val |= RCC_AHB3ENR_FMCEN;
   putreg32(val, STM32_RCC_AHB3ENR);
 
+  /* Go throught the SDRAM initialization steps per the reference manual.
+   * hclk period = 1/84 MHz = 11.9 ns (??)
+   */
+
+  /* Step 1:
+   * Program the memory device features into the FMC_SDCRx register.The SDRAM clock
+   * frequency, RBURST and RPIPE must be programmed in the FMC_SDCR1 register.
+   */
+  val = getreg32(STM32_FMC_SDCR1);
+  val &= (0x1ffff << 15);       /* reserved */
+  val |= (1 << 13);             /* rpipe = 1 hclk */
+  val |= (1 << 12);             /* rburst enabled */
+  val |= (2 << 10);             /* sdclk = 2 hclk */
+  val |= (0 << 9);              /* wp disabled */
+  val |= (2 << 7);              /* cas = 2 cycles */
+  val |= (1 << 6);              /* nb = 4 internal banks */
+  val |= (1 << 4);              /* mwid = 16 bits */
+  val |= (1 << 2);              /* nr = 12 bits */
+  val |= (0 << 0);              /* nc = 8 bits */
+  putreg32(val, STM32_FMC_SDCR1);
+
+  /* Step 2:
+   * Program the memory device timing into the FMC_SDTRx register. The TRP and TRC
+   * timings must be programmed in the FMC_SDTR1 register.
+   */
+
+  /* TODO - review, I'm not convinced the hclk is 11.9 ns */
+  val = getreg32(STM32_FMC_SDTR1);
+  val &= (15 << 28);            /* reserved */
+  val |= (1 << 24);             /* trcd 15ns => 2x11.90ns */
+  val |= (1 << 20);             /* trp 15ns => 2x11.90ns */
+  val |= (1 << 16);             /* twr 2 clock cycles */
+  val |= (6 << 12);             /* trc min=63 (6x11.90ns) */
+  val |= (3 << 8);              /* tras min=42ns (4x11.90ns) max=120k (ns) */
+  val |= (6 << 4);              /* txsr min=70ns (6x11.90ns) */
+  val |= (1 << 0);              /* tmrd 2 clock cycles */
+  putreg32(val, STM32_FMC_SDTR1);
+
+  /* Step 3:
+   * Set MODE bits to ‘001’ and configure the Target Bank bits (CTB1 and/or CTB2) in the
+   * FMC_SDCMR register to start delivering the clock to the memory (SDCKE is driven
+   * high).
+   */
+
+  /* Step 4:
+   * Wait during the prescribed delay period. Typical delay is around 100 μs (refer to the
+   * SDRAM datasheet for the required delay after power-up).
+   */
+
+  /* Step 5:
+   * Set MODE bits to ‘010’ and configure the Target Bank bits (CTB1 and/or CTB2) in the
+   * FMC_SDCMR register to issue a “Precharge All” command.
+   */
+
+  /* Step 6:
+   * Set MODE bits to ‘011’, and configure the Target Bank bits (CTB1 and/or CTB2) as well
+   * as the number of consecutive Auto-refresh commands (NRFS) in the FMC_SDCMR
+   * register. Refer to the SDRAM datasheet for the number of Auto-refresh commands that
+   * should be issued. Typical number is 8.
+   */
+
+  /* Step 7:
+   * Configure the MRD field according to your SDRAM device, set the MODE bits to '100',
+   * and configure the Target Bank bits (CTB1 and/or CTB2) in the FMC_SDCMR register
+   * to issue a "Load Mode Register" command in order to program the SDRAM. In
+   * particular:
+   * a) The CAS latency must be selected following configured value in FMC_SDCR1/2
+   *    registers
+   * b) The Burst Length (BL) of 1 must be selected by configuring the M[2:0] bits to 000
+   *    in the mode register (refer to the SDRAM datasheet). If the Mode Register is not
+   *    the same for both SDRAM banks, this step has to be repeated twice, once for
+   *    each bank, and the Target Bank bits set accordingly.
+   */
+
+  /* Step 8:
+   * Program the refresh rate in the FMC_SDRTR register
+   * The refresh rate corresponds to the delay between refresh cycles. Its value must be
+   * adapted to SDRAM devices.
+   */
+
+  /* Step 9:
+   * For mobile SDRAM devices, to program the extended mode register it should be done
+   * once the SDRAM device is initialized: First, a dummy read access should be performed
+   * while BA1=1 and BA=0 (refer to SDRAM address mapping section for BA[1:0] address
+   * mapping) in order to select the extended mode register instead of Load mode register
+   * and then program the needed value.
+   */
+
+  /* We don't have a mobile SDRAM device ... */
+
 /*
 SDCR1 : a0000140[31:0] = 0x00003954   SDRAM Control Register 1
 SDCR2 : a0000144[31:0] = 0x000002d0   SDRAM Control Register 2
@@ -124,6 +213,5 @@ SDCMR : a0000150[31:0] = 0x00044200   SDRAM Command Mode register
 SDRTR : a0000154[31:0] = 0x00000556   SDRAM Refresh Timer register
 SDSR  : a0000158[31:0] = 0            SDRAM Status register
 */
-
   return OK;
 }

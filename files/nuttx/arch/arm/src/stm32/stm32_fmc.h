@@ -89,7 +89,7 @@
 #define STM32_FMC_PATT3_OFFSET   0x008c /* Attribute memory space timing register 3 */
 #define STM32_FMC_PATT4_OFFSET   0x00ac /* Attribute memory space timing register 4 */
 
-#define STM32_PIO4_OFFSET        0x00b0 /* I/O space timing register 4 */
+#define STM32_FMC_PIO4_OFFSET    0x00b0 /* I/O space timing register 4 */
 
 #define STM32_FMC_ECCR_OFFSET(n) (0x0020*((n)-1)+0x0054)
 #define STM32_FMC_ECCR2_OFFSET   0x0074 /* ECC result register 2 */
@@ -145,7 +145,7 @@
 #define STM32_FMC_PATT3          (STM32_FMC_BASE+STM32_FMC_PATT3_OFFSET )
 #define STM32_FMC_PATT4          (STM32_FMC_BASE+STM32_FMC_PATT4_OFFSET )
 
-#define STM32_PIO4                (STM32_FMC_BASE+STM32_FMC_PIO4_OFFSET )
+#define STM32_FMC_PIO4           (STM32_FMC_BASE+STM32_FMC_PIO4_OFFSET )
 
 #define STM32_FMC_ECCR(n)        (STM32_FMC_BASE+STM32_FMC_ECCR_OFFSET(n))
 #define STM32_FMC_ECCR2          (STM32_FMC_BASE+STM32_FMC_ECCR2_OFFSET )
