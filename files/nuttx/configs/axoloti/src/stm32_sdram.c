@@ -59,6 +59,8 @@
 #warning "FMC is not enabled"
 #endif
 
+#define SDRAM_MEMTEST 1
+
 /****************************************************************************
  * Axoloti SDRAM GPIO configuration
  */
@@ -86,16 +88,81 @@ static const uint32_t g_sdram_config[] = {
   GPIO_FMC_SDNRAS,              /* ras */
   GPIO_FMC_SDNE0_1,             /* cs0 */
   GPIO_FMC_SDNE1_2,             /* cs1 */
-  //GPIO_FMC_SDNE1_1,             /* cs1 ?? */
 };
 
 #define NUM_SDRAM_GPIOS (sizeof(g_sdram_config) / sizeof(uint32_t))
 
 /****************************************************************************
+ * Name: stm32_sdram_memtest
+ *
+ * Description:
+ *  Test the SDRAM.
+ */
+
+#ifdef SDRAM_MEMTEST
+
+#define RAND_A 22695477
+#define RAND_C 1
+#define TEST_ITERATIONS 16
+
+static int stm32_sdram_memtest(void *base, uint32_t size)
+{
+  volatile int i, iter;
+
+  /* linear write with linear congruential generator values */
+  for (iter = 0; iter < TEST_ITERATIONS; iter++)
+    {
+      uint32_t x = iter;
+      /* write */
+      for (i = 0; i < size / 4; i++)
+        {
+          x = (RAND_A * x) + RAND_C;
+          ((volatile uint32_t *)base)[i] = x;
+        }
+      /* read/verify */
+      x = iter;
+      for (i = 0; i < size / 4; i++)
+        {
+          x = (RAND_A * x) + RAND_C;
+          if (((volatile uint32_t *)base)[i] != x)
+            {
+              return -1;
+            }
+        }
+    }
+
+  /* scattered byte write at linear congruential generator addresses */
+  for (iter = 0; iter < TEST_ITERATIONS; iter++)
+    {
+      uint32_t x = iter;
+      /* write */
+      for (i = 0; i < 1024 * 1024; i++)
+        {
+          x = (RAND_A * x) + RAND_C;
+          ((volatile uint8_t *)base)[x & (size - 1)] = (uint8_t) i;
+        }
+      /* read/verify */
+      x = iter;
+      for (i = 0; i < 1024 * 1024; i++)
+        {
+          x = (RAND_A * x) + RAND_C;
+          if (((volatile uint8_t *)base)[x & (size - 1)] != (uint8_t) i)
+            {
+              return -1;
+            }
+        }
+    }
+
+  return OK;
+}
+
+#endif /* SDRAM_MEMTEST */
+
+/****************************************************************************
  * Name: stm32_sdram_wait
  *
  * Description:
- *  Wait for the SDRM controller to be ready.
+ *  Wait for the SDRAM controller to be ready.
  */
 
 static void stm32_sdram_wait(int timeout)
@@ -295,5 +362,10 @@ int stm32_sdram_initialize(void)
 
   /*wait for the controller to be ready */
   stm32_sdram_wait(5);
+
+#ifdef SDRAM_MEMTEST
+  return stm32_sdram_memtest((void *)STM32_FMC_BANK5, 8 << 20 /* 8 MiB */ );
+#else
   return OK;
+#endif
 }
