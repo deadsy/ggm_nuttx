@@ -348,16 +348,16 @@
 #define FMC_SDRAM_TR_TRP_SHIFT                       20
 #define FMC_SDRAM_TR_TRCD_SHIFT                      24
 
-#define FMC_SDRAM_MODE_CMD_NORMAL                    0
-#define FMC_SDRAM_MODE_CMD_CLK_ENABLE                1
-#define FMC_SDRAM_MODE_CMD_PALL                      2
-#define FMC_SDRAM_MODE_CMD_AUTO_REFRESH              3
-#define FMC_SDRAM_MODE_CMD_LOAD_MODE                 4
-#define FMC_SDRAM_MODE_CMD_SELF_REFRESH              5
-#define FMC_SDRAM_MODE_CMD_POWER_DOWN                6
+#define FMC_SDRAM_MODE_CMD_NORMAL                    (0 << 0)
+#define FMC_SDRAM_MODE_CMD_CLK_ENABLE                (1 << 0)
+#define FMC_SDRAM_MODE_CMD_PALL                      (2 << 0)
+#define FMC_SDRAM_MODE_CMD_AUTO_REFRESH              (3 << 0)
+#define FMC_SDRAM_MODE_CMD_LOAD_MODE                 (4 << 0)
+#define FMC_SDRAM_MODE_CMD_SELF_REFRESH              (5 << 0)
+#define FMC_SDRAM_MODE_CMD_POWER_DOWN                (6 << 0)
 
-#define FMC_SDRAM_CMD_BANK_1                         0x00000010
-#define FMC_SDRAM_CMD_BANK_2                         0x00000008
+#define FMC_SDRAM_CMD_BANK_1                         (1 << 4)
+#define FMC_SDRAM_CMD_BANK_2                         (1 << 3)
 
 #define FMC_SDRAM_AUTO_REFRESH_SHIFT                 5
 #define FMC_SDRAM_MODEREG_SHIFT                      9

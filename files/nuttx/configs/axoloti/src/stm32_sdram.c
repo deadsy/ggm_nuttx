@@ -92,6 +92,79 @@ static const uint32_t g_sdram_config[] = {
 #define NUM_SDRAM_GPIOS (sizeof(g_sdram_config) / sizeof(uint32_t))
 
 /****************************************************************************
+ * Name: stm32_sdram_wait
+ *
+ * Description:
+ *  Wait for the SDRM controller to be ready.
+ */
+
+static void stm32_sdram_wait(int timeout)
+{
+  while (timeout > 0)
+    {
+      if ((getreg32(STM32_FMC_SDSR) & (1 << 5 /*busy */ )) == 0)
+        {
+          break;
+        }
+      timeout--;
+      nxsig_usleep(1000);
+    }
+  DEBUGASSERT(timeout > 0);
+}
+
+/****************************************************************************
+ * Name: stm32_sdram_command
+ *
+ * Description:
+ *  Send a command to the SDRAM.
+ */
+
+static void stm32_sdram_command(uint32_t mrd, int nrfs, int bank, int mode)
+{
+  uint32_t val = getreg32(STM32_FMC_SDCMR);
+  /*wait for the controller to be ready */
+  stm32_sdram_wait(5);
+  /*setup the command value */
+  val &= (0x3ff << 22);         /* reserved */
+  val |= mrd & (0xfff << 9);    /* mrd */
+  val |= ((nrfs & 15) << 5);    /* nrfs */
+  val |= bank & (3 << 3);       /* ctb1, ctb2 */
+  val |= ((mode & 7) << 0);     /* mode */
+  /*write the command value */
+  putreg32(val, STM32_FMC_SDCMR);
+}
+
+/****************************************************************************
+ * Name: stm32_sdram_write_enable
+ *
+ * Description:
+ *  Enable write access to the SDRAM.
+ */
+
+static void stm32_sdram_write_enable(void)
+{
+  uint32_t val = getreg32(STM32_FMC_SDCR1);
+  stm32_sdram_wait(5);
+  val &= ~(1 << 9);             /* wp == 0 */
+  putreg32(val, STM32_FMC_SDCR1);
+}
+
+/****************************************************************************
+ * Name: stm32_sdram_set_refresh_rate
+ *
+ * Description:
+ *  Set the SDRAM refresh rate.
+ */
+
+static void stm32_sdram_set_refresh_rate(int count)
+{
+  uint32_t val = getreg32(STM32_FMC_SDRTR);
+  val &= (0x1ffff << 15);       /* reserved */
+  val |= ((count & 0x1fff) << 1);
+  putreg32(val, STM32_FMC_SDRTR);
+}
+
+/****************************************************************************
  * Name: stm32_sdram_initialize
  *
  * Description:
@@ -157,16 +230,20 @@ int stm32_sdram_initialize(void)
    * FMC_SDCMR register to start delivering the clock to the memory (SDCKE is driven
    * high).
    */
+  stm32_sdram_command(0, 1, FMC_SDRAM_CMD_BANK_1,
+                      FMC_SDRAM_MODE_CMD_CLK_ENABLE);
 
   /* Step 4:
    * Wait during the prescribed delay period. Typical delay is around 100 μs (refer to the
    * SDRAM datasheet for the required delay after power-up).
    */
+  nxsig_usleep(1000);
 
   /* Step 5:
    * Set MODE bits to ‘010’ and configure the Target Bank bits (CTB1 and/or CTB2) in the
    * FMC_SDCMR register to issue a “Precharge All” command.
    */
+  stm32_sdram_command(0, 1, FMC_SDRAM_CMD_BANK_1, FMC_SDRAM_MODE_CMD_PALL);
 
   /* Step 6:
    * Set MODE bits to ‘011’, and configure the Target Bank bits (CTB1 and/or CTB2) as well
@@ -174,6 +251,8 @@ int stm32_sdram_initialize(void)
    * register. Refer to the SDRAM datasheet for the number of Auto-refresh commands that
    * should be issued. Typical number is 8.
    */
+  stm32_sdram_command(0, 4, FMC_SDRAM_CMD_BANK_1,
+                      FMC_SDRAM_MODE_CMD_AUTO_REFRESH);
 
   /* Step 7:
    * Configure the MRD field according to your SDRAM device, set the MODE bits to '100',
@@ -187,12 +266,20 @@ int stm32_sdram_initialize(void)
    *    the same for both SDRAM banks, this step has to be repeated twice, once for
    *    each bank, and the Target Bank bits set accordingly.
    */
+  val = FMC_SDRAM_MODEREG_BURST_LENGTH_2 |
+    FMC_SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL |
+    FMC_SDRAM_MODEREG_CAS_LATENCY_2 |
+    FMC_SDRAM_MODEREG_OPERATING_MODE_STANDARD |
+    FMC_SDRAM_MODEREG_WRITEBURST_MODE_SINGLE;
+  stm32_sdram_command(val, 1, FMC_SDRAM_CMD_BANK_1,
+                      FMC_SDRAM_MODE_CMD_LOAD_MODE);
 
   /* Step 8:
    * Program the refresh rate in the FMC_SDRTR register
    * The refresh rate corresponds to the delay between refresh cycles. Its value must be
    * adapted to SDRAM devices.
    */
+  stm32_sdram_set_refresh_rate(683);    /* (7.81 us x Freq) - 20 */
 
   /* Step 9:
    * For mobile SDRAM devices, to program the extended mode register it should be done
@@ -201,17 +288,12 @@ int stm32_sdram_initialize(void)
    * mapping) in order to select the extended mode register instead of Load mode register
    * and then program the needed value.
    */
-
   /* We don't have a mobile SDRAM device ... */
 
-/*
-SDCR1 : a0000140[31:0] = 0x00003954   SDRAM Control Register 1
-SDCR2 : a0000144[31:0] = 0x000002d0   SDRAM Control Register 2
-SDTR1 : a0000148[31:0] = 0x01116361   SDRAM Timing register 1
-SDTR2 : a000014c[31:0] = 0x0fffffff   SDRAM Timing register 2
-SDCMR : a0000150[31:0] = 0x00044200   SDRAM Command Mode register
-SDRTR : a0000154[31:0] = 0x00000556   SDRAM Refresh Timer register
-SDSR  : a0000158[31:0] = 0            SDRAM Status register
-*/
+  /* enable memory writes */
+  stm32_sdram_write_enable();
+
+  /*wait for the controller to be ready */
+  stm32_sdram_wait(5);
   return OK;
 }
