@@ -160,6 +160,8 @@ filter_dirs = (
 
 # don't format files in this list
 filter_files = (
+	'files/nuttx/arch/arm/src/stm32/chip/stm32_fsmc.h',
+	'files/nuttx/arch/arm/src/stm32/chip/stm32_fmc.h',
 )
 
 #------------------------------------------------------------------------------

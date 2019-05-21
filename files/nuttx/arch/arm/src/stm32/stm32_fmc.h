@@ -75,4 +75,3 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_STC_STM32_STM32_FMC_H */
-
