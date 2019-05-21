@@ -340,13 +340,13 @@
 #define FMC_SDRAM_CR_RPIPE_1                         0x00002000
 #define FMC_SDRAM_CR_RPIPE_2                         0x00004000
 
-#define FMC_SDRAM_TR_TMRD_SHIFT                      0
-#define FMC_SDRAM_TR_TXSR_SHIFT                      4
-#define FMC_SDRAM_TR_TRAS_SHIFT                      8
-#define FMC_SDRAM_TR_TRC_SHIFT                       12
-#define FMC_SDRAM_TR_TWR_SHIFT                       16
-#define FMC_SDRAM_TR_TRP_SHIFT                       20
-#define FMC_SDRAM_TR_TRCD_SHIFT                      24
+#define FMC_SDTR_TMRD(n)  (((n & 15) - 1) << 0)
+#define FMC_SDTR_TXSR(n)  (((n & 15) - 1) << 4)
+#define FMC_SDTR_TRAS(n)  (((n & 15) - 1) << 8)
+#define FMC_SDTR_TRC(n)   (((n & 15) - 1) << 12)
+#define FMC_SDTR_TWR(n)   (((n & 15) - 1) << 16)
+#define FMC_SDTR_TRP(n)   (((n & 15) - 1) << 20)
+#define FMC_SDTR_TRCD(n)  (((n & 15) - 1) << 24)
 
 #define FMC_SDRAM_MODE_CMD_NORMAL                    (0 << 0)
 #define FMC_SDRAM_MODE_CMD_CLK_ENABLE                (1 << 0)

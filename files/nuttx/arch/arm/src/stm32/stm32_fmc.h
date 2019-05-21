@@ -68,6 +68,66 @@ extern "C"
  * Public Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: stm32_fmc_sdram_wait
+ *
+ * Description:
+ *   Wait for the SDRAM controller to be ready.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_wait(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_enable
+ *
+ * Description:
+ *   Enable clocking to the FMC.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_enable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_disable
+ *
+ * Description:
+ *   Disable clocking to the FMC.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_disable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_write_enable
+ *
+ * Description:
+ *   Enable writes to an SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_write_enable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_write_disable
+ *
+ * Description:
+ *   Disable writes to an SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_write_disable(void);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_refresh_rate
+ *
+ * Description:
+ *   Set the SDRAM refresh rate.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_refresh_rate(int count);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

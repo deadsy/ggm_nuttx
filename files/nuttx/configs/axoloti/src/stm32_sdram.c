@@ -159,27 +159,6 @@ static int stm32_sdram_memtest(void *base, uint32_t size)
 #endif /* SDRAM_MEMTEST */
 
 /****************************************************************************
- * Name: stm32_sdram_wait
- *
- * Description:
- *  Wait for the SDRAM controller to be ready.
- */
-
-static void stm32_sdram_wait(int timeout)
-{
-  while (timeout > 0)
-    {
-      if ((getreg32(STM32_FMC_SDSR) & (1 << 5 /*busy */ )) == 0)
-        {
-          break;
-        }
-      timeout--;
-      nxsig_usleep(1000);
-    }
-  DEBUGASSERT(timeout > 0);
-}
-
-/****************************************************************************
  * Name: stm32_sdram_command
  *
  * Description:
@@ -190,7 +169,7 @@ static void stm32_sdram_command(uint32_t mrd, int nrfs, int bank, int mode)
 {
   uint32_t val = getreg32(STM32_FMC_SDCMR);
   /*wait for the controller to be ready */
-  stm32_sdram_wait(5);
+  stm32_fmc_sdram_wait();
   /*setup the command value */
   val &= (0x3ff << 22);         /* reserved */
   val |= mrd & (0xfff << 9);    /* mrd */
@@ -199,36 +178,6 @@ static void stm32_sdram_command(uint32_t mrd, int nrfs, int bank, int mode)
   val |= ((mode & 7) << 0);     /* mode */
   /*write the command value */
   putreg32(val, STM32_FMC_SDCMR);
-}
-
-/****************************************************************************
- * Name: stm32_sdram_write_enable
- *
- * Description:
- *  Enable write access to the SDRAM.
- */
-
-static void stm32_sdram_write_enable(void)
-{
-  uint32_t val = getreg32(STM32_FMC_SDCR1);
-  stm32_sdram_wait(5);
-  val &= ~(1 << 9);             /* wp == 0 */
-  putreg32(val, STM32_FMC_SDCR1);
-}
-
-/****************************************************************************
- * Name: stm32_sdram_set_refresh_rate
- *
- * Description:
- *  Set the SDRAM refresh rate.
- */
-
-static void stm32_sdram_set_refresh_rate(int count)
-{
-  uint32_t val = getreg32(STM32_FMC_SDRTR);
-  val &= (0x1ffff << 15);       /* reserved */
-  val |= ((count & 0x1fff) << 1);
-  putreg32(val, STM32_FMC_SDRTR);
 }
 
 /****************************************************************************
@@ -249,10 +198,8 @@ int stm32_sdram_initialize(void)
       stm32_configgpio(g_sdram_config[i]);
     }
 
-  /* Enable AHB clocking to the FMC */
-  val = getreg32(STM32_RCC_AHB3ENR);
-  val |= RCC_AHB3ENR_FMCEN;
-  putreg32(val, STM32_RCC_AHB3ENR);
+  /* Enable the FMC */
+  stm32_fmc_enable();
 
   /* Go throught the SDRAM initialization steps per the reference manual.
    * hclk period = 1/84 MHz = 11.9 ns (??)
@@ -283,13 +230,13 @@ int stm32_sdram_initialize(void)
   /* TODO - review, I'm not convinced the hclk is 11.9 ns */
   val = getreg32(STM32_FMC_SDTR1);
   val &= (15 << 28);            /* reserved */
-  val |= (1 << 24);             /* trcd 15ns => 2x11.90ns */
-  val |= (1 << 20);             /* trp 15ns => 2x11.90ns */
-  val |= (1 << 16);             /* twr 2 clock cycles */
-  val |= (6 << 12);             /* trc min=63 (6x11.90ns) */
-  val |= (3 << 8);              /* tras min=42ns (4x11.90ns) max=120k (ns) */
-  val |= (6 << 4);              /* txsr min=70ns (6x11.90ns) */
-  val |= (1 << 0);              /* tmrd 2 clock cycles */
+  val |= FMC_SDTR_TRCD(2);      /* trcd 15ns => 2x11.90ns */
+  val |= FMC_SDTR_TRP(2);       /* trp 15ns => 2x11.90ns */
+  val |= FMC_SDTR_TWR(2);       /* twr 2 clock cycles */
+  val |= FMC_SDTR_TRC(6);       /* trc min=63 (6x11.90ns) */
+  val |= FMC_SDTR_TRAS(4);      /* tras min=42ns (4x11.90ns) max=120k (ns) */
+  val |= FMC_SDTR_TXSR(6);      /* txsr min=70ns (6x11.90ns) */
+  val |= FMC_SDTR_TMRD(2);      /* tmrd 2 clock cycles */
   putreg32(val, STM32_FMC_SDTR1);
 
   /* Step 3:
@@ -346,7 +293,7 @@ int stm32_sdram_initialize(void)
    * The refresh rate corresponds to the delay between refresh cycles. Its value must be
    * adapted to SDRAM devices.
    */
-  stm32_sdram_set_refresh_rate(683);    /* (7.81 us x Freq) - 20 */
+  stm32_fmc_sdram_set_refresh_rate(683);        /* (7.81 us x Freq) - 20 */
 
   /* Step 9:
    * For mobile SDRAM devices, to program the extended mode register it should be done
@@ -358,10 +305,10 @@ int stm32_sdram_initialize(void)
   /* We don't have a mobile SDRAM device ... */
 
   /* enable memory writes */
-  stm32_sdram_write_enable();
+  stm32_fmc_sdram_write_enable();
 
   /*wait for the controller to be ready */
-  stm32_sdram_wait(5);
+  stm32_fmc_sdram_wait();
 
 #ifdef SDRAM_MEMTEST
   return stm32_sdram_memtest((void *)STM32_FMC_BANK5, 8 << 20 /* 8 MiB */ );
