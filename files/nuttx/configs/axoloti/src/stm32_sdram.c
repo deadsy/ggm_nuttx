@@ -209,18 +209,15 @@ int stm32_sdram_initialize(void)
    * Program the memory device features into the FMC_SDCRx register.The SDRAM clock
    * frequency, RBURST and RPIPE must be programmed in the FMC_SDCR1 register.
    */
-  val = getreg32(STM32_FMC_SDCR1);
-  val &= (0x1ffff << 15);       /* reserved */
-  val |= (1 << 13);             /* rpipe = 1 hclk */
-  val |= (1 << 12);             /* rburst enabled */
-  val |= (2 << 10);             /* sdclk = 2 hclk */
-  val |= (0 << 9);              /* wp disabled */
-  val |= (2 << 7);              /* cas = 2 cycles */
-  val |= (1 << 6);              /* nb = 4 internal banks */
-  val |= (1 << 4);              /* mwid = 16 bits */
-  val |= (1 << 2);              /* nr = 12 bits */
-  val |= (0 << 0);              /* nc = 8 bits */
-  putreg32(val, STM32_FMC_SDCR1);
+  val = FMC_SDCR_RPIPE_1 |      /* rpipe = 1 hclk */
+    FMC_SDCR_READ_BURST |       /* read burst enabled */
+    FMC_SDCR_SDCLK_2X |         /* sdclk = 2 hclk */
+    FMC_SDCR_CAS_LATENCY_2 |    /* cas latency = 2 cycles */
+    FMC_SDCR_NBANKS_4 |         /* 4 internal banks */
+    FMC_SDCR_WIDTH_16 |         /* width = 16 bits */
+    FMC_SDCR_ROWS_12 |          /* numrows = 12 */
+    FMC_SDCR_COLS_8;            /* numcols = 8 bits */
+  stm32_fmc_sdram_set_control(1, val);
 
   /* Step 2:
    * Program the memory device timing into the FMC_SDTRx register. The TRP and TRC

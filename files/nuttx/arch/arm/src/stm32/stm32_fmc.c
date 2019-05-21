@@ -180,13 +180,35 @@ void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
   uint32_t val, sdtr;
 
   DEBUGASSERT((bank == 1) || (bank == 2));
-  DEBUGASSERT(timing & FMC_SDTR_RESERVED == 0);
+  DEBUGASSERT((timing & FMC_SDTR_RESERVED) == 0);
 
   sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
   val = getreg32(sdtr);
   val &= FMC_SDTR_RESERVED;     /* preserve reserved bits */
   val |= timing;
   putreg32(val, sdtr);
+}
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_control
+ *
+ * Description:
+ *   Set the SDRAM control parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
+{
+  uint32_t val, sdcr;
+
+  DEBUGASSERT((bank == 1) || (bank == 2));
+  DEBUGASSERT((ctrl & FMC_SDCR_RESERVED) == 0);
+
+  sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
+  val = getreg32(sdcr);
+  val &= FMC_SDCR_RESERVED;     /* preserve reserved bits */
+  val |= ctrl;
+  putreg32(val, sdcr);
 }
 
 #endif /* CONFIG_STM32_FMC */

@@ -308,39 +308,32 @@
 #define FMC_PIO4_IOHIZ_MASK      (255 << FMC_PIO4_IOHIZ_SHIFT)
 #  define FMC_PIO4_IOHIZ(n)      ((n) << FMC_PIO4_IOHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
-#define FMC_SDRAM_CR_COLBITS_8                       0x00000000
-#define FMC_SDRAM_CR_COLBITS_9                       0x00000001
-#define FMC_SDRAM_CR_COLBITS_10                      0x00000002
-#define FMC_SDRAM_CR_COLBITS_11                      0x00000003
+#define FMC_SDCR_RESERVED       (0x1ffff << 15)  /* reserved bits */
+#define FMC_SDCR_RPIPE_0        (0 << 13) /* read pipe */
+#define FMC_SDCR_RPIPE_1        (1 << 13)
+#define FMC_SDCR_RPIPE_2        (2 << 13)
+#define FMC_SDCR_READ_BURST     (1 << 12) /* read burst */
+#define FMC_SDCR_SDCLK_DISABLE  (0 << 10) /* sdram clock */
+#define FMC_SDCR_SDCLK_2X       (2 << 10)
+#define FMC_SDCR_SDCLK_3X       (3 << 10)
+#define FMC_SDCR_WP             (1 << 9) /* write protect */
+#define FMC_SDCR_CAS_LATENCY_1  (1 << 7) /* cas latency */
+#define FMC_SDCR_CAS_LATENCY_2  (2 << 7)
+#define FMC_SDCR_CAS_LATENCY_3  (3 << 7)
+#define FMC_SDCR_NBANKS_2       (0 << 6) /* number of internal banks */
+#define FMC_SDCR_NBANKS_4       (1 << 6)
+#define FMC_SDCR_WIDTH_8        (0 << 4) /* memory width */
+#define FMC_SDCR_WIDTH_16       (1 << 4)
+#define FMC_SDCR_WIDTH_32       (2 << 4)
+#define FMC_SDCR_ROWS_11        (0 << 2) /* number of rows */
+#define FMC_SDCR_ROWS_12        (1 << 2)
+#define FMC_SDCR_ROWS_13        (2 << 2)
+#define FMC_SDCR_COLS_8         (0 << 0) /* number of columns */
+#define FMC_SDCR_COLS_9         (1 << 0)
+#define FMC_SDCR_COLS_10        (2 << 0)
+#define FMC_SDCR_COLS_11        (3 << 0)
 
-#define FMC_SDRAM_CR_ROWBITS_11                      0x00000000
-#define FMC_SDRAM_CR_ROWBITS_12                      0x00000004
-#define FMC_SDRAM_CR_ROWBITS_13                      0x00000008
-
-#define FMC_SDRAM_CR_WIDTH_8                         0x00000000
-#define FMC_SDRAM_CR_WIDTH_16                        0x00000010
-#define FMC_SDRAM_CR_WIDTH_32                        0x00000020
-
-#define FMC_SDRAM_CR_BANKS_2                         0x00000000
-#define FMC_SDRAM_CR_BANKS_4                         0x00000040
-
-#define FMC_SDRAM_CR_CASLAT_1                        0x00000080
-#define FMC_SDRAM_CR_CASLAT_2                        0x00000100
-#define FMC_SDRAM_CR_CASLAT_3                        0x00000180
-
-#define FMC_SDCR_WP (1 << 9) /*write protect*/
-
-#define FMC_SDRAM_CR_SDCLK_DISABLE                   0x00000000
-#define FMC_SDRAM_CR_SDCLK_2X                        0x00000800
-#define FMC_SDRAM_CR_SDCLK_3X                        0x00000C00
-
-#define FMC_SDRAM_CR_BURST_READ                      0x00001000
-
-#define FMC_SDRAM_CR_RPIPE_0                         0x00000000
-#define FMC_SDRAM_CR_RPIPE_1                         0x00002000
-#define FMC_SDRAM_CR_RPIPE_2                         0x00004000
-
-#define FMC_SDTR_RESERVED (15 << 28)
+#define FMC_SDTR_RESERVED (15 << 28)  /*reserved bits*/
 #define FMC_SDTR_TMRD(n)  (((n & 15) - 1) << 0)
 #define FMC_SDTR_TXSR(n)  (((n & 15) - 1) << 4)
 #define FMC_SDTR_TRAS(n)  (((n & 15) - 1) << 8)

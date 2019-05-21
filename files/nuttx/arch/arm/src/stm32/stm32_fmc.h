@@ -128,6 +128,16 @@ void stm32_fmc_sdram_set_refresh_rate(int count);
 
 void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
 
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_control
+ *
+ * Description:
+ *   Set the SDRAM control parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
