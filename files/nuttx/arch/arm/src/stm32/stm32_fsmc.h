@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_fmc.h
+ * arch/arm/src/stm32/stm32_fsmc.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_STM32_FMC_H
-#define __ARCH_ARM_STC_STM32_STM32_FMC_H
+#ifndef __ARCH_ARM_STC_STM32_STM32_FSMC_H
+#define __ARCH_ARM_STC_STM32_STM32_FSMC_H
 
 /************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/stm32_fmc.h"
+#include "chip/stm32_fsmc.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -74,5 +74,5 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32_STM32_FMC_H */
+#endif /* __ARCH_ARM_STC_STM32_STM32_FSMC_H */
 

@@ -1,5 +1,5 @@
 NUTTX_URL = https://bitbucket.org/nuttx/nuttx.git
-NUTTX_HASH = 8cc0d2fc15d6d1f7064b3cb7603b62c3e739fd6e
+NUTTX_HASH = 52203c4ae158c94ecaa93aa3a3bbb9a82fb5eeb9
 
 APPS_URL = https://bitbucket.org/nuttx/apps.git
-APPS_HASH = 02c148e07e3729ef87fb08193cc005a39b31e53c
+APPS_HASH = 891ea23356f4542035f5ba00b84a0c48a7cdad4f

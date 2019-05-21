@@ -347,3 +347,17 @@
  #define STM32_CORTEX_BASE    0xe0000000     /* 0xe0000000-0xffffffff: 512Mb Cortex-M4 block */
  
  #define STM32_REGION_MASK    0xf0000000
+--- ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-20 17:33:02.871425403 -0700
++++ ./nuttx/arch/arm/src/stm32/Make.defs	2019-05-20 17:33:39.947076060 -0700
+@@ -269,3 +269,11 @@
+ ifeq ($(CONFIG_STM32_BBSRAM),y)
+ CHIP_CSRCS += stm32_bbsram.c
+ endif
++
++ifeq ($(CONFIG_STM32_FMC),y)
++CHIP_CSRCS += stm32_fmc.c
++endif
++
++ifeq ($(CONFIG_STM32_FSMC),y)
++CHIP_CSRCS += stm32_fsmc.c
++endif
