@@ -2,7 +2,7 @@
  * arch/arm/src/stm32/stm32_fsmc.c
  *
  *   Copyright (C) 20019 Gregory Nutt. All rights reserved.
- *   Author: Jason T. Harris <dirmanlypowers@gmail.com>
+ *   Author: Jason T. Harris <sirmanlypowers@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
