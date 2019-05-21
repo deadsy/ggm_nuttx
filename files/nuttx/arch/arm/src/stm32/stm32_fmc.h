@@ -99,24 +99,14 @@ void stm32_fmc_enable(void);
 void stm32_fmc_disable(void);
 
 /****************************************************************************
- * Name: stm32_fmc_sdram_write_enable
+ * Name: stm32_fmc_sdram_write_protect
  *
  * Description:
- *   Enable writes to an SDRAM.
+ *   Enable/Disable writes to an SDRAM.
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_write_enable(void);
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_write_disable
- *
- * Description:
- *   Disable writes to an SDRAM.
- *
- ****************************************************************************/
-
-void stm32_fmc_sdram_write_disable(void);
+void stm32_fmc_sdram_write_protect(int bank, bool state);
 
 /****************************************************************************
  * Name: stm32_fmc_sdram_set_refresh_rate
@@ -127,6 +117,16 @@ void stm32_fmc_sdram_write_disable(void);
  ****************************************************************************/
 
 void stm32_fmc_sdram_set_refresh_rate(int count);
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_timing
+ *
+ * Description:
+ *   Set the SDRAM timing parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
 
 #undef EXTERN
 #if defined(__cplusplus)

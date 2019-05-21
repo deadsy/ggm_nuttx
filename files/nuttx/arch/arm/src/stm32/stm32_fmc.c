@@ -123,35 +123,28 @@ void stm32_fmc_disable(void)
 }
 
 /****************************************************************************
- * Name: stm32_fmc_sdram_write_enable
+ * Name: stm32_fmc_sdram_write_protect
  *
  * Description:
- *   Enable writes to an SDRAM.
+ *   Enable/Disable writes to an SDRAM.
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_write_enable(void)
+void stm32_fmc_sdram_write_protect(int bank, bool state)
 {
-  uint32_t val = getreg32(STM32_FMC_SDCR1);
+  uint32_t sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
+  uint32_t val;
   stm32_fmc_sdram_wait();
-  val &= ~(1 << 9);             /* wp == 0 */
-  putreg32(val, STM32_FMC_SDCR1);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_write_disable
- *
- * Description:
- *   Disable writes to an SDRAM.
- *
- ****************************************************************************/
-
-void stm32_fmc_sdram_write_disable(void)
-{
-  uint32_t val = getreg32(STM32_FMC_SDCR1);
-  stm32_fmc_sdram_wait();
-  val |= (1 << 9);              /* wp == 1 */
-  putreg32(val, STM32_FMC_SDCR1);
+  val = getreg32(sdcr);
+  if (state)
+    {
+      val |= FMC_SDCR_WP;       /* wp == 1 */
+    }
+  else
+    {
+      val &= ~FMC_SDCR_WP;      /* wp == 0 */
+    }
+  putreg32(val, sdcr);
 }
 
 /****************************************************************************
@@ -165,15 +158,31 @@ void stm32_fmc_sdram_write_disable(void)
 void stm32_fmc_sdram_set_refresh_rate(int count)
 {
   uint32_t val;
-
-  count &= 0x1fff;              /*13 bits */
-  DEBUGASSERT(count >= 0x29);
-
+  DEBUGASSERT((count <= 0x1fff) && (count >= 0x29));
   stm32_fmc_sdram_wait();
   val = getreg32(STM32_FMC_SDRTR);
   val &= ~(0x1fff << 1);        /*preserve non-count bits */
   val |= (count << 1);
   putreg32(val, STM32_FMC_SDRTR);
+}
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_set_timing
+ *
+ * Description:
+ *   Set the SDRAM timing parameters.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
+{
+  uint32_t sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
+  uint32_t val;
+  DEBUGASSERT(timing & FMC_SDTR_RESERVED == 0);
+  val = getreg32(sdtr);
+  val &= FMC_SDTR_RESERVED;     /* preserve reserved bits */
+  val |= timing;
+  putreg32(val, sdtr);
 }
 
 #endif /* CONFIG_STM32_FMC */

@@ -95,11 +95,11 @@
 #define STM32_FMC_ECCR2_OFFSET   0x0074 /* ECC result register 2 */
 #define STM32_FMC_ECCR3_OFFSET   0x0094 /* ECC result register 3 */
 
-#define STM32_FMC_SDCR1_OFFSET   0x0140 /* SDRAM Control Register, Bank 0 */
-#define STM32_FMC_SDCR2_OFFSET   0x0144 /* SDRAM Control Register, Bank 1 */
+#define STM32_FMC_SDCR1_OFFSET   0x0140 /* SDRAM Control Register, Bank 1 */
+#define STM32_FMC_SDCR2_OFFSET   0x0144 /* SDRAM Control Register, Bank 2 */
 
-#define STM32_FMC_SDTR1_OFFSET   0x0148 /* SDRAM Timing Register, Bank 0 */
-#define STM32_FMC_SDTR2_OFFSET   0x014c /* SDRAM Timing Register, Bank 1 */
+#define STM32_FMC_SDTR1_OFFSET   0x0148 /* SDRAM Timing Register, Bank 1 */
+#define STM32_FMC_SDTR2_OFFSET   0x014c /* SDRAM Timing Register, Bank 2 */
 
 #define STM32_FMC_SDCMR_OFFSET   0x0150 /* SDRAM Config Memory register */
 #define STM32_FMC_SDRTR_OFFSET   0x0154 /* SDRAM Refresh Timing Register maybe */
@@ -328,7 +328,7 @@
 #define FMC_SDRAM_CR_CASLAT_2                        0x00000100
 #define FMC_SDRAM_CR_CASLAT_3                        0x00000180
 
-#define FMC_SDRAM_CR_WRITE_PROT                      0x00000200
+#define FMC_SDCR_WP (1 << 9) /*write protect*/
 
 #define FMC_SDRAM_CR_SDCLK_DISABLE                   0x00000000
 #define FMC_SDRAM_CR_SDCLK_2X                        0x00000800
@@ -340,6 +340,7 @@
 #define FMC_SDRAM_CR_RPIPE_1                         0x00002000
 #define FMC_SDRAM_CR_RPIPE_2                         0x00004000
 
+#define FMC_SDTR_RESERVED (15 << 28)
 #define FMC_SDTR_TMRD(n)  (((n & 15) - 1) << 0)
 #define FMC_SDTR_TXSR(n)  (((n & 15) - 1) << 4)
 #define FMC_SDTR_TRAS(n)  (((n & 15) - 1) << 8)

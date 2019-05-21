@@ -226,18 +226,14 @@ int stm32_sdram_initialize(void)
    * Program the memory device timing into the FMC_SDTRx register. The TRP and TRC
    * timings must be programmed in the FMC_SDTR1 register.
    */
-
-  /* TODO - review, I'm not convinced the hclk is 11.9 ns */
-  val = getreg32(STM32_FMC_SDTR1);
-  val &= (15 << 28);            /* reserved */
-  val |= FMC_SDTR_TRCD(2);      /* trcd 15ns => 2x11.90ns */
-  val |= FMC_SDTR_TRP(2);       /* trp 15ns => 2x11.90ns */
-  val |= FMC_SDTR_TWR(2);       /* twr 2 clock cycles */
-  val |= FMC_SDTR_TRC(6);       /* trc min=63 (6x11.90ns) */
-  val |= FMC_SDTR_TRAS(4);      /* tras min=42ns (4x11.90ns) max=120k (ns) */
-  val |= FMC_SDTR_TXSR(6);      /* txsr min=70ns (6x11.90ns) */
-  val |= FMC_SDTR_TMRD(2);      /* tmrd 2 clock cycles */
-  putreg32(val, STM32_FMC_SDTR1);
+  val = FMC_SDTR_TRCD(2) |      /* trcd 15ns => 2x11.90ns */
+    FMC_SDTR_TRP(2) |           /* trp 15ns => 2x11.90ns */
+    FMC_SDTR_TWR(2) |           /* twr 2 clock cycles */
+    FMC_SDTR_TRC(6) |           /* trc min=63 (6x11.90ns) */
+    FMC_SDTR_TRAS(4) |          /* tras min=42ns (4x11.90ns) max=120k (ns) */
+    FMC_SDTR_TXSR(6) |          /* txsr min=70ns (6x11.90ns) */
+    FMC_SDTR_TMRD(2);           /* tmrd 2 clock cycles */
+  stm32_fmc_sdram_set_timing(1, val);
 
   /* Step 3:
    * Set MODE bits to ‘001’ and configure the Target Bank bits (CTB1 and/or CTB2) in the
@@ -304,8 +300,8 @@ int stm32_sdram_initialize(void)
    */
   /* We don't have a mobile SDRAM device ... */
 
-  /* enable memory writes */
-  stm32_fmc_sdram_write_enable();
+  /* enable memory writes for bank 1 */
+  stm32_fmc_sdram_write_protect(1, false);
 
   /*wait for the controller to be ready */
   stm32_fmc_sdram_wait();
