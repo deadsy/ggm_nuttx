@@ -134,7 +134,7 @@
 #define STM32_FSMC_PATT3          (STM32_FSMC_BASE+STM32_FSMC_PATT3_OFFSET )
 #define STM32_FSMC_PATT4          (STM32_FSMC_BASE+STM32_FSMC_PATT4_OFFSET )
 
-#define STM32_PIO4                (STM32_FSMC_BASE+STM32_FSMC_PIO4_OFFSET )
+#define STM32_FSMC_PIO4           (STM32_FSMC_BASE+STM32_FSMC_PIO4_OFFSET )
 
 #define STM32_FSMC_ECCR(n)        (STM32_FSMC_BASE+STM32_FSMC_ECCR_OFFSET(n))
 #define STM32_FSMC_ECCR2          (STM32_FSMC_BASE+STM32_FSMC_ECCR2_OFFSET )
@@ -276,16 +276,16 @@
 #define FSMC_PATT_ATTHIZ_MASK     (255 << FSMC_PATT_ATTHIZ_SHIFT)
 #  define FSMC_PATT_ATTHIZ(n)     ((n) << FSMC_PATT_ATTHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
-#define FSMC_PIO4_IOSET_SHIFT     (0)       /* IOribute memory setup time */
+#define FSMC_PIO4_IOSET_SHIFT     (0)       /* IO memory setup time */
 #define FSMC_PIO4_IOSET_MASK      (255 << FSMC_PIO4_IOSET_SHIFT)
 #  define FSMC_PIO4_IOSET(n)      ((n-1) << FSMC_PIO4_IOSET_SHIFT) /* (n)xHCLK n=1..256 */
-#define FSMC_PIO4_IOWAIT_SHIFT    (8)       /* IOribute memory wait time */
+#define FSMC_PIO4_IOWAIT_SHIFT    (8)       /* IO memory wait time */
 #define FSMC_PIO4_IOWAIT_MASK     (255 << FSMC_PIO4_IOWAIT_SHIFT)
 #  define FSMC_PIO4_IOWAIT(n)     ((n-1) << FSMC_PIO4_IOWAIT_SHIFT) /* (n)xHCLK n=2..256 */
-#define FSMC_PIO4_IOHOLD_SHIFT    (16)      /* IOribute memory hold time */
+#define FSMC_PIO4_IOHOLD_SHIFT    (16)      /* IO memory hold time */
 #define FSMC_PIO4_IOHOLD_MASK     (255 << FSMC_PIO4_IOHOLD_SHIFT)
 #  define FSMC_PIO4_IOHOLD(n)     ((n) <<  FSMC_PIO4_IOHOLD_SHIFT) /* (n)xHCLK n=1..255 */
-#define FSMC_PIO4_IOHIZ_SHIFT     (24)       /* IOribute memory databus HiZ time */
+#define FSMC_PIO4_IOHIZ_SHIFT     (24)       /* IO memory databus HiZ time */
 #define FSMC_PIO4_IOHIZ_MASK      (255 << FSMC_PIO4_IOHIZ_SHIFT)
 #  define FSMC_PIO4_IOHIZ(n)      ((n) << FSMC_PIO4_IOHIZ_SHIFT) /* (n)xHCLK n=0..255 */
 
