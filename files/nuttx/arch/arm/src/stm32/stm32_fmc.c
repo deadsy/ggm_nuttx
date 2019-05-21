@@ -102,9 +102,7 @@ void stm32_fmc_sdram_wait(void)
 
 void stm32_fmc_enable(void)
 {
-  uint32_t val = getreg32(STM32_RCC_AHB3ENR);
-  val |= RCC_AHB3ENR_FMCEN;
-  putreg32(val, STM32_RCC_AHB3ENR);
+  modifyreg32(STM32_RCC_AHB3ENR, 0, RCC_AHB3ENR_FMCEN);
 }
 
 /****************************************************************************
@@ -117,9 +115,7 @@ void stm32_fmc_enable(void)
 
 void stm32_fmc_disable(void)
 {
-  uint32_t val = getreg32(STM32_RCC_AHB3ENR);
-  val &= ~RCC_AHB3ENR_FMCEN;
-  putreg32(val, STM32_RCC_AHB3ENR);
+  modifyreg32(STM32_RCC_AHB3ENR, RCC_AHB3ENR_FMCEN, 0);
 }
 
 /****************************************************************************
@@ -132,8 +128,11 @@ void stm32_fmc_disable(void)
 
 void stm32_fmc_sdram_write_protect(int bank, bool state)
 {
-  uint32_t sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
-  uint32_t val;
+  uint32_t val, sdcr;
+
+  DEBUGASSERT((bank == 1) || (bank == 2));
+
+  sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
   stm32_fmc_sdram_wait();
   val = getreg32(sdcr);
   if (state)
@@ -158,7 +157,9 @@ void stm32_fmc_sdram_write_protect(int bank, bool state)
 void stm32_fmc_sdram_set_refresh_rate(int count)
 {
   uint32_t val;
+
   DEBUGASSERT((count <= 0x1fff) && (count >= 0x29));
+
   stm32_fmc_sdram_wait();
   val = getreg32(STM32_FMC_SDRTR);
   val &= ~(0x1fff << 1);        /*preserve non-count bits */
@@ -176,9 +177,12 @@ void stm32_fmc_sdram_set_refresh_rate(int count)
 
 void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
 {
-  uint32_t sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
-  uint32_t val;
+  uint32_t val, sdtr;
+
+  DEBUGASSERT((bank == 1) || (bank == 2));
   DEBUGASSERT(timing & FMC_SDTR_RESERVED == 0);
+
+  sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
   val = getreg32(sdtr);
   val &= FMC_SDTR_RESERVED;     /* preserve reserved bits */
   val |= timing;
