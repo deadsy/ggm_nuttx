@@ -162,7 +162,7 @@ void stm32_fmc_sdram_set_refresh_rate(int count)
 
   stm32_fmc_sdram_wait();
   val = getreg32(STM32_FMC_SDRTR);
-  val &= ~(0x1fff << 1);        /*preserve non-count bits */
+  val &= ~(0x1fff << 1);        /* preserve non-count bits */
   val |= (count << 1);
   putreg32(val, STM32_FMC_SDRTR);
 }
@@ -209,6 +209,29 @@ void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
   val &= FMC_SDCR_RESERVED;     /* preserve reserved bits */
   val |= ctrl;
   putreg32(val, sdcr);
+}
+
+/****************************************************************************
+ * Name: stm32_fmc_sdram_command
+ *
+ * Description:
+ *   Send a command to the SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_command(uint32_t cmd)
+{
+  uint32_t val;
+
+  DEBUGASSERT((cmd & FMC_SDCMR_RESERVED) == 0);
+
+  /* wait for the controller to be ready */
+  stm32_fmc_sdram_wait();
+
+  val = getreg32(STM32_FMC_SDCMR);
+  val &= FMC_SDCMR_RESERVED;    /* preserve reserved bits */
+  val |= cmd;
+  putreg32(val, STM32_FMC_SDCMR);
 }
 
 #endif /* CONFIG_STM32_FMC */

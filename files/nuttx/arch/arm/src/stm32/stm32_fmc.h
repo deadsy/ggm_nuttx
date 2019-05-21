@@ -138,6 +138,16 @@ void stm32_fmc_sdram_set_timing(int bank, uint32_t timing);
 
 void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl);
 
+/****************************************************************************
+ * Name: stm32_fmc_sdram_command
+ *
+ * Description:
+ *   Send a command to the SDRAM.
+ *
+ ****************************************************************************/
+
+void stm32_fmc_sdram_command(uint32_t cmd);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

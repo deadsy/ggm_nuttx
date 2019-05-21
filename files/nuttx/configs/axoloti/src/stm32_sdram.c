@@ -159,28 +159,6 @@ static int stm32_sdram_memtest(void *base, uint32_t size)
 #endif /* SDRAM_MEMTEST */
 
 /****************************************************************************
- * Name: stm32_sdram_command
- *
- * Description:
- *  Send a command to the SDRAM.
- */
-
-static void stm32_sdram_command(uint32_t mrd, int nrfs, int bank, int mode)
-{
-  uint32_t val = getreg32(STM32_FMC_SDCMR);
-  /*wait for the controller to be ready */
-  stm32_fmc_sdram_wait();
-  /*setup the command value */
-  val &= (0x3ff << 22);         /* reserved */
-  val |= mrd & (0xfff << 9);    /* mrd */
-  val |= ((nrfs & 15) << 5);    /* nrfs */
-  val |= bank & (3 << 3);       /* ctb1, ctb2 */
-  val |= ((mode & 7) << 0);     /* mode */
-  /*write the command value */
-  putreg32(val, STM32_FMC_SDCMR);
-}
-
-/****************************************************************************
  * Name: stm32_sdram_initialize
  *
  * Description:
@@ -210,7 +188,7 @@ int stm32_sdram_initialize(void)
    * frequency, RBURST and RPIPE must be programmed in the FMC_SDCR1 register.
    */
   val = FMC_SDCR_RPIPE_1 |      /* rpipe = 1 hclk */
-    FMC_SDCR_READ_BURST |       /* read burst enabled */
+    FMC_SDCR_READBURST |        /* read burst enabled */
     FMC_SDCR_SDCLK_2X |         /* sdclk = 2 hclk */
     FMC_SDCR_CAS_LATENCY_2 |    /* cas latency = 2 cycles */
     FMC_SDCR_NBANKS_4 |         /* 4 internal banks */
@@ -237,8 +215,8 @@ int stm32_sdram_initialize(void)
    * FMC_SDCMR register to start delivering the clock to the memory (SDCKE is driven
    * high).
    */
-  stm32_sdram_command(0, 1, FMC_SDRAM_CMD_BANK_1,
-                      FMC_SDRAM_MODE_CMD_CLK_ENABLE);
+  val = FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_CLK_ENABLE;
+  stm32_fmc_sdram_command(val);
 
   /* Step 4:
    * Wait during the prescribed delay period. Typical delay is around 100 μs (refer to the
@@ -250,7 +228,8 @@ int stm32_sdram_initialize(void)
    * Set MODE bits to ‘010’ and configure the Target Bank bits (CTB1 and/or CTB2) in the
    * FMC_SDCMR register to issue a “Precharge All” command.
    */
-  stm32_sdram_command(0, 1, FMC_SDRAM_CMD_BANK_1, FMC_SDRAM_MODE_CMD_PALL);
+  val = FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_PALL;
+  stm32_fmc_sdram_command(val);
 
   /* Step 6:
    * Set MODE bits to ‘011’, and configure the Target Bank bits (CTB1 and/or CTB2) as well
@@ -258,8 +237,8 @@ int stm32_sdram_initialize(void)
    * register. Refer to the SDRAM datasheet for the number of Auto-refresh commands that
    * should be issued. Typical number is 8.
    */
-  stm32_sdram_command(0, 4, FMC_SDRAM_CMD_BANK_1,
-                      FMC_SDRAM_MODE_CMD_AUTO_REFRESH);
+  val = FMC_SDCMR_NRFS(5) | FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_AUTO_REFRESH;
+  stm32_fmc_sdram_command(val);
 
   /* Step 7:
    * Configure the MRD field according to your SDRAM device, set the MODE bits to '100',
@@ -273,13 +252,13 @@ int stm32_sdram_initialize(void)
    *    the same for both SDRAM banks, this step has to be repeated twice, once for
    *    each bank, and the Target Bank bits set accordingly.
    */
-  val = FMC_SDRAM_MODEREG_BURST_LENGTH_2 |
-    FMC_SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL |
-    FMC_SDRAM_MODEREG_CAS_LATENCY_2 |
-    FMC_SDRAM_MODEREG_OPERATING_MODE_STANDARD |
-    FMC_SDRAM_MODEREG_WRITEBURST_MODE_SINGLE;
-  stm32_sdram_command(val, 1, FMC_SDRAM_CMD_BANK_1,
-                      FMC_SDRAM_MODE_CMD_LOAD_MODE);
+  val = FMC_SDCMR_MDR_BURST_LENGTH_2 |
+    FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL |
+    FMC_SDCMR_MDR_CAS_LATENCY_2 |
+    FMC_SDCMR_MDR_OPERATING_MODE_STANDARD |
+    FMC_SDCMR_MDR_WRITEBURST_MODE_SINGLE |
+    FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_LOAD_MODE;
+  stm32_fmc_sdram_command(val);
 
   /* Step 8:
    * Program the refresh rate in the FMC_SDRTR register

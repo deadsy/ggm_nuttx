@@ -312,7 +312,7 @@
 #define FMC_SDCR_RPIPE_0        (0 << 13) /* read pipe */
 #define FMC_SDCR_RPIPE_1        (1 << 13)
 #define FMC_SDCR_RPIPE_2        (2 << 13)
-#define FMC_SDCR_READ_BURST     (1 << 12) /* read burst */
+#define FMC_SDCR_READBURST      (1 << 12) /* read burst */
 #define FMC_SDCR_SDCLK_DISABLE  (0 << 10) /* sdram clock */
 #define FMC_SDCR_SDCLK_2X       (2 << 10)
 #define FMC_SDCR_SDCLK_3X       (3 << 10)
@@ -333,7 +333,7 @@
 #define FMC_SDCR_COLS_10        (2 << 0)
 #define FMC_SDCR_COLS_11        (3 << 0)
 
-#define FMC_SDTR_RESERVED (15 << 28)  /*reserved bits*/
+#define FMC_SDTR_RESERVED (15 << 28)  /* reserved bits */
 #define FMC_SDTR_TMRD(n)  (((n & 15) - 1) << 0)
 #define FMC_SDTR_TXSR(n)  (((n & 15) - 1) << 4)
 #define FMC_SDTR_TRAS(n)  (((n & 15) - 1) << 8)
@@ -342,31 +342,28 @@
 #define FMC_SDTR_TRP(n)   (((n & 15) - 1) << 20)
 #define FMC_SDTR_TRCD(n)  (((n & 15) - 1) << 24)
 
-#define FMC_SDRAM_MODE_CMD_NORMAL                    (0 << 0)
-#define FMC_SDRAM_MODE_CMD_CLK_ENABLE                (1 << 0)
-#define FMC_SDRAM_MODE_CMD_PALL                      (2 << 0)
-#define FMC_SDRAM_MODE_CMD_AUTO_REFRESH              (3 << 0)
-#define FMC_SDRAM_MODE_CMD_LOAD_MODE                 (4 << 0)
-#define FMC_SDRAM_MODE_CMD_SELF_REFRESH              (5 << 0)
-#define FMC_SDRAM_MODE_CMD_POWER_DOWN                (6 << 0)
-
-#define FMC_SDRAM_CMD_BANK_1                         (1 << 4)
-#define FMC_SDRAM_CMD_BANK_2                         (1 << 3)
-
-#define FMC_SDRAM_AUTO_REFRESH_SHIFT                 5
-#define FMC_SDRAM_MODEREG_SHIFT                      9
-
-#define FMC_SDRAM_MODEREG_BURST_LENGTH_1             (0x0000 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_BURST_LENGTH_2             (0x0001 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_BURST_LENGTH_4             (0x0002 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_BURST_LENGTH_8             (0x0004 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL      (0x0000 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_BURST_TYPE_INTERLEAVED     (0x0008 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_CAS_LATENCY_2              (0x0020 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_CAS_LATENCY_3              (0x0030 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_OPERATING_MODE_STANDARD    (0x0000 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_WRITEBURST_MODE_PROGRAMMED (0x0000 << FMC_SDRAM_MODEREG_SHIFT)
-#define FMC_SDRAM_MODEREG_WRITEBURST_MODE_SINGLE     (0x0200 << FMC_SDRAM_MODEREG_SHIFT)
+#define FMC_SDCMR_RESERVED                        (0x3ff << 22)  /* reserved bits */
+#define FMC_SDCMR_MDR_BURST_LENGTH_1              (0x0000 << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_2              (0x0001 << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_4              (0x0002 << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_8              (0x0004 << 9)
+#define FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL       (0x0000 << 9)
+#define FMC_SDCMR_MDR_BURST_TYPE_INTERLEAVED      (0x0008 << 9)
+#define FMC_SDCMR_MDR_CAS_LATENCY_2               (0x0020 << 9)
+#define FMC_SDCMR_MDR_CAS_LATENCY_3               (0x0030 << 9)
+#define FMC_SDCMR_MDR_OPERATING_MODE_STANDARD     (0x0000 << 9)
+#define FMC_SDCMR_MDR_WRITEBURST_MODE_PROGRAMMED  (0x0000 << 9)
+#define FMC_SDCMR_MDR_WRITEBURST_MODE_SINGLE      (0x0200 << 9)
+#define FMC_SDCMR_NRFS(n)                         (((n & 15) - 1) << 5)
+#define FMC_SDCMR_BANK_1                          (1 << 4)
+#define FMC_SDCMR_BANK_2                          (1 << 3)
+#define FMC_SDCMR_CMD_NORMAL                      (0 << 0)
+#define FMC_SDCMR_CMD_CLK_ENABLE                  (1 << 0)
+#define FMC_SDCMR_CMD_PALL                        (2 << 0)
+#define FMC_SDCMR_CMD_AUTO_REFRESH                (3 << 0)
+#define FMC_SDCMR_CMD_LOAD_MODE                   (4 << 0)
+#define FMC_SDCMR_CMD_SELF_REFRESH                (5 << 0)
+#define FMC_SDCMR_CMD_POWER_DOWN                  (6 << 0)
 
 /************************************************************************************
  * Public Types
