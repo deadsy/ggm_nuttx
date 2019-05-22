@@ -2,10 +2,18 @@ TOP = .
 include $(TOP)/mk/common.mk
 
 #BOARD_CONFIG ?= axoloti/ggm
-BOARD_CONFIG ?= stm32f429i-disco/nsh
 #BOARD_CONFIG ?= axoloti/nsh
+
 #BOARD_CONFIG ?= stm32f4discovery/ggm
 #BOARD_CONFIG ?= stm32f4discovery/audio
+#BOARD_CONFIG ?= stm32f4discovery/nxlines
+
+BOARD_CONFIG ?= stm32f429i-disco/nsh
+
+#BOARD_CONFIG ?= stm3210e-eval/nsh
+#BOARD_CONFIG ?= stm3240g-eval/nxterm
+#BOARD_CONFIG ?= stm3220g-eval/nxwm
+#BOARD_CONFIG ?= mikroe-stm32f4/
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
