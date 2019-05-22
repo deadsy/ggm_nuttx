@@ -16,6 +16,7 @@ apps:
 	git clone https://bitbucket.org/nuttx/apps.git
 
 archive:
+	mkdir -p $(TOP)/dl
 	-rm $(NUTTX_TGZ)
 	-rm $(APPS_TGZ)
 	cd nuttx; git archive -o $(NUTTX_TGZ) $(NUTTX_HASH); cd ..

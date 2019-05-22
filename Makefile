@@ -1,7 +1,8 @@
 TOP = .
 include $(TOP)/mk/common.mk
 
-BOARD_CONFIG ?= axoloti/ggm
+#BOARD_CONFIG ?= axoloti/ggm
+BOARD_CONFIG ?= stm32f429i-disco/nsh
 #BOARD_CONFIG ?= axoloti/nsh
 #BOARD_CONFIG ?= stm32f4discovery/ggm
 #BOARD_CONFIG ?= stm32f4discovery/audio
@@ -62,6 +63,15 @@ config:
 .PHONY: distclean
 distclean: clean
 	-rm -rf $(DL)
+
+.PHONY: unpatched
+unpatched:
+	mkdir -p $(NUTTX_SRC)
+	tar -C $(NUTTX_SRC) -xzf $(NUTTX_TGZ)
+	mkdir -p $(APPS_SRC)
+	tar -C $(APPS_SRC) -xzf $(APPS_TGZ)
+	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD_CONFIG)
+	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_SRC)
 
 .stamp_src: $(NUTTX_TGZ) $(APPS_TGZ)
 	mkdir -p $(NUTTX_SRC)
