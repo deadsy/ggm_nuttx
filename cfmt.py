@@ -162,6 +162,7 @@ filter_dirs = (
 filter_files = (
 	'files/nuttx/arch/arm/src/stm32/chip/stm32_fsmc.h',
 	'files/nuttx/arch/arm/src/stm32/chip/stm32_fmc.h',
+  'files/nuttx/configs/stm32f429i-disco/src/stm32_extmem.c.original',
 )
 
 #------------------------------------------------------------------------------
