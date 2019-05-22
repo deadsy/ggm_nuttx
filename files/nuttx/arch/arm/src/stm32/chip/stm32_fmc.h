@@ -351,12 +351,13 @@
 #define FMC_SDCMR_MDR_BURST_LENGTH_2              ((1 << 0) << 9)
 #define FMC_SDCMR_MDR_BURST_LENGTH_4              ((2 << 0) << 9)
 #define FMC_SDCMR_MDR_BURST_LENGTH_8              ((3 << 0) << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_FULL           ((7 << 0) << 9)
 #define FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL       ((0 << 3) << 9)
-#define FMC_SDCMR_MDR_BURST_TYPE_INTERLEAVED      ((1 << 3) << 9)
+#define FMC_SDCMR_MDR_BURST_TYPE_INTERLEAVE       ((1 << 3) << 9)
 #define FMC_SDCMR_MDR_CAS_LATENCY_1               ((1 << 4) << 9)
 #define FMC_SDCMR_MDR_CAS_LATENCY_2               ((2 << 4) << 9)
 #define FMC_SDCMR_MDR_CAS_LATENCY_3               ((3 << 4) << 9)
-#define FMC_SDCMR_MDR_MODE_MRS                    ((0 << 7) << 9)
+#define FMC_SDCMR_MDR_MODE_NORMAL                 ((0 << 7) << 9)
 #define FMC_SDCMR_MDR_WBL_BURST                   ((0 << 9) << 9)
 #define FMC_SDCMR_MDR_WBL_SINGLE                  ((1 << 9) << 9)
 #define FMC_SDCMR_NRFS(n)                         (((n & 15) - 1) << 5)
@@ -369,6 +370,15 @@
 #define FMC_SDCMR_CMD_LOAD_MODE                   (4 << 0)
 #define FMC_SDCMR_CMD_SELF_REFRESH                (5 << 0)
 #define FMC_SDCMR_CMD_POWER_DOWN                  (6 << 0)
+
+#define FMC_SDSR_RE                       (1 << 0)
+#define FMC_SDSR_BUSY                     (1 << 5)
+#define FMC_SDSR_MODES1_NORMAL            (0 << 1)
+#define FMC_SDSR_MODES1_SELF_REFRESH      (1 << 1)
+#define FMC_SDSR_MODES1_POWER_DOWN        (2 << 1)
+#define FMC_SDSR_MODES2_NORMAL            (0 << 3)
+#define FMC_SDSR_MODES2_SELF_REFRESH      (1 << 3)
+#define FMC_SDSR_MODES2_POWER_DOWN        (2 << 3)
 
 /************************************************************************************
  * Public Types

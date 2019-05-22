@@ -82,7 +82,7 @@ void stm32_fmc_sdram_wait(void)
   int timeout = 5;
   while (timeout > 0)
     {
-      if ((getreg32(STM32_FMC_SDSR) & (1 << 5 /*busy */ )) == 0)
+      if ((getreg32(STM32_FMC_SDSR) & FMC_SDSR_BUSY) == 0)
         {
           break;
         }

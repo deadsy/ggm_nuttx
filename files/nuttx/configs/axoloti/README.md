@@ -8,7 +8,7 @@ memory and 256KiB of SRAM. The board features:
 * ADAU1961 24-bit 96 kHz stereo CODEC
 * 1/4" in/out jacks for analog audio signals
 * 3.5 mm jack for analog audio signals
-* 8 MiB of SDRAM (Samsung K4S51153PF)
+* 8 MiB of SDRAM (Alliance Memory AS4C4M16SA)
 * Serial MIDI in/out ports
 * SD Card slot
 * Two user LEDs and one (GPIO) push-button

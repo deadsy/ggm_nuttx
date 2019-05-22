@@ -59,8 +59,6 @@
 #warning "FMC is not enabled"
 #endif
 
-#define SDRAM_MEMTEST 1
-
 /****************************************************************************
  * Axoloti SDRAM GPIO configuration
  */
@@ -99,13 +97,11 @@ static const uint32_t g_sdram_config[] = {
  *  Test the SDRAM.
  */
 
-#ifdef SDRAM_MEMTEST
-
 #define RAND_A 22695477
 #define RAND_C 1
 #define TEST_ITERATIONS 16
 
-static int stm32_sdram_memtest(void *base, uint32_t size)
+int stm32_sdram_memtest(void *base, uint32_t size)
 {
   volatile int i, iter;
 
@@ -156,14 +152,12 @@ static int stm32_sdram_memtest(void *base, uint32_t size)
   return OK;
 }
 
-#endif /* SDRAM_MEMTEST */
-
 /****************************************************************************
  * Name: stm32_sdram_initialize
  *
  * Description:
  *   Called from stm32_bringup to initialize external SDRAM access.
- *   The axoloti uses a Samsung K4S51153PF SDRAM.
+ *   The Axoloti uses an Alliance Memory AS4C4M16SA SDRAM.
  */
 
 int stm32_sdram_initialize(void)
@@ -203,13 +197,13 @@ int stm32_sdram_initialize(void)
    * Program the memory device timing into the FMC_SDTRx register. The TRP and TRC
    * timings must be programmed in the FMC_SDTR1 register.
    */
-  val = FMC_SDTR_TRCD(3) |      /* ras to cas delay 27ns => 3x11.90ns */
-    FMC_SDTR_TRP(3) |           /* row precharge 27ns => 3x11.90ns */
-    FMC_SDTR_TWR(2) |           /* write to precharge 15ns => 2x11.9ns */
-    FMC_SDTR_TRC(7) |           /* row cycle time 77ns => 7x11.9ns */
-    FMC_SDTR_TRAS(5) |          /* row active time 50ns = >5x11.9ns */
-    FMC_SDTR_TXSR(11) |         /* exit self refresh 120ns => 11x11.9ns */
-    FMC_SDTR_TMRD(2);           /* load mode register to active 2x11.9ns */
+  val = FMC_SDTR_TRCD(2) |      /* ras to cas delay 21ns => 2x11.90ns */
+    FMC_SDTR_TRP(2) |           /* row precharge 21ns => 2x11.90ns */
+    FMC_SDTR_TRC(6) |           /* row cycle time 63ns => 6x11.9ns */
+    FMC_SDTR_TRAS(4) |          /* row active time 42ns = >4x11.9ns */
+    FMC_SDTR_TWR(4) |           /* write to precharge 42ns => 4x11.9ns */
+    FMC_SDTR_TXSR(6) |          /* exit self refresh 65ns => 6x11.9ns */
+    FMC_SDTR_TMRD(2);           /* load mode register to active 2 clks */
   stm32_fmc_sdram_set_timing(1, val);
 
   /* Step 3:
@@ -257,7 +251,7 @@ int stm32_sdram_initialize(void)
   val = FMC_SDCMR_MDR_BURST_LENGTH_2 |
     FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL |
     FMC_SDCMR_MDR_CAS_LATENCY_2 |
-    FMC_SDCMR_MDR_MODE_MRS |
+    FMC_SDCMR_MDR_MODE_NORMAL |
     FMC_SDCMR_MDR_WBL_SINGLE | FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_LOAD_MODE;
   stm32_fmc_sdram_command(val);
 
@@ -266,7 +260,7 @@ int stm32_sdram_initialize(void)
    * The refresh rate corresponds to the delay between refresh cycles. Its value must be
    * adapted to SDRAM devices.
    */
-  stm32_fmc_sdram_set_refresh_rate(683);        /* (7.81 us x Freq) - 20 */
+  stm32_fmc_sdram_set_refresh_rate(1292);       /* (64ms/4096rows) x 84MHz) - 20 */
 
   /* Step 9:
    * For mobile SDRAM devices, to program the extended mode register it should be done
@@ -282,10 +276,5 @@ int stm32_sdram_initialize(void)
 
   /*wait for the controller to be ready */
   stm32_fmc_sdram_wait();
-
-#ifdef SDRAM_MEMTEST
-  return stm32_sdram_memtest((void *)STM32_FMC_BANK5, 8 << 20 /* 8 MiB */ );
-#else
   return OK;
-#endif
 }
