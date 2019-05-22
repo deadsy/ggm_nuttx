@@ -342,18 +342,23 @@
 #define FMC_SDTR_TRP(n)   (((n & 15) - 1) << 20)
 #define FMC_SDTR_TRCD(n)  (((n & 15) - 1) << 24)
 
+/* Note: The FMC_SDCMR_MDR_x values can be found in the SDRAM datasheet.
+ * They should be standard, but it's probably a good idea to review
+ * the datasheet for your SDRAM device.
+ */
 #define FMC_SDCMR_RESERVED                        (0x3ff << 22)  /* reserved bits */
-#define FMC_SDCMR_MDR_BURST_LENGTH_1              (0x0000 << 9)
-#define FMC_SDCMR_MDR_BURST_LENGTH_2              (0x0001 << 9)
-#define FMC_SDCMR_MDR_BURST_LENGTH_4              (0x0002 << 9)
-#define FMC_SDCMR_MDR_BURST_LENGTH_8              (0x0004 << 9)
-#define FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL       (0x0000 << 9)
-#define FMC_SDCMR_MDR_BURST_TYPE_INTERLEAVED      (0x0008 << 9)
-#define FMC_SDCMR_MDR_CAS_LATENCY_2               (0x0020 << 9)
-#define FMC_SDCMR_MDR_CAS_LATENCY_3               (0x0030 << 9)
-#define FMC_SDCMR_MDR_OPERATING_MODE_STANDARD     (0x0000 << 9)
-#define FMC_SDCMR_MDR_WRITEBURST_MODE_PROGRAMMED  (0x0000 << 9)
-#define FMC_SDCMR_MDR_WRITEBURST_MODE_SINGLE      (0x0200 << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_1              ((0 << 0) << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_2              ((1 << 0) << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_4              ((2 << 0) << 9)
+#define FMC_SDCMR_MDR_BURST_LENGTH_8              ((3 << 0) << 9)
+#define FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL       ((0 << 3) << 9)
+#define FMC_SDCMR_MDR_BURST_TYPE_INTERLEAVED      ((1 << 3) << 9)
+#define FMC_SDCMR_MDR_CAS_LATENCY_1               ((1 << 4) << 9)
+#define FMC_SDCMR_MDR_CAS_LATENCY_2               ((2 << 4) << 9)
+#define FMC_SDCMR_MDR_CAS_LATENCY_3               ((3 << 4) << 9)
+#define FMC_SDCMR_MDR_MODE_MRS                    ((0 << 7) << 9)
+#define FMC_SDCMR_MDR_WBL_BURST                   ((0 << 9) << 9)
+#define FMC_SDCMR_MDR_WBL_SINGLE                  ((1 << 9) << 9)
 #define FMC_SDCMR_NRFS(n)                         (((n & 15) - 1) << 5)
 #define FMC_SDCMR_BANK_1                          (1 << 4)
 #define FMC_SDCMR_BANK_2                          (1 << 3)

@@ -163,6 +163,7 @@ static int stm32_sdram_memtest(void *base, uint32_t size)
  *
  * Description:
  *   Called from stm32_bringup to initialize external SDRAM access.
+ *   The axoloti uses a Samsung K4S51153PF SDRAM.
  */
 
 int stm32_sdram_initialize(void)
@@ -179,8 +180,9 @@ int stm32_sdram_initialize(void)
   /* Enable the FMC */
   stm32_fmc_enable();
 
-  /* Go throught the SDRAM initialization steps per the reference manual.
-   * hclk period = 1/84 MHz = 11.9 ns (??)
+  /* Go through the SDRAM initialization steps per the reference manual.
+   * The sdclk period is set to 2 x hclk. That is: 168 /2 = 84 MHz
+   * This gives a clock period of about 11.9 ns
    */
 
   /* Step 1:
@@ -201,13 +203,13 @@ int stm32_sdram_initialize(void)
    * Program the memory device timing into the FMC_SDTRx register. The TRP and TRC
    * timings must be programmed in the FMC_SDTR1 register.
    */
-  val = FMC_SDTR_TRCD(2) |      /* trcd 15ns => 2x11.90ns */
-    FMC_SDTR_TRP(2) |           /* trp 15ns => 2x11.90ns */
-    FMC_SDTR_TWR(2) |           /* twr 2 clock cycles */
-    FMC_SDTR_TRC(6) |           /* trc min=63 (6x11.90ns) */
-    FMC_SDTR_TRAS(4) |          /* tras min=42ns (4x11.90ns) max=120k (ns) */
-    FMC_SDTR_TXSR(6) |          /* txsr min=70ns (6x11.90ns) */
-    FMC_SDTR_TMRD(2);           /* tmrd 2 clock cycles */
+  val = FMC_SDTR_TRCD(3) |      /* ras to cas delay 27ns => 3x11.90ns */
+    FMC_SDTR_TRP(3) |           /* row precharge 27ns => 3x11.90ns */
+    FMC_SDTR_TWR(2) |           /* write to precharge 15ns => 2x11.9ns */
+    FMC_SDTR_TRC(7) |           /* row cycle time 77ns => 7x11.9ns */
+    FMC_SDTR_TRAS(5) |          /* row active time 50ns = >5x11.9ns */
+    FMC_SDTR_TXSR(11) |         /* exit self refresh 120ns => 11x11.9ns */
+    FMC_SDTR_TMRD(2);           /* load mode register to active 2x11.9ns */
   stm32_fmc_sdram_set_timing(1, val);
 
   /* Step 3:
@@ -255,9 +257,8 @@ int stm32_sdram_initialize(void)
   val = FMC_SDCMR_MDR_BURST_LENGTH_2 |
     FMC_SDCMR_MDR_BURST_TYPE_SEQUENTIAL |
     FMC_SDCMR_MDR_CAS_LATENCY_2 |
-    FMC_SDCMR_MDR_OPERATING_MODE_STANDARD |
-    FMC_SDCMR_MDR_WRITEBURST_MODE_SINGLE |
-    FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_LOAD_MODE;
+    FMC_SDCMR_MDR_MODE_MRS |
+    FMC_SDCMR_MDR_WBL_SINGLE | FMC_SDCMR_BANK_1 | FMC_SDCMR_CMD_LOAD_MODE;
   stm32_fmc_sdram_command(val);
 
   /* Step 8:
@@ -274,7 +275,7 @@ int stm32_sdram_initialize(void)
    * mapping) in order to select the extended mode register instead of Load mode register
    * and then program the needed value.
    */
-  /* We don't have a mobile SDRAM device ... */
+  /* Setting EMRS is optional and we're not bothering ... */
 
   /* enable memory writes for bank 1 */
   stm32_fmc_sdram_write_protect(1, false);
