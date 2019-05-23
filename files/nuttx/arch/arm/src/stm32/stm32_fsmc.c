@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "stm32_fsmc.h"
+#include "stm32.h"
 
 #if defined(CONFIG_STM32_FSMC)
 
@@ -66,5 +66,31 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_fsmc_enable
+ *
+ * Description:
+ *   Enable clocking to the FSMC.
+ *
+ ****************************************************************************/
+
+void stm32_fsmc_enable(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, 0, RCC_AHB3ENR_FSMCEN);
+}
+
+/****************************************************************************
+ * Name: stm32_fsmc_disable
+ *
+ * Description:
+ *   Disable clocking to the FSMC.
+ *
+ ****************************************************************************/
+
+void stm32_fsmc_disable(void)
+{
+  modifyreg32(STM32_RCC_AHB3ENR, RCC_AHB3ENR_FSMCEN, 0);
+}
 
 #endif /* CONFIG_STM32_FSMC */

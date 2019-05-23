@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/signal.h>
-
 #include "stm32.h"
 
 #if defined(CONFIG_STM32_FMC)
@@ -79,7 +77,7 @@
 
 void stm32_fmc_sdram_wait(void)
 {
-  int timeout = 5;
+  int timeout = 0xffff;
   while (timeout > 0)
     {
       if ((getreg32(STM32_FMC_SDSR) & FMC_SDSR_BUSY) == 0)
@@ -87,7 +85,6 @@ void stm32_fmc_sdram_wait(void)
           break;
         }
       timeout--;
-      nxsig_usleep(1000);
     }
   DEBUGASSERT(timeout > 0);
 }

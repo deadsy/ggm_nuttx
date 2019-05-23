@@ -8,7 +8,9 @@ include $(TOP)/mk/common.mk
 #BOARD_CONFIG ?= stm32f4discovery/audio
 #BOARD_CONFIG ?= stm32f4discovery/nxlines
 
-BOARD_CONFIG ?= stm32f429i-disco/nsh
+#BOARD_CONFIG ?= stm32f429i-disco/nsh
+#BOARD_CONFIG ?= stm32f429i-disco/lvgl
+BOARD_CONFIG ?= stm32f429i-disco/nxhello
 
 #BOARD_CONFIG ?= stm3210e-eval/nsh
 #BOARD_CONFIG ?= stm3240g-eval/nxterm
@@ -53,7 +55,7 @@ reset:
 	$(RESET_CMD)
 
 .PHONY: flash
-flash: .stamp_build
+flash:
 	st-flash write $(BIN_FILE) 0x08000000
 	$(RESET_CMD)
 
