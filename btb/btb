@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+#------------------------------------------------------------------------------
+"""
+
+BtB - Bob The Builder
+
+"""
+#------------------------------------------------------------------------------
+
+import glob
+import subprocess
+import os
+import fnmatch
+import sys
+
+import cfg
+
+#------------------------------------------------------------------------------
+
+def get_defconfigs():
+  """get the set of defconfig files"""
+  path = cfg.nuttx_path + '/configs'
+  flist = []
+  for root, dname, fnames in os.walk(path):
+    for fname in fnmatch.filter(fnames, 'defconfig'):
+      flist.append(os.path.join(root, fname))
+  return flist
+
+def read_defconfig(fpath):
+  """read a defconfig file"""
+  dc = {}
+  f = open(fpath)
+  for l in f.readlines():
+    if not l.startswith('#'):
+      l = l.strip()
+      y = l.split('=', 1)
+      assert len(y) == 2
+      assert y[0] not in dc
+      dc[y[0]] = y[1]
+  f.close()
+  return dc
+
+#------------------------------------------------------------------------------
+
+_arch_list = (
+  'arm', 'mips', 'hc', 'risc-v', 'z80',
+  'sim', 'renesas', 'avr', 'or1k', 'xtensa',
+  'z16', 'misoc', 'x86',
+  )
+
+class build:
+
+  def __init__(self, path):
+    self.dcpath = path
+    self.dc = read_defconfig(path)
+    self.name = self.get_name()
+    self.arch = self.get_arch()
+    self.board = self.get_board()
+    self.chip = self.get_chip()
+
+  def get_name(self):
+    """return the name of the build"""
+    head, _ = os.path.split(self.dcpath)
+    _, name = os.path.split(head)
+    return name
+
+  def get_arch(self):
+    """return the top-level architecture"""
+    arch = self.dc['CONFIG_ARCH'].strip('"')
+    assert arch in _arch_list, "arch = %s is not recognized" % arch
+    return arch
+
+  def get_board(self):
+    """return the board name"""
+    return self.dc['CONFIG_ARCH_BOARD'].strip('"')
+
+  def get_chip(self):
+    """return a tuple with the chip names"""
+    prefix = 'CONFIG_ARCH_CHIP_'
+    chip = []
+    for key in self.dc.keys():
+      if key.startswith(prefix):
+        name = key[len(prefix):].lower()
+        chip.append(name)
+    return tuple(chip)
+
+  def chip_match(self, names):
+    """return True if the names matches the chip strings"""
+    for n in names:
+      if n not in self.chip:
+        return False
+    return True
+
+  def __str__(self):
+    s = []
+    s.append('name: %s/%s' % (self.board, self.name))
+    s.append('arch: %s' % self.arch)
+    s.append('chip: %s' % '/'.join(self.chip))
+    return '\n'.join(s)
+
+def get_builds():
+  """return a set of builds"""
+  builds = []
+  for f in get_defconfigs():
+    builds.append(build(f))
+  return builds
+
+def filter_by_chip(builds, names):
+  """filter a set of builds by the chip names"""
+  x = []
+  for b in builds:
+    if b.chip_match(names):
+      x.append(b)
+  return x
+
+#------------------------------------------------------------------------------
+
+def main():
+  builds = get_builds()
+  x = filter_by_chip(builds, ('stm32',))
+  print("%d total builds" % len(x))
+  for b in x:
+    print("%s\n" % b)
+
+main()
+
+#------------------------------------------------------------------------------
