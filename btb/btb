@@ -9,6 +9,7 @@ BtB - Bob The Builder
 
 import glob
 import subprocess
+import datetime
 import os
 import fnmatch
 import sys
@@ -16,12 +17,80 @@ import sys
 import cfg
 
 #------------------------------------------------------------------------------
+# print messages
 
-def get_defconfigs():
+def pr_error(msg, usage=None):
+  """log an error message - exit 1"""
+  ts = datetime.datetime.utcnow()
+  print('%s error: %s' % (ts, msg))
+  if usage:
+    usage(sys.argv)
+  sys.exit(1)
+
+def pr_warn(msg):
+  """log an warning message"""
+  ts = datetime.datetime.utcnow()
+  print('%s warn: %s' % (ts, msg))
+
+def pr_info(msg):
+  """log an informational message"""
+  ts = datetime.datetime.utcnow()
+  print('%s info: %s' % (ts, msg))
+
+def pr_debug(msg):
+  """log an debug message"""
+  if cfg.debug:
+    ts = datetime.datetime.utcnow()
+    print('%s debug: %s' % (ts, msg))
+
+#------------------------------------------------------------------------------
+
+def check_dir(name):
+  """check for the existence of a directory"""
+  return os.path.isdir(name)
+
+#------------------------------------------------------------------------------
+
+def get_nuttx_dir():
+  """return the nuttx directory path"""
+  return '%s/nuttx' % cfg.build_path
+
+def get_apps_dir():
+  """return the apps directory path"""
+  return '%s/apps' % cfg.build_path
+
+def get_status_dir(bc):
+  """return the build status directory"""
+  return '%s/%s' % (cfg.status_path, bc)
+
+def get_nuttx_tgz():
+  """return the nuttx archive file"""
+  return '%s/nuttx-%s.tar.gz' % (cfg.archive_path, cfg.nuttx_hash)
+
+def get_apps_tgz():
+  """return the apps archive file"""
+  return '%s/apps-%s.tar.gz' % (cfg.archive_path, cfg.apps_hash)
+
+#------------------------------------------------------------------------------
+
+def exec_cmd(cmd):
+  """execute a command, return the output and return code"""
+  pr_debug(cmd)
+  output = b''
+  rc = 0
+  try:
+    output = subprocess.check_output(cmd, shell=True)
+  except subprocess.CalledProcessError as e:
+    rc = e.returncode
+  pr_debug('returned %d' % rc)
+  return output.decode('utf-8'), rc
+
+#------------------------------------------------------------------------------
+
+def get_defconfigs(path):
   """get the set of defconfig files"""
-  path = cfg.nuttx_path + '/configs'
   flist = []
-  for root, dname, fnames in os.walk(path):
+  for root, dname, fnames in os.walk(path + '/configs'):
     for fname in fnmatch.filter(fnames, 'defconfig'):
       flist.append(os.path.join(root, fname))
   return flist
@@ -42,6 +111,47 @@ def read_defconfig(fpath):
 
 #------------------------------------------------------------------------------
 
+def extract_tgz(src, dst):
+  if check_dir(dst):
+    pr_warn("directory %s already exists" % dst)
+  else:
+    pr_debug('make directory %s' % dst)
+    os.makedirs(dst)
+  pr_debug('extract archive %s' % src)
+  _, rc = exec_cmd('tar -C %s -zxf %s' % (dst, src))
+  if rc != 0:
+    pr_info('extract %s failed' % src)
+
+def remove_dir(path):
+  """remove a directory"""
+  if check_dir(path):
+    pr_debug('remove directory %s' % path)
+    _, rc = exec_cmd('rm -rf %s' % path)
+    if rc != 0:
+      pr_info('rm %s failed' % path)
+
+def remove_src():
+  """remove the source"""
+  remove_dir(get_nuttx_dir())
+  remove_dir(get_apps_dir())
+
+def extract_src():
+  """extract the source from the tar gzip files"""
+  extract_tgz(get_nuttx_tgz(), get_nuttx_dir())
+  extract_tgz(get_apps_tgz(), get_apps_dir())
+
+def clean_src():
+  """remove an re-extract the source"""
+  remove_src()
+  extract_src()
+
+def clean_status(path):
+  """clean a status directory"""
+  remove_dir(path)
+  os.makedirs(path)
+
+#------------------------------------------------------------------------------
+
 _arch_list = (
   'arm', 'mips', 'hc', 'risc-v', 'z80',
   'sim', 'renesas', 'avr', 'or1k', 'xtensa',
@@ -53,13 +163,13 @@ class build:
   def __init__(self, path):
     self.dcpath = path
     self.dc = read_defconfig(path)
-    self.name = self.get_name()
+    self.app = self.get_app()
     self.arch = self.get_arch()
     self.board = self.get_board()
     self.chip = self.get_chip()
 
-  def get_name(self):
-    """return the name of the build"""
+  def get_app(self):
+    """return the name of the build application"""
     head, _ = os.path.split(self.dcpath)
     _, name = os.path.split(head)
     return name
@@ -73,6 +183,10 @@ class build:
   def get_board(self):
     """return the board name"""
     return self.dc['CONFIG_ARCH_BOARD'].strip('"')
+
+  def get_boardconfig(self):
+    """return the boardconfig string"""
+    return '%s/%s' % (self.board, self.app)
 
   def get_chip(self):
     """return a tuple with the chip names"""
@@ -91,36 +205,122 @@ class build:
         return False
     return True
 
+  def app_match(self, names):
+    """return True if the names matches the application"""
+    for n in names:
+      if n == self.app:
+        return True
+    return False
+
+  def board_match(self, names):
+    """return True if the names matches the board"""
+    for n in names:
+      if n == self.board:
+        return True
+    return False
+
   def __str__(self):
     s = []
-    s.append('name: %s/%s' % (self.board, self.name))
-    s.append('arch: %s' % self.arch)
-    s.append('chip: %s' % '/'.join(self.chip))
-    return '\n'.join(s)
+    s.append('%s/%s' % (self.board, self.app))
+    s.append('%s' % self.arch)
+    s.append('(%s)' % '/'.join(self.chip))
+    return ' '.join(s)
+
+#------------------------------------------------------------------------------
 
 def get_builds():
-  """return a set of builds"""
+  """return the full set of builds"""
+  clean_src()
   builds = []
-  for f in get_defconfigs():
+  for f in get_defconfigs(get_nuttx_dir()):
     builds.append(build(f))
   return builds
 
-def filter_by_chip(builds, names):
-  """filter a set of builds by the chip names"""
+def filter_in_by_chip(builds, names):
+  """filter in a set of builds by the chip names"""
   x = []
   for b in builds:
     if b.chip_match(names):
       x.append(b)
+  pr_info("filter in by chip (%s): %d -> %d builds" % (','.join(names), len(builds), len(x)))
   return x
+
+def filter_in_by_app(builds, names):
+  """filter in a set of builds by application name"""
+  x = []
+  for b in builds:
+    if b.app_match(names):
+      x.append(b)
+  pr_info("filter in by app (%s): %d -> %d builds" % (','.join(names), len(builds), len(x)))
+  return x
+
+def filter_in_by_board(builds, names):
+  """filter in a set of builds by board name"""
+  x = []
+  for b in builds:
+    if b.board_match(names):
+      x.append(b)
+  pr_info("filter in by board (%s): %d -> %d builds" % (','.join(names), len(builds), len(x)))
+  return x
+
+#------------------------------------------------------------------------------
+
+def gen_build_status(path, good):
+  x = ('build_fail', 'build_ok')[good]
+  f = open('%s/%s' % (path, x), 'w')
+  f.write('%s\n' % x)
+  f.close()
+
+def make(bc):
+  """make a build"""
+  nuttx_dir = get_nuttx_dir()
+  status_dir = get_status_dir(bc)
+  build_log = status_dir + '/build_log.txt'
+
+  # get a clean copy of the source
+  clean_src()
+  clean_status(status_dir)
+  # configure for this build
+  pr_info("configure %s" % bc)
+  cmd = '%s/tools/configure.sh -l %s' % (nuttx_dir, bc)
+  _, rc = exec_cmd(cmd)
+  if rc != 0:
+    pr_warn("unable to configure %s" % bc)
+    return False
+  # build
+  pr_info("make %s" % bc)
+  cmd = 'CROSSDEV=%s ARCROSSDEV=%s make -C %s > %s 2>&1' % (cfg.xtools, cfg.xtools, nuttx_dir, build_log)
+  _, rc = exec_cmd(cmd)
+  pr_info('build %s' % ('failed', 'is good')[rc == 0])
+  # create a status file
+  gen_build_status(status_dir, rc == 0)
+  return rc == 0
 
 #------------------------------------------------------------------------------
 
 def main():
   builds = get_builds()
-  x = filter_by_chip(builds, ('stm32',))
-  print("%d total builds" % len(x))
-  for b in x:
-    print("%s\n" % b)
+
+  builds = filter_in_by_chip(builds, ('stm32',))
+  #builds = filter_in_by_board(builds, ('stm32f4discovery',))
+  #builds = filter_in_by_board(builds, ('shenzhou',))
+  #builds = filter_in_by_app(builds, ('nsh',))
+
+  # do the builds
+  total_builds = len(builds)
+  bad_builds = []
+  i = 0
+  for b in builds:
+    i += 1
+    bc = b.get_boardconfig()
+    pr_info("build %s (%d of %d)" % (bc, i, total_builds))
+    good = make(bc)
+    if not good:
+      bad_builds.append(bc)
+  good_builds = total_builds - len(bad_builds)
+  pr_info("%d builds %d good %d failed" % (total_builds, good_builds, len(bad_builds)))
+  for bc in bad_builds:
+    pr_info("bad: %s" % bc)
 
 main()
 
