@@ -49,6 +49,10 @@ def check_dir(name):
   """check for the existence of a directory"""
   return os.path.isdir(name)
 
+def check_file(name):
+  """check for the existence of a file"""
+  return os.path.isfile(name)
+
 #------------------------------------------------------------------------------
 
 def get_nuttx_dir():
@@ -62,6 +66,14 @@ def get_apps_dir():
 def get_status_dir(bc):
   """return the build status directory"""
   return '%s/%s' % (cfg.status_path, bc)
+
+def get_build_log_file(bc):
+  """return the build log file"""
+  return get_status_dir(bc) + '/build_log.txt'
+
+def get_bad_build_file():
+  """return the bad build file"""
+  return '%s/bad_build.txt' % cfg.status_path
 
 def get_nuttx_tgz():
   """return the nuttx archive file"""
@@ -127,6 +139,14 @@ def remove_dir(path):
   if check_dir(path):
     pr_debug('remove directory %s' % path)
     _, rc = exec_cmd('rm -rf %s' % path)
+    if rc != 0:
+      pr_info('rm %s failed' % path)
+
+def remove_file(path):
+  """remove a file"""
+  if check_file(path):
+    pr_debug('remove file %s' % path)
+    _, rc = exec_cmd('rm %s' % path)
     if rc != 0:
       pr_info('rm %s failed' % path)
 
@@ -219,6 +239,14 @@ class build:
         return True
     return False
 
+  def boardconfig_match(self, names):
+    """return True if the names matches the boardconfig"""
+    bc = self.get_boardconfig()
+    for n in names:
+      if n == bc:
+        return True
+    return False
+
   def __str__(self):
     s = []
     s.append('%s/%s' % (self.board, self.app))
@@ -263,64 +291,110 @@ def filter_in_by_board(builds, names):
   pr_info("filter in by board (%s): %d -> %d builds" % (','.join(names), len(builds), len(x)))
   return x
 
+def filter_in_by_boardconfig(builds, names):
+  """filter in a set of builds by boardconfig"""
+  x = []
+  for b in builds:
+    if b.boardconfig_match(names):
+      x.append(b)
+  pr_info("filter in by boardconfig: %d -> %d builds" % (len(builds), len(x)))
+  return x
+
 #------------------------------------------------------------------------------
 
-def gen_build_status(path, good):
+def gen_build_status(path, good, msg):
+  """generate build status file"""
   x = ('build_fail', 'build_ok')[good]
   f = open('%s/%s' % (path, x), 'w')
-  f.write('%s\n' % x)
+  f.write('%s\n' % msg)
   f.close()
+
+def append_bad_build(bc):
+  """append to the bad build file"""
+  build_log = get_build_log_file(bc)
+  # get the last lines of the build log
+  fail_log, rc = exec_cmd('tail -n %d %s' % (cfg.log_lines, build_log))
+  if rc != 0:
+    fail_log = "could not open %s" % build_log
+  # add it to the bad build file
+  f = open(get_bad_build_file(), "a+")
+  f.write("%s\n\n%s\n\n" % (bc, fail_log))
+  f.close()
+
+#------------------------------------------------------------------------------
 
 def make(bc):
   """make a build"""
   nuttx_dir = get_nuttx_dir()
   status_dir = get_status_dir(bc)
-  build_log = status_dir + '/build_log.txt'
-
+  build_log = get_build_log_file(bc)
   # get a clean copy of the source
   clean_src()
   clean_status(status_dir)
   # configure for this build
   pr_info("configure %s" % bc)
-  cmd = '%s/tools/configure.sh -l %s' % (nuttx_dir, bc)
+  cmd = '%s/tools/configure.sh -l %s > %s 2>&1' % (nuttx_dir, bc, build_log)
   _, rc = exec_cmd(cmd)
   if rc != 0:
-    pr_warn("unable to configure %s" % bc)
-    return False
+    return False, "unable to configure (rc %d)" % rc
   # build
   pr_info("make %s" % bc)
-  cmd = 'CROSSDEV=%s ARCROSSDEV=%s make -C %s > %s 2>&1' % (cfg.xtools, cfg.xtools, nuttx_dir, build_log)
+  cmd = 'CROSSDEV=%s ARCROSSDEV=%s make -C %s >> %s 2>&1' % (cfg.xtools, cfg.xtools, nuttx_dir, build_log)
   _, rc = exec_cmd(cmd)
-  pr_info('build %s' % ('failed', 'is good')[rc == 0])
-  # create a status file
-  gen_build_status(status_dir, rc == 0)
-  return rc == 0
+  if rc != 0:
+    return False, "build failed (rc %d)" % rc
+  return True, "build good"
+
+#------------------------------------------------------------------------------
+
+# bad stm32 builds
+bad_builds = (
+  'shenzhou/thttpd',
+  'stm3240g-eval/knxwm',
+  'nucleo-f303re/nxlines',
+  'photon/wlan',
+  'stm32f4discovery/testlibcxx',
+  'stm32f4discovery/winbuild',
+  'stm32f4discovery/cxxtest',
+  'mikroe-stm32f4/fulldemo',
+  'clicker2-stm32/mrf24j40-mac',
+)
 
 #------------------------------------------------------------------------------
 
 def main():
+
+  global bad_builds
+
   builds = get_builds()
 
+  # filter the builds
   builds = filter_in_by_chip(builds, ('stm32',))
   #builds = filter_in_by_board(builds, ('stm32f4discovery',))
   #builds = filter_in_by_board(builds, ('shenzhou',))
   #builds = filter_in_by_app(builds, ('nsh',))
+  #builds = filter_in_by_boardconfig(builds, bad_builds)
 
   # do the builds
+  remove_file(get_bad_build_file())
   total_builds = len(builds)
-  bad_builds = []
+  bad_builds = 0
   i = 0
   for b in builds:
     i += 1
     bc = b.get_boardconfig()
+    status_dir = get_status_dir(bc)
     pr_info("build %s (%d of %d)" % (bc, i, total_builds))
-    good = make(bc)
+    good, msg = make(bc)
+    pr_info(msg)
+    gen_build_status(status_dir, good, msg)
     if not good:
-      bad_builds.append(bc)
-  good_builds = total_builds - len(bad_builds)
-  pr_info("%d builds %d good %d failed" % (total_builds, good_builds, len(bad_builds)))
-  for bc in bad_builds:
-    pr_info("bad: %s" % bc)
+      bad_builds += 1
+      append_bad_build(bc)
+
+  # report overall build status
+  good_builds = total_builds - bad_builds
+  pr_info("%d builds %d good %d failed" % (total_builds, good_builds, bad_builds))
 
 main()
 

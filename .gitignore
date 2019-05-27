@@ -1,4 +1,5 @@
 dl
 repo/nuttx
 repo/apps
+btb/__pycache__
 .stamp*
