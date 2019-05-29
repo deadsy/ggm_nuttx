@@ -21,8 +21,8 @@
  ifeq ($(CONFIG_STM32_LTDC),y)
  CHIP_CSRCS += stm32_ltdc.c
  endif
---- ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:25:40.184599461 -0700
-+++ ./nuttx/arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h	2019-05-05 08:34:52.164900219 -0700
+--- ./nuttx/arch/arm/src/stm32/hardware/stm32f40xxx_pinmap.h	2019-05-05 08:25:40.184599461 -0700
++++ ./nuttx/arch/arm/src/stm32/hardware/stm32f40xxx_pinmap.h	2019-05-05 08:34:52.164900219 -0700
 @@ -1170,6 +1170,19 @@
  #  define GPIO_SAI2_SD_B_3    (GPIO_ALT|GPIO_AF10|GPIO_PORTF|GPIO_PIN11)
  #endif
@@ -199,8 +199,8 @@
 +endchoice # SAI2 synchronization enable
 +
 +endmenu
---- ./nuttx/arch/arm/src/stm32/chip/stm32_dma_v2.h	2019-05-06 11:04:48.000000000 -0700
-+++ ./nuttx/arch/arm/src/stm32/chip/stm32_dma_v2.h	2019-05-17 11:44:22.937885207 -0700
+--- ./nuttx/arch/arm/src/stm32/hardware/stm32_dma_v2.h	2019-05-06 11:04:48.000000000 -0700
++++ ./nuttx/arch/arm/src/stm32/hardware/stm32_dma_v2.h	2019-05-17 11:44:22.937885207 -0700
 @@ -485,10 +485,13 @@
  #define DMAMAP_I2C2_TX             STM32_DMA_MAP(DMA1,DMA_STREAM7,DMA_CHAN7)
  

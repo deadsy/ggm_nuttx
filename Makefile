@@ -2,20 +2,12 @@ TOP = .
 include $(TOP)/mk/common.mk
 
 #BOARD_CONFIG ?= axoloti/ggm
-#BOARD_CONFIG ?= axoloti/nsh
+BOARD_CONFIG ?= axoloti/nsh
 
 #BOARD_CONFIG ?= stm32f4discovery/ggm
 #BOARD_CONFIG ?= stm32f4discovery/audio
-#BOARD_CONFIG ?= stm32f4discovery/nxlines
 
 #BOARD_CONFIG ?= stm32f429i-disco/nsh
-#BOARD_CONFIG ?= stm32f429i-disco/lvgl
-BOARD_CONFIG ?= stm32f429i-disco/nxhello
-
-#BOARD_CONFIG ?= stm3210e-eval/nsh
-#BOARD_CONFIG ?= stm3240g-eval/nxterm
-#BOARD_CONFIG ?= stm3220g-eval/nxwm
-#BOARD_CONFIG ?= mikroe-stm32f4/
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
@@ -99,13 +91,3 @@ unpatched:
 .stamp_build: .stamp_cfg
 	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_SRC)
 	touch $@
-
-#$(NUTTX_TGZ):
-#	mkdir -p $(DL)
-#	wget -P $(DL) $(NUTTX_SITE)/$(NUTTX_NAME).tar.gz
-#	echo "$(NUTTX_HASH) *$(NUTTX_TGZ)" | sha256sum --check --strict
-
-#$(APPS_TGZ):
-#	mkdir -p $(DL)
-#	wget -P $(DL) $(NUTTX_SITE)/$(APPS_NAME).tar.gz
-#	echo "$(APPS_HASH) *$(APPS_TGZ)" | sha256sum --check --strict

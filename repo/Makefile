@@ -5,15 +5,11 @@ NUTTX_TGZ = $(PWD)/../dl/nuttx-$(NUTTX_HASH).tar.gz
 APPS_TGZ = $(PWD)/../dl/apps-$(APPS_HASH).tar.gz
 
 .PHONY: update
-update: nuttx apps
-	git -C nuttx pull
-	git -C apps pull
-
-nuttx:
-	git clone https://bitbucket.org/nuttx/nuttx.git
-
-apps:
-	git clone https://bitbucket.org/nuttx/apps.git
+update:
+	git -C nuttx fetch upstream
+	git -C nuttx merge upstream/master
+	git -C apps fetch upstream
+	git -C apps merge upstream/master
 
 archive:
 	mkdir -p $(TOP)/dl
