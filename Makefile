@@ -1,12 +1,15 @@
 TOP = .
 
-#BOARD_CONFIG ?= axoloti/ggm
-BOARD_CONFIG ?= axoloti/nsh
+#BOARD_CONFIG = axoloti/ggm
+#BOARD_CONFIG = axoloti/nsh
 
-#BOARD_CONFIG ?= stm32f4discovery/ggm
-#BOARD_CONFIG ?= stm32f4discovery/audio
+#BOARD_CONFIG = stm32f4discovery/ggm
+#BOARD_CONFIG = stm32f4discovery/audio
 
-#BOARD_CONFIG ?= stm32f429i-disco/nsh
+#BOARD_CONFIG = stm32f429i-disco/nsh
+
+#BOARD_CONFIG = imxrt1050-evk/nsh
+BOARD_CONFIG = imxrt1020-evk/nsh
 
 NUTTX_REPO = $(TOP)/nuttx
 APPS_REPO = $(TOP)/apps
