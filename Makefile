@@ -1,5 +1,4 @@
 TOP = .
-include $(TOP)/mk/common.mk
 
 #BOARD_CONFIG ?= axoloti/ggm
 BOARD_CONFIG ?= axoloti/nsh
@@ -9,30 +8,14 @@ BOARD_CONFIG ?= axoloti/nsh
 
 #BOARD_CONFIG ?= stm32f429i-disco/nsh
 
+NUTTX_REPO = $(TOP)/nuttx
+APPS_REPO = $(TOP)/apps
+
+BUILD = $(TOP)/build
+NUTTX_BUILD = $(BUILD)/nuttx
+APPS_BUILD = $(BUILD)/apps
+
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
-
-DL = $(PWD)/dl
-SRC = $(PWD)/src
-
-NUTTX_NAME = nuttx-$(NUTTX_HASH)
-NUTTX_TGZ = $(DL)/$(NUTTX_NAME).tar.gz
-NUTTX_SRC = $(SRC)/nuttx
-
-APPS_NAME = apps-$(APPS_HASH)
-APPS_TGZ = $(DL)/$(APPS_NAME).tar.gz
-APPS_SRC = $(SRC)/apps
-
-BIN_FILE = $(NUTTX_SRC)/nuttx.bin
-
-PATCHFILES := $(sort $(wildcard patches/*.patch))
-
-PATCH_CMD = \
-  for f in $(PATCHFILES); do\
-      echo $$f ":"; \
-      patch -d $(SRC) --backup -p1 < $$f || exit 1; \
-  done
-
-COPY_CMD = tar cf - -C files . | tar xf - -C $(SRC)
 
 RESET_CMD =	st-flash reset
 
@@ -53,41 +36,36 @@ flash:
 
 .PHONY: clean
 clean:
-	-rm -rf $(SRC)
+	-rm -rf $(BUILD)
 	-rm .stamp*
 
 .PHONY: config
 config:
-	make -C $(NUTTX_SRC) menuconfig
-	make -C $(NUTTX_SRC) savedefconfig
-	cp $(NUTTX_SRC)/defconfig files/nuttx/configs/$(BOARD_CONFIG)/defconfig
+	make -C $(NUTTX_BUILD) menuconfig
+	make -C $(NUTTX_BUILD) savedefconfig
+	cp $(NUTTX_BUILD)/defconfig $(NUTTX_REPO)/configs/$(BOARD_CONFIG)/defconfig
 
-.PHONY: distclean
-distclean: clean
-	-rm -rf $(DL)
+.PHONY: init
+init: nuttx apps
 
-.PHONY: unpatched
-unpatched:
-	mkdir -p $(NUTTX_SRC)
-	tar -C $(NUTTX_SRC) -xzf $(NUTTX_TGZ)
-	mkdir -p $(APPS_SRC)
-	tar -C $(APPS_SRC) -xzf $(APPS_TGZ)
-	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD_CONFIG)
-	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_SRC)
-
-.stamp_src: $(NUTTX_TGZ) $(APPS_TGZ)
-	mkdir -p $(NUTTX_SRC)
-	tar -C $(NUTTX_SRC) -xzf $(NUTTX_TGZ)
-	mkdir -p $(APPS_SRC)
-	tar -C $(APPS_SRC) -xzf $(APPS_TGZ)
-	$(PATCH_CMD)
-	$(COPY_CMD)
+.stamp_src: nuttx apps
+	mkdir -p $(BUILD)
+	rsync -aq $(NUTTX_REPO) $(BUILD) --exclude .git
+	rsync -aq $(APPS_REPO) $(BUILD) --exclude .git
 	touch $@
 
+nuttx:
+	git clone git@github.com:deadsy/nuttx.git
+	git -C nuttx remote add upstream https://bitbucket.org/nuttx/nuttx.git 
+
+apps:
+	git clone git@github.com:deadsy/apps.git
+	git -C apps remote add upstream https://bitbucket.org/nuttx/apps.git
+
 .stamp_cfg: .stamp_src
-	$(NUTTX_SRC)/tools/configure.sh -l $(BOARD_CONFIG)
+	$(NUTTX_BUILD)/tools/configure.sh -l $(BOARD_CONFIG)
 	touch $@
 
 .stamp_build: .stamp_cfg
-	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_SRC)
+	CROSSDEV=$(XTOOLS) ARCROSSDEV=$(XTOOLS) make -C $(NUTTX_BUILD)
 	touch $@

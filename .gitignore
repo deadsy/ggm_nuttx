@@ -1,5 +1,4 @@
-dl
-repo/nuttx
-repo/apps
+nuttx
+apps
 btb/__pycache__
 .stamp*
