@@ -80,6 +80,7 @@ nuttx_indent_opts = (
   'ncs', # no-space-after-casts
   'npcs', # Do not put space after the function in function calls.
   'pmt', # Preserve access and modification times on output files.
+  'lps', # Leave space between ‘#’ and preprocessor directive.
 )
 
 nuttx_indent_opts_old = (
@@ -150,9 +151,8 @@ def get_files(dlist, fo_flist, fo_dlist):
 
 # *.c and *.h files in these directories will be auto-formatted.
 src_dirs = (
-	('files/nuttx', fmt_nuttx),
-	('repo/nuttx/configs/axoloti', fmt_nuttx),
-	('files/apps/ggm', fmt_linux),
+	('nuttx/configs/axoloti', fmt_nuttx),
+	('nuttx/configs/imxrt1020-evk', fmt_nuttx),
 )
 
 # don't format directories in this list
@@ -161,9 +161,6 @@ filter_dirs = (
 
 # don't format files in this list
 filter_files = (
-	'files/nuttx/arch/arm/src/stm32/chip/stm32_fsmc.h',
-	'files/nuttx/arch/arm/src/stm32/chip/stm32_fmc.h',
-  'files/nuttx/configs/stm32f429i-disco/src/stm32_extmem.c.original',
 )
 
 #------------------------------------------------------------------------------
