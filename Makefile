@@ -1,15 +1,16 @@
 TOP = .
 
-#BOARD_CONFIG = axoloti/ggm
-#BOARD_CONFIG = axoloti/nsh
+#BOARD = axoloti
+#BOARD = stm32f4discovery
+#BOARD = stm32f429i-disco
+BOARD = imxrt1020-evk
+#BOARD = imxrt1050-evk
 
-#BOARD_CONFIG = stm32f4discovery/ggm
-#BOARD_CONFIG = stm32f4discovery/audio
+CONFIG = nsh
+#CONFIG = ggm
+#CONFIG = audio
 
-#BOARD_CONFIG = stm32f429i-disco/nsh
-
-#BOARD_CONFIG = imxrt1050-evk/nsh
-BOARD_CONFIG = imxrt1020-evk/nsh
+BOARD_CONFIG = $(BOARD)/$(CONFIG)
 
 NUTTX_REPO = $(TOP)/nuttx
 APPS_REPO = $(TOP)/apps
@@ -17,6 +18,9 @@ APPS_REPO = $(TOP)/apps
 BUILD = $(TOP)/build
 NUTTX_BUILD = $(BUILD)/nuttx
 APPS_BUILD = $(BUILD)/apps
+
+ELF_FILE = $(NUTTX_BUILD)/nuttx
+BIN_FILE = $(NUTTX_BUILD)/nuttx.bin
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
@@ -36,6 +40,10 @@ reset:
 flash:
 	st-flash write $(BIN_FILE) 0x08000000
 	$(RESET_CMD)
+
+.PHONY: flash_nxp
+flash_nxp:
+	elftosb -f imx -V -c $(NUTTX_REPO)/configs/$(BOARD)/scripts/qspi_nor.bd -o nuttx.bin $(ELF_FILE)
 
 .PHONY: clean
 clean:
