@@ -74,7 +74,6 @@ nuttx_indent_opts = (
   'sai', # Put a space after each if.
   'sob', # Swallow optional blank lines.
   'nbs', # Do not put a space between sizeof and its argument.
-  'bli2', # Indent braces n spaces.
   'nprs', # Do not put a space after every ’(’ and before every ’)’.
   'npsl',# Put the type of a procedure on the same line as its name.
   'ncs', # no-space-after-casts
@@ -128,9 +127,9 @@ nuttx_indent_opts_old = (
 
 def fmt_nuttx(fname):
   print("fmt_nuttx on %s" % fname)
-  opts = ' '.join(["-%s" % opt for opt in nuttx_indent_opts])
-  exec_indent(fname, opts)
-  #exec_cmd('%s -c ./tools/uncrustify.cfg -q --no-backup %s' % (uncrustify_exec, fname))
+  #opts = ' '.join(["-%s" % opt for opt in nuttx_indent_opts])
+  #exec_indent(fname, opts)
+  exec_cmd('%s -c ./tools/uncrustify.cfg -q --no-backup %s' % (uncrustify_exec, fname))
   #exec_cmd('%s -m 90 %s' % (nxstyle_exec, fname))
 
 #------------------------------------------------------------------------------
@@ -151,7 +150,7 @@ def get_files(dlist, fo_flist, fo_dlist):
 
 # *.c and *.h files in these directories will be auto-formatted.
 src_dirs = (
-	('nuttx/configs/axoloti', fmt_nuttx),
+	#('nuttx/configs/axoloti', fmt_nuttx),
 	('nuttx/configs/imxrt1020-evk', fmt_nuttx),
 )
 
