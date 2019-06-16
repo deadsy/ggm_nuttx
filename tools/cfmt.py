@@ -150,7 +150,7 @@ def get_files(dlist, fo_flist, fo_dlist):
 
 # *.c and *.h files in these directories will be auto-formatted.
 src_dirs = (
-	#('nuttx/configs/axoloti', fmt_nuttx),
+	('nuttx/configs/axoloti', fmt_nuttx),
 	('nuttx/configs/imxrt1020-evk', fmt_nuttx),
 )
 
