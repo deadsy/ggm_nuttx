@@ -24,6 +24,9 @@ BIN_FILE = $(NUTTX_BUILD)/nuttx.bin
 
 XTOOLS = /opt/gcc-arm-none-eabi-8-2018-q4-major/bin/arm-none-eabi-
 
+JLINK = /opt/SEGGER/JLink/JLinkExe
+JLINK_CMD = cmd.jlink
+
 RESET_CMD =	st-flash reset
 
 .PHONY: all
@@ -36,17 +39,19 @@ src: .stamp_src
 reset:
 	$(RESET_CMD)
 
-.PHONY: flash
+.PHONY: flash_st
 flash:
 	st-flash write $(BIN_FILE) 0x08000000
 	$(RESET_CMD)
 
 .PHONY: flash_nxp
 flash_nxp:
-	elftosb -f imx -V -c $(NUTTX_REPO)/configs/$(BOARD)/scripts/qspi_nor.bd -o nuttx.bin $(ELF_FILE)
+	echo "r\nloadfile $(BIN_FILE) 0x60000000\nq" > $(JLINK_CMD)
+	$(JLINK) -if swd -speed auto -device MIMXRT1021xxx5A -CommanderScript $(JLINK_CMD)
 
 .PHONY: clean
 clean:
+	-rm $(JLINK_CMD)
 	-rm -rf $(BUILD)
 	-rm .stamp*
 
